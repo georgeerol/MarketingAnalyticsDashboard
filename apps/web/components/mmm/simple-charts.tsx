@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { useMMMData } from '@/hooks/use-mmm-data'
+import { useAuth } from '@/lib/auth'
 import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react'
 
 // Simple bar chart component without external dependencies
@@ -79,11 +80,14 @@ function SimpleLineChart({ data, title }: { data: Array<{x: number, y: number}>,
 
 export function SimpleContributionChart() {
   const { getChannelSummary, loading, error } = useMMMData()
+  const { token } = useAuth()
   const [data, setData] = useState<Array<{name: string, value: number, color: string}>>([])
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
   useEffect(() => {
+    if (!token) return // Don't fetch data if not authenticated
+    
     let isMounted = true
     
     const fetchData = async () => {
@@ -110,7 +114,7 @@ export function SimpleContributionChart() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [token])
 
   if (loading) {
     return (
@@ -178,6 +182,7 @@ export function SimpleContributionChart() {
 
 export function SimpleResponseCurves() {
   const { getResponseCurves, getChannels, loading, error } = useMMMData()
+  const { token } = useAuth()
   const [selectedChannel, setSelectedChannel] = useState<string>('')
   const [channels, setChannels] = useState<string[]>([])
   const [curveData, setCurveData] = useState<Array<{x: number, y: number}>>([])
@@ -187,6 +192,8 @@ export function SimpleResponseCurves() {
 
   // Initial data fetch
   useEffect(() => {
+    if (!token) return // Don't fetch data if not authenticated
+    
     let isMounted = true
     
     const fetchData = async () => {
@@ -219,7 +226,7 @@ export function SimpleResponseCurves() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [token])
 
   // Update data when selected channel changes
   useEffect(() => {
@@ -333,10 +340,13 @@ export function SimpleResponseCurves() {
 
 export function SimpleMMInsights() {
   const { getChannelSummary, getMMMInfo, loading, error } = useMMMData()
+  const { token } = useAuth()
   const [insights, setInsights] = useState<Array<{type: string, title: string, description: string}>>([])
   const [modelInfo, setModelInfo] = useState<any>(null)
 
   useEffect(() => {
+    if (!token) return // Don't fetch data if not authenticated
+    
     let isMounted = true
     
     const generateInsights = async () => {
@@ -384,7 +394,7 @@ export function SimpleMMInsights() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [token])
 
   if (loading) {
     return (
