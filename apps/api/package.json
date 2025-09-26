@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "uv run python -m uvicorn main:app --host localhost --port 8000 --reload",
+    "dev": "uv run python -m uvicorn app.main:app --host localhost --port 8000 --reload",
     "seed": "uv run python seed.py",
-    "start": "uv run uvicorn main:app --host 0.0.0.0 --port 8000",
+    "start": "uv run uvicorn app.main:app --host 0.0.0.0 --port 8000",
     "install": "uv sync"
   },
   "devDependencies": {}
