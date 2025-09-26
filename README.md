@@ -1,10 +1,21 @@
 # shadcn/ui monorepo template
 
-## Task
-1.Implement user authentication.
-2. Implement a user dashboard.
-3.  test
-4. 
+## Project Overview
+This project implements a **Google Meridian Media Mix Modeling (MMM) Dashboard** that provides marketing attribution and channel performance analysis using machine learning models.
+
+## Original Requirements (User Management)
+1.Implement user authentication  
+2. Implement a user dashboard  
+
+## New Requirements (Marketing Analytics)
+3.Load and integrate the Google Meridian model trace (`saved_mmm.pkl`)  
+4. Create contribution charts (pick one type)  
+5.Implement response curves showing diminishing returns  
+6.Build compelling customer narrative for channel performance
+
+## Reference Documentation
+- [Google Meridian Developer Documentation](https://developers.google.com/meridian/docs/advanced-modeling/interpret-visualizations)
+
 
 
 
