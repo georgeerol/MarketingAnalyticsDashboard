@@ -38,7 +38,6 @@ class Settings(BaseSettings):
     
     # MMM Configuration
     MMM_MODEL_PATH: str = "data/models/saved_mmm.pkl"
-    USE_MOCK_DATA: bool = False
     
     # Logging
     LOG_LEVEL: str = "INFO"

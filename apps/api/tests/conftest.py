@@ -105,11 +105,9 @@ def mmm_service() -> MMMService:
     return MMMService()
 
 @pytest.fixture
-def mock_mmm_service() -> MMMService:
-    """Create an MMM service with mock data."""
-    service = MMMService()
-    service._use_mock_data = True
-    return service
+def mmm_service_with_fallback() -> MMMService:
+    """Create an MMM service for testing (will use real model if available)."""
+    return MMMService()
 
 @pytest.fixture
 def auth_headers(test_user: User) -> dict:
