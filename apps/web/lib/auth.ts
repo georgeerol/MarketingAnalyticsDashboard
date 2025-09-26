@@ -42,6 +42,7 @@ interface AuthState {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_V1_PREFIX = '/api/v1'
 
 export const useAuth = create<AuthState>()(
   persist(
@@ -57,7 +58,7 @@ export const useAuth = create<AuthState>()(
           formData.append('username', credentials.email)
           formData.append('password', credentials.password)
 
-          const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}/auth/login`, {
             method: 'POST',
             body: formData,
           })
@@ -82,7 +83,7 @@ export const useAuth = create<AuthState>()(
       register: async (data: RegisterData) => {
         set({ isLoading: true })
         try {
-          const response = await fetch(`${API_BASE_URL}/auth/register`, {
+          const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}/auth/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ export const useAuth = create<AuthState>()(
         if (!token) return
 
         try {
-          const response = await fetch(`${API_BASE_URL}/auth/me`, {
+          const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },

@@ -43,6 +43,9 @@ interface MMMInfo {
   data_source: string
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_V1_PREFIX = '/api/v1'
+
 export function useMMMData() {
   const { token } = useAuth()
   const [loading, setLoading] = useState(false)
@@ -51,7 +54,7 @@ export function useMMMData() {
   const fetchWithAuth = async (url: string) => {
     if (!token) throw new Error('No authentication token')
     
-    const response = await fetch(`http://localhost:8000${url}`, {
+    const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}${url}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
