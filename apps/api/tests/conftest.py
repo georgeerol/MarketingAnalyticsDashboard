@@ -17,11 +17,12 @@ from pathlib import Path
 # Add the parent directory to sys.path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Import from new refactored structure
 from main import app
-from database import get_db, Base
-from models import User
-from auth_utils import hash_password
-from mmm_utils import MMMModelLoader
+from app.core.database import get_db, Base
+from app.models.user import User
+from app.core.security import hash_password
+from app.services.mmm_service import MMMService
 
 # Test database URL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
@@ -99,19 +100,21 @@ def mmm_model_path() -> Path:
     return Path(__file__).parent.parent / "data" / "models" / "saved_mmm.pkl"
 
 @pytest.fixture
-def mmm_loader() -> MMMModelLoader:
-    """Create an MMM model loader instance."""
-    return MMMModelLoader()
+def mmm_service() -> MMMService:
+    """Create an MMM service instance."""
+    return MMMService()
 
 @pytest.fixture
-def mock_mmm_loader() -> MMMModelLoader:
-    """Create an MMM model loader with mock data."""
-    return MMMModelLoader(use_mock_data=True)
+def mock_mmm_service() -> MMMService:
+    """Create an MMM service with mock data."""
+    service = MMMService()
+    service._use_mock_data = True
+    return service
 
 @pytest.fixture
 def auth_headers(test_user: User) -> dict:
     """Create authentication headers for API requests."""
-    from auth_utils import create_access_token
+    from app.core.security import create_access_token
     token = create_access_token(data={"sub": test_user.email})
     return {"Authorization": f"Bearer {token}"}
 
@@ -146,3 +149,16 @@ def sample_response_curves():
             }
         }
     }
+
+# Service fixtures for testing business logic
+@pytest.fixture
+def user_service(db_session: AsyncSession):
+    """Create a user service instance for testing."""
+    from app.services.user_service import UserService
+    return UserService(db_session)
+
+@pytest.fixture
+def auth_service(db_session: AsyncSession):
+    """Create an auth service instance for testing."""
+    from app.services.auth_service import AuthService
+    return AuthService(db_session)
