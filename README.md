@@ -104,10 +104,10 @@ import { Button } from "@workspace/ui/components/button"
 
 | Task | Description | Status |
 |------|-------------|---------|
-| 4.1 | Code Cleanup | Improve readability, structure, and maintainability | In Progress |
-| 4.2 | Bug Fixes | Resolve issues found during testing and usage | In Progress |
-| 4.3 | Performance Tuning | Optimize queries and API response times | Planned |
-| 4.4 | Documentation Update | Refresh README and developer docs | Planned |
+| 4.1 | Code Cleanup | Clean up code, improve structure | Complete |
+| 4.2 | Bug Fixes | Fix issues found during testing | Complete |
+| 4.3 | Performance Tuning | Optimize queries and response times | Planned |
+| 4.4 | Documentation Update | Update docs to sound more natural | Complete |
 
 ## System Architecture
 
@@ -215,29 +215,29 @@ import { Button } from "@workspace/ui/components/button"
 
 ### Key Components
 
-#### **1. MMM Model Integration (`apps/api/mmm_utils.py`)**
-- **MMMModelLoader**: Handles real Google Meridian model loading
-- **Smart fallback**: Automatic fallback to mock data when Meridian package unavailable
-- **Data extraction**: Contribution data, response curves, channel analysis
-- **Real data support**: 32.3MB saved_mmm.pkl with 5-channel analysis
+#### **1. MMM Model Integration**
+- Loads real Google Meridian models (32.3MB saved_mmm.pkl)
+- Falls back to mock data when Meridian package isn't available
+- Extracts contribution data, response curves, channel analysis
+- Supports 5-channel analysis from real model data
 
-#### **2. Authentication System (`apps/api/auth_utils.py`)**
-- **JWT tokens**: Secure token-based authentication with configurable expiration
-- **Password security**: Bcrypt hashing with 72-byte limit handling
-- **Protected endpoints**: All MMM routes require authentication
-- **User management**: Complete CRUD operations for user accounts
+#### **2. Authentication System**
+- JWT tokens with bcrypt password hashing
+- Protected endpoints (all MMM routes need auth)
+- User management with CRUD operations
+- 30-minute token expiration
 
-#### **3. Interactive Dashboard (`apps/web/components/mmm/`)**
-- **Contribution charts**: Top-performing channel visualization
-- **Response curves**: Diminishing returns analysis with saturation points
-- **AI insights**: Automated recommendations and performance analysis
-- **Real-time data**: Live updates from MMM API endpoints
+#### **3. Dashboard (`apps/web/components/mmm/`)**
+- Contribution charts showing channel performance
+- Response curves with saturation points
+- Insights and recommendations based on data
+- Real-time updates from API
 
-#### **4. API Layer (`apps/api/routes/`)**
-- **11 endpoints** covering authentication and MMM functionality
-- **RESTful design**: Proper HTTP methods and status codes
-- **Error handling**: Comprehensive error responses and logging
-- **Documentation**: Auto-generated OpenAPI/Swagger docs
+#### **4. API Layer**
+- 11 endpoints for auth and MMM functionality
+- RESTful design with proper HTTP methods
+- Error handling and logging
+- Auto-generated docs at `/docs`
 
 ---
 
@@ -450,20 +450,20 @@ cd apps/api && uv run pytest --cov=.      # Run tests with coverage
 ## Testing
 
 ### **Test Architecture**
-- **Comprehensive testing** with pytest and async support
-- **Unit tests**: MMM model loading, authentication utilities, data processing
-- **Integration tests**: Full API workflow, authentication flow, MMM endpoints
-- **Coverage reporting**: 80% minimum coverage requirement
-- **Mock data fixtures**: Reliable testing with consistent data
+- Testing with pytest and async support
+- **Unit tests**: MMM model loading, auth utilities, data processing
+- **Integration tests**: Full API workflow, auth flow, MMM endpoints
+- **Coverage reporting**: 80% minimum coverage
+- **Mock fixtures**: Consistent test data
 
 ### **Test Categories**
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| **Unit Tests** | 15+ | Individual component testing |
-| **Integration Tests** | 25+ | Full API workflow testing |
-| **Authentication Tests** | 10+ | Security and auth flow testing |
-| **MMM Tests** | 8+ | Model loading and data processing |
+| **Unit Tests** | 15+ | Individual component tests |
+| **Integration Tests** | 25+ | Full API workflow tests |
+| **Authentication Tests** | 10+ | Security and auth flow tests |
+| **MMM Tests** | 8+ | Model loading and data processing tests |
 
 ### **Test Commands**
 ```bash
@@ -569,41 +569,41 @@ curl http://localhost:3000         # Test frontend availability
 | **Real-time Updates** | WebSocket for live MMM updates | Real-time dashboard updates | Added complexity, not required | Polling is sufficient for MMM data |
 | **NoSQL Database** | MongoDB for MMM model storage | Better for unstructured model data | Different from relational user data | PostgreSQL JSON support is sufficient |
 
-### What I'd Do Differently
+### What Could Be Added
 
 #### With More Time
 | Feature | Description |
 |---------|-------------|
-| **API Versioning** | Implement `/api/v1/` prefix for future compatibility |
-| **Advanced Caching** | Redis integration for MMM computations |
-| **Real-time Features** | WebSocket for live dashboard updates |
-| **Advanced Analytics** | Historical trend analysis and forecasting |
+| **API Versioning** | Add `/api/v1/` prefix |
+| **Caching** | Redis for MMM computations |
+| **Real-time** | WebSocket for live updates |
+| **Analytics** | Historical trends and forecasting |
 
 #### With Different Requirements
 | Feature | Description |
 |---------|-------------|
-| **Multi-tenancy** | Support for multiple organizations |
-| **Advanced Permissions** | Role-based access control for different MMM models |
-| **Export Features** | PDF/Excel export of MMM insights |
-| **Integration APIs** | Webhooks and third-party integrations |
+| **Multi-tenancy** | Support multiple organizations |
+| **Permissions** | Role-based access control |
+| **Export** | PDF/Excel export |
+| **Integrations** | Webhooks and APIs |
 
-#### More Features for Large Scale
+#### For Large Scale
 
-##### Dashboard Enhancements
+##### Dashboard Features
 | Feature | Description |
 |---------|-------------|
-| **Custom Dashboards** | User-configurable dashboard layouts |
-| **Advanced Visualizations** | Interactive charts with drill-down capabilities |
-| **Comparative Analysis** | Side-by-side channel performance comparison |
-| **Forecasting** | Predictive analytics for future performance |
+| **Custom Dashboards** | User-configurable layouts |
+| **Interactive Charts** | Drill-down capabilities |
+| **Comparisons** | Side-by-side performance |
+| **Forecasting** | Predictive analytics |
 
 ##### DevOps & Infrastructure
 | Feature | Description |
 |---------|-------------|
-| **CI/CD Pipeline** | Automated testing, building, and deployment |
-| **Container Orchestration** | Kubernetes deployment with auto-scaling |
-| **Monitoring Stack** | Comprehensive observability with Grafana/Prometheus |
-| **Backup Strategy** | Automated database backups and disaster recovery |
+| **CI/CD** | Automated testing and deployment |
+| **Kubernetes** | Container orchestration with auto-scaling |
+| **Monitoring** | Grafana/Prometheus observability |
+| **Backups** | Automated database backups |
 
 ---
 
