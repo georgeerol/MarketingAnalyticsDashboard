@@ -38,7 +38,7 @@ export function ContributionChart() {
           contribution: Math.round(data.total_contribution),
           share: Math.round(data.contribution_share * 100),
           efficiency: Math.round(data.efficiency * 100) / 100,
-          color: COLORS[index % COLORS.length]
+          color: COLORS[index % COLORS.length] || '#0088FE'
         }))
         
         // Sort by contribution descending

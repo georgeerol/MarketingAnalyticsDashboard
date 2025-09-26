@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { Loader2, TrendingDown, Target, Zap } from 'lucide-react'
+import { Loader2, TrendingDown, Target, Zap, BarChart3 } from 'lucide-react'
 
 interface CurveData {
   spend: number
@@ -182,7 +182,7 @@ export function ResponseCurves() {
                     x={selectedCurve.saturation_point} 
                     stroke="#ff7300" 
                     strokeDasharray="5 5"
-                    label={{ value: "Saturation", position: "topRight" }}
+                    label={{ value: "Saturation", position: "top" }}
                   />
                   <Line 
                     type="monotone" 
@@ -198,7 +198,10 @@ export function ResponseCurves() {
 
             {/* Insights */}
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">📊 Key Insights</h4>
+              <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Key Insights
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="font-medium">Optimal Spend Range:</span>

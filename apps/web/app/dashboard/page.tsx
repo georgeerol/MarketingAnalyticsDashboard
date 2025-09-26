@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { useAuth } from "@/lib/auth"
 import { SimpleContributionChart, SimpleResponseCurves, SimpleMMInsights } from "@/components/mmm/simple-charts"
+import { CheckCircle, BarChart3 } from "lucide-react"
 
 export default function DashboardPage() {
   const { user, token, logout, checkAuth } = useAuth()
@@ -105,11 +106,13 @@ export default function DashboardPage() {
                   <h3 className="font-medium text-purple-900 dark:text-purple-100">
                     Model Status
                   </h3>
-                  <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
-                    ✅ MMM Model: Active
+                  <p className="text-sm text-purple-700 dark:text-purple-300 mt-1 flex items-center gap-1">
+                    <CheckCircle className="h-4 w-4" />
+                    MMM Model: Active
                   </p>
-                  <p className="text-sm text-purple-700 dark:text-purple-300">
-                    📊 Data: 105 weeks, 10 channels
+                  <p className="text-sm text-purple-700 dark:text-purple-300 flex items-center gap-1">
+                    <BarChart3 className="h-4 w-4" />
+                    Data: 105 weeks, 10 channels
                   </p>
                 </div>
               </div>

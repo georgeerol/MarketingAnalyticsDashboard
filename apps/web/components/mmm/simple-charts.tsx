@@ -4,7 +4,14 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { useAuth } from '@/lib/auth'
-import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight, Rocket, BarChart3, Search, BarChart2 } from 'lucide-react'
+
+interface Insight {
+  type: 'success' | 'warning' | 'info'
+  title: string
+  description: string
+  icon?: React.ReactNode
+}
 
 // Enhanced bar chart component with performance indicators
 function SimpleBarChart({ data, title, showPerformance = false }: { 
@@ -20,9 +27,9 @@ function SimpleBarChart({ data, title, showPerformance = false }: {
   
   const getPerformanceIndicator = (efficiency?: number) => {
     if (!efficiency || !showPerformance) return null
-    if (efficiency > avgEfficiency * 1.2) return { icon: '🚀', label: 'High Performer', color: 'text-green-600' }
-    if (efficiency < avgEfficiency * 0.8) return { icon: '⚠️', label: 'Underperformer', color: 'text-red-600' }
-    return { icon: '📊', label: 'Average', color: 'text-blue-600' }
+    if (efficiency > avgEfficiency * 1.2) return { icon: <Rocket className="h-4 w-4" />, label: 'High Performer', color: 'text-green-600' }
+    if (efficiency < avgEfficiency * 0.8) return { icon: <AlertTriangle className="h-4 w-4" />, label: 'Underperformer', color: 'text-red-600' }
+    return { icon: <BarChart3 className="h-4 w-4" />, label: 'Average', color: 'text-blue-600' }
   }
   
   return (
@@ -424,7 +431,7 @@ export function SimpleResponseCurves() {
 export function SimpleMMInsights() {
   const { getChannelSummary, getMMMInfo, getResponseCurves, loading, error } = useMMMData()
   const { token } = useAuth()
-  const [insights, setInsights] = useState<Array<{type: string, title: string, description: string}>>([])
+  const [insights, setInsights] = useState<Insight[]>([])
   const [modelInfo, setModelInfo] = useState<any>(null)
 
   useEffect(() => {
@@ -449,7 +456,7 @@ export function SimpleMMInsights() {
         const topPerformer = sortedByEfficiency[0]
         const underPerformer = sortedByEfficiency[sortedByEfficiency.length - 1]
 
-        const generatedInsights = []
+        const generatedInsights: Insight[] = []
         
         // Calculate efficiency statistics
         const efficiencies = Object.values(curves.curves || {}).map((c: any) => c?.efficiency || 0).filter(e => e > 0)
@@ -464,7 +471,8 @@ export function SimpleMMInsights() {
           
           generatedInsights.push({
             type: 'success',
-            title: `🚀 ${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
+            title: `${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
+            icon: <Rocket className="h-5 w-5" />,
             description: `ROI: ${topEfficiency.toFixed(2)} (${((topEfficiency - avgEfficiency) / avgEfficiency * 100).toFixed(0)}% above average). Saturation at $${saturationPoint.toLocaleString()}. Consider increasing spend up to this threshold.`
           })
         }
@@ -475,7 +483,8 @@ export function SimpleMMInsights() {
           
           generatedInsights.push({
             type: 'warning',
-            title: `⚠️ ${underPerformer[0].replace(/_/g, ' ')} underperforming`,
+            title: `${underPerformer[0].replace(/_/g, ' ')} underperforming`,
+            icon: <AlertTriangle className="h-5 w-5" />,
             description: `ROI: ${underEfficiency.toFixed(2)} (${potentialGain}% below average). Optimize targeting, creative, or reduce spend and reallocate to higher-performing channels.`
           })
         }
@@ -485,7 +494,8 @@ export function SimpleMMInsights() {
           const efficiencyGap = (topPerformer[1] as any).efficiency - (underPerformer[1] as any).efficiency
           generatedInsights.push({
             type: 'info',
-            title: `💡 Budget Optimization Opportunity`,
+            title: `Budget Optimization Opportunity`,
+            icon: <Lightbulb className="h-5 w-5" />,
             description: `Shifting budget from ${underPerformer[0].replace(/_/g, ' ')} to ${topPerformer[0].replace(/_/g, ' ')} could improve ROI by ${efficiencyGap.toFixed(2)}x per dollar spent.`
           })
         }
@@ -499,14 +509,16 @@ export function SimpleMMInsights() {
         if (nearSaturation.length > 0) {
           generatedInsights.push({
             type: 'warning',
-            title: `📊 Saturation Alert`,
+            title: `Saturation Alert`,
+            icon: <BarChart2 className="h-5 w-5" />,
             description: `${nearSaturation.map(([name]) => name.replace(/_/g, ' ')).join(', ')} ${nearSaturation.length === 1 ? 'has' : 'have'} low saturation points. Monitor spend levels to avoid diminishing returns.`
           })
         }
         
         generatedInsights.push({
           type: 'info',
-          title: '📈 Portfolio Performance',
+          title: 'Portfolio Performance',
+          icon: <TrendingUp className="h-5 w-5" />,
           description: `Average ROI: ${avgEfficiency.toFixed(2)} | Best: ${maxEfficiency.toFixed(2)} | Worst: ${minEfficiency.toFixed(2)} | ${info.total_weeks} weeks analyzed across ${info.channels.length} channels.`
         })
 
@@ -577,7 +589,10 @@ export function SimpleMMInsights() {
         )}
 
         <div className="space-y-4">
-          <h4 className="font-semibold">🔍 Key Insights</h4>
+          <h4 className="font-semibold flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Key Insights
+          </h4>
           {insights.map((insight, index) => (
             <div key={index} className={`p-4 rounded-lg border-l-4 ${
               insight.type === 'success' ? 'border-green-500 bg-green-50' :
@@ -590,9 +605,9 @@ export function SimpleMMInsights() {
                   insight.type === 'warning' ? 'text-yellow-600' :
                   'text-blue-600'
                 }`}>
-                  {insight.type === 'success' ? <CheckCircle className="h-5 w-5" /> :
+                  {insight.icon || (insight.type === 'success' ? <CheckCircle className="h-5 w-5" /> :
                    insight.type === 'warning' ? <AlertTriangle className="h-5 w-5" /> :
-                   <Lightbulb className="h-5 w-5" />}
+                   <Lightbulb className="h-5 w-5" />)}
                 </div>
                 <div className="flex-1">
                   <h5 className="font-medium mb-1">{insight.title}</h5>
@@ -604,7 +619,10 @@ export function SimpleMMInsights() {
         </div>
 
         <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-          <h4 className="font-semibold text-gray-900 mb-2">📈 Next Steps</h4>
+          <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Next Steps
+          </h4>
           <p className="text-sm text-gray-700 mb-3">
             Focus on optimizing your top-performing channels while improving efficiency in underperforming areas.
           </p>

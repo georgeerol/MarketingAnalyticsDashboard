@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { useMMMData } from '@/hooks/use-mmm-data'
-import { Loader2, Lightbulb, TrendingUp, AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react'
+import { Loader2, Lightbulb, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, Search, Target } from 'lucide-react'
 
 interface Insight {
   type: 'success' | 'warning' | 'info'
@@ -210,7 +210,10 @@ export function MMMInsights() {
 
         {/* Key Insights */}
         <div className="space-y-4 mb-6">
-          <h4 className="font-semibold">🔍 Key Insights</h4>
+          <h4 className="font-semibold flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Key Insights
+          </h4>
           {insights.map((insight, index) => (
             <div key={index} className={`p-4 rounded-lg border-l-4 ${
               insight.type === 'success' ? 'border-green-500 bg-green-50' :
@@ -242,7 +245,10 @@ export function MMMInsights() {
 
         {/* Channel Recommendations */}
         <div>
-          <h4 className="font-semibold mb-3">🎯 Channel Recommendations</h4>
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            Channel Recommendations
+          </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {recommendations.map((rec, index) => (
               <div key={index} className="p-3 border rounded-lg hover:shadow-sm transition-shadow">
@@ -265,7 +271,10 @@ export function MMMInsights() {
 
         {/* Call to Action */}
         <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-          <h4 className="font-semibold text-gray-900 mb-2">📈 Next Steps</h4>
+          <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Next Steps
+          </h4>
           <p className="text-sm text-gray-700 mb-3">
             Based on your MMM analysis, focus on optimizing your top-performing channels while 
             improving efficiency in underperforming areas.

@@ -229,7 +229,7 @@ describe('Enhanced MMM Components', () => {
       expect(screen.getByText(/real_model/)).toBeInTheDocument()
 
       // Should show key insights
-      expect(screen.getByText('🔍 Key Insights')).toBeInTheDocument()
+      expect(screen.getByText('Key Insights')).toBeInTheDocument()
       
       // Should identify top performer
       expect(screen.getByText(/Channel0.*top performer/)).toBeInTheDocument()
