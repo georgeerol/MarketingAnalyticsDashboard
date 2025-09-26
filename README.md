@@ -1,10 +1,19 @@
 # shadcn/ui monorepo template
 
-## Task
-1.Implement user authentication.
-2. Implement a user dashboard.
-3.  test
-4. 
+## Requirements
+
+### Part 1: User Management
+1. Implement user authentication
+2. Implement a user dashboard
+
+### Part 2: Google Meridian MMM Dashboard  
+3. Load and integrate the Google Meridian model trace (`saved_mmm.pkl`)
+4. Create contribution charts (pick one type)
+5. Implement response curves showing diminishing returns
+6. Build compelling customer narrative for channel performance
+
+### Reference Documentation
+- [Google Meridian Developer Documentation](https://developers.google.com/meridian/docs/advanced-modeling/interpret-visualizations)
 
 
 
@@ -20,16 +29,24 @@
 
 ## Getting started
 Use the monorepo setup. 
-Run: **pnpm turbo run install** 
-- installs dependencies for nextjs (/apps/web)
-- installs dependencies for fastapi (/apps/api)
 
-Run: **pnpm turbo run dev** 
-- spins up docker-compose /packages/docker
+**Install dependencies:**
+```bash
+pnpm install
+```
+
+**Start development:**
+```bash
+pnpm dev
+```
+
+This will:
+- Install dependencies for all apps and packages
+- Spin up docker-compose /packages/docker
     - 5432 for database
     - 8080 for adminer (db ui)
-- starts fastapi dev server
-- starts next applicaiton in dev
+- Start fastapi dev server
+- Start next application in dev
  
 
 ## Frontend component library
