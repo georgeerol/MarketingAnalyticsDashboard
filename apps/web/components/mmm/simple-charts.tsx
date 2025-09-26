@@ -6,30 +6,81 @@ import { useMMMData } from '@/hooks/use-mmm-data'
 import { useAuth } from '@/lib/auth'
 import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react'
 
-// Simple bar chart component without external dependencies
-function SimpleBarChart({ data, title }: { data: Array<{name: string, value: number, color: string}>, title: string }) {
+// Enhanced bar chart component with performance indicators
+function SimpleBarChart({ data, title, showPerformance = false }: { 
+  data: Array<{name: string, value: number, color: string, efficiency?: number}>, 
+  title: string,
+  showPerformance?: boolean 
+}) {
   const maxValue = Math.max(...data.map(d => d.value))
+  
+  // Calculate performance tiers for efficiency indicators
+  const efficiencies = data.map(d => d.efficiency || 0).filter(e => e > 0)
+  const avgEfficiency = efficiencies.length > 0 ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length : 1
+  
+  const getPerformanceIndicator = (efficiency?: number) => {
+    if (!efficiency || !showPerformance) return null
+    if (efficiency > avgEfficiency * 1.2) return { icon: '🚀', label: 'High Performer', color: 'text-green-600' }
+    if (efficiency < avgEfficiency * 0.8) return { icon: '⚠️', label: 'Underperformer', color: 'text-red-600' }
+    return { icon: '📊', label: 'Average', color: 'text-blue-600' }
+  }
   
   return (
     <div className="space-y-3">
-      <h4 className="font-medium text-sm text-gray-600">{title}</h4>
-      {data.map((item, index) => (
-        <div key={index} className="space-y-1">
-          <div className="flex justify-between text-sm">
-            <span className="font-medium">{item.name}</span>
-            <span className="text-gray-600">{item.value.toLocaleString()}</span>
+      <div className="flex justify-between items-center">
+        <h4 className="font-medium text-sm text-gray-600">{title}</h4>
+        {showPerformance && (
+          <div className="text-xs text-gray-500">
+            Avg ROI: {avgEfficiency.toFixed(2)}
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="h-2 rounded-full transition-all duration-500"
-              style={{
-                width: `${(item.value / maxValue) * 100}%`,
-                backgroundColor: item.color
-              }}
-            />
+        )}
+      </div>
+      {data.map((item, index) => {
+        const performance = getPerformanceIndicator(item.efficiency)
+        return (
+          <div key={index} className="space-y-1">
+            <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{item.name}</span>
+                {performance && (
+                  <span className={`text-xs ${performance.color} flex items-center gap-1`}>
+                    {performance.icon} {performance.label}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {item.efficiency && showPerformance && (
+                  <span className="text-xs text-gray-500">
+                    ROI: {item.efficiency.toFixed(2)}
+                  </span>
+                )}
+                <span className="text-gray-600">{item.value.toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="h-3 rounded-full transition-all duration-500 relative"
+                style={{
+                  width: `${(item.value / maxValue) * 100}%`,
+                  backgroundColor: item.color
+                }}
+              >
+                {/* Performance gradient overlay */}
+                {performance && (
+                  <div 
+                    className="absolute inset-0 rounded-full opacity-20"
+                    style={{
+                      background: performance.color.includes('green') ? 'linear-gradient(90deg, transparent, #10b981)' :
+                                 performance.color.includes('red') ? 'linear-gradient(90deg, transparent, #ef4444)' :
+                                 'linear-gradient(90deg, transparent, #3b82f6)'
+                    }}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -79,9 +130,9 @@ function SimpleLineChart({ data, title }: { data: Array<{x: number, y: number}>,
 }
 
 export function SimpleContributionChart() {
-  const { getChannelSummary, loading, error } = useMMMData()
+  const { getChannelSummary, getResponseCurves, loading, error } = useMMMData()
   const { token } = useAuth()
-  const [data, setData] = useState<Array<{name: string, value: number, color: string}>>([])
+  const [data, setData] = useState<Array<{name: string, value: number, color: string, efficiency?: number}>>([])
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
@@ -92,15 +143,26 @@ export function SimpleContributionChart() {
     
     const fetchData = async () => {
       try {
-        const summary = await getChannelSummary()
+        // Fetch both contribution and efficiency data
+        const [summary, responseCurves] = await Promise.all([
+          getChannelSummary(),
+          getResponseCurves()
+        ])
         
         if (!isMounted) return
         
-        const chartData = Object.entries(summary).map(([channel, data], index) => ({
-          name: channel.replace(/_/g, ' '),
-          value: Math.round(data.total_contribution),
-          color: COLORS[index % COLORS.length] || '#8884D8'
-        }))
+        const chartData = Object.entries(summary).map(([channel, data], index) => {
+          // Get efficiency from response curves
+          const efficiency = responseCurves.curves && typeof responseCurves.curves === 'object' && 
+                            responseCurves.curves[channel as keyof typeof responseCurves.curves]?.efficiency || 0
+          
+          return {
+            name: channel.replace(/_/g, ' '),
+            value: Math.round(data.total_contribution),
+            color: COLORS[index % COLORS.length] || '#8884D8',
+            efficiency: efficiency
+          }
+        })
         
         chartData.sort((a, b) => b.value - a.value)
         setData(chartData.slice(0, 6)) // Show top 6 channels
@@ -156,10 +218,10 @@ export function SimpleContributionChart() {
           <TrendingUp className="h-5 w-5" />
           Channel Performance
         </CardTitle>
-        <CardDescription>Top performing media channels</CardDescription>
+        <CardDescription>Top performing media channels with ROI insights</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">
               {totalContribution.toLocaleString()}
@@ -172,9 +234,30 @@ export function SimpleContributionChart() {
             </div>
             <div className="text-sm text-gray-500">Top Channel</div>
           </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">
+              {data.length > 0 ? (data.reduce((sum, item) => sum + (item.efficiency || 0), 0) / data.length).toFixed(2) : '0.00'}
+            </div>
+            <div className="text-sm text-gray-500">Avg ROI</div>
+          </div>
         </div>
 
-        <SimpleBarChart data={data} title="Channel Contributions" />
+        <SimpleBarChart data={data} title="Channel Contributions" showPerformance={true} />
+        
+        {data.length > 0 && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-blue-800">
+              <Lightbulb className="h-4 w-4" />
+              <span className="font-medium">Performance Insight:</span>
+            </div>
+            <p className="text-sm text-blue-700 mt-1">
+              {data.find(d => d.efficiency && d.efficiency > 1.4) ? 
+                `${data.find(d => d.efficiency && d.efficiency > 1.4)?.name} shows exceptional ROI (${data.find(d => d.efficiency && d.efficiency > 1.4)?.efficiency?.toFixed(2)}). Consider increasing investment.` :
+                `Top performer: ${data[0]?.name} with ${data[0]?.efficiency?.toFixed(2) || 'N/A'} ROI. Monitor for optimization opportunities.`
+              }
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -339,7 +422,7 @@ export function SimpleResponseCurves() {
 }
 
 export function SimpleMMInsights() {
-  const { getChannelSummary, getMMMInfo, loading, error } = useMMMData()
+  const { getChannelSummary, getMMMInfo, getResponseCurves, loading, error } = useMMMData()
   const { token } = useAuth()
   const [insights, setInsights] = useState<Array<{type: string, title: string, description: string}>>([])
   const [modelInfo, setModelInfo] = useState<any>(null)
@@ -351,9 +434,10 @@ export function SimpleMMInsights() {
     
     const generateInsights = async () => {
       try {
-        const [summary, info] = await Promise.all([
+        const [summary, info, curves] = await Promise.all([
           getChannelSummary(),
-          getMMMInfo()
+          getMMMInfo(),
+          getResponseCurves()
         ])
         
         if (!isMounted) return
@@ -361,32 +445,69 @@ export function SimpleMMInsights() {
         setModelInfo(info)
 
         const channels = Object.entries(summary)
-        const sortedByEfficiency = channels.sort(([,a], [,b]) => b.efficiency - a.efficiency)
+        const sortedByEfficiency = channels.sort(([,a], [,b]) => (b as any).efficiency - (a as any).efficiency)
         const topPerformer = sortedByEfficiency[0]
         const underPerformer = sortedByEfficiency[sortedByEfficiency.length - 1]
 
         const generatedInsights = []
         
+        // Calculate efficiency statistics
+        const efficiencies = Object.values(curves.curves || {}).map((c: any) => c?.efficiency || 0).filter(e => e > 0)
+        const avgEfficiency = efficiencies.length > 0 ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length : 1
+        const maxEfficiency = efficiencies.length > 0 ? Math.max(...efficiencies) : 1
+        const minEfficiency = efficiencies.length > 0 ? Math.min(...efficiencies) : 1
+        
         if (topPerformer) {
+          const topEfficiency = (topPerformer[1] as any).efficiency
+          const topChannelCurve = (curves.curves as any)?.[topPerformer[0]]
+          const saturationPoint = topChannelCurve?.saturation_point || 50000
+          
           generatedInsights.push({
             type: 'success',
-            title: `${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
-            description: `With an efficiency of ${topPerformer[1].efficiency.toFixed(2)}, this channel delivers the highest ROI.`
+            title: `🚀 ${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
+            description: `ROI: ${topEfficiency.toFixed(2)} (${((topEfficiency - avgEfficiency) / avgEfficiency * 100).toFixed(0)}% above average). Saturation at $${saturationPoint.toLocaleString()}. Consider increasing spend up to this threshold.`
           })
         }
         
         if (underPerformer && underPerformer !== topPerformer) {
+          const underEfficiency = (underPerformer[1] as any).efficiency
+          const potentialGain = ((avgEfficiency - underEfficiency) / underEfficiency * 100).toFixed(0)
+          
           generatedInsights.push({
             type: 'warning',
-            title: `${underPerformer[0].replace(/_/g, ' ')} needs optimization`,
-            description: `Low efficiency of ${underPerformer[1].efficiency.toFixed(2)} suggests room for improvement.`
+            title: `⚠️ ${underPerformer[0].replace(/_/g, ' ')} underperforming`,
+            description: `ROI: ${underEfficiency.toFixed(2)} (${potentialGain}% below average). Optimize targeting, creative, or reduce spend and reallocate to higher-performing channels.`
+          })
+        }
+        
+        // Budget reallocation recommendation
+        if (topPerformer && underPerformer && topPerformer !== underPerformer) {
+          const efficiencyGap = (topPerformer[1] as any).efficiency - (underPerformer[1] as any).efficiency
+          generatedInsights.push({
+            type: 'info',
+            title: `💡 Budget Optimization Opportunity`,
+            description: `Shifting budget from ${underPerformer[0].replace(/_/g, ' ')} to ${topPerformer[0].replace(/_/g, ' ')} could improve ROI by ${efficiencyGap.toFixed(2)}x per dollar spent.`
+          })
+        }
+        
+        // Saturation warnings
+        const nearSaturation = Object.entries(curves.curves || {}).filter(([_, data]: [string, any]) => {
+          // Assume current spend is 70% of saturation point for this example
+          return data?.saturation_point && data.saturation_point < 50000 // Low saturation threshold
+        })
+        
+        if (nearSaturation.length > 0) {
+          generatedInsights.push({
+            type: 'warning',
+            title: `📊 Saturation Alert`,
+            description: `${nearSaturation.map(([name]) => name.replace(/_/g, ' ')).join(', ')} ${nearSaturation.length === 1 ? 'has' : 'have'} low saturation points. Monitor spend levels to avoid diminishing returns.`
           })
         }
         
         generatedInsights.push({
           type: 'info',
-          title: 'Model Coverage',
-          description: `Analysis covers ${info.total_weeks} weeks across ${info.channels.length} channels.`
+          title: '📈 Portfolio Performance',
+          description: `Average ROI: ${avgEfficiency.toFixed(2)} | Best: ${maxEfficiency.toFixed(2)} | Worst: ${minEfficiency.toFixed(2)} | ${info.total_weeks} weeks analyzed across ${info.channels.length} channels.`
         })
 
         setInsights(generatedInsights)
