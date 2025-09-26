@@ -213,7 +213,7 @@ import { Button } from "@workspace/ui/components/button"
 
 ---
 
-### 🔧 **Key Components**
+### **Key Components**
 
 #### **1. Protocol-Based Architecture**
 - **Service Interfaces**: `UserServiceProtocol`, `AuthServiceProtocol`, `MMMServiceProtocol`
@@ -247,7 +247,7 @@ import { Button } from "@workspace/ui/components/button"
 
 ---
 
-## 📡 **API Documentation**
+## **API Documentation**
 
 ### **Authentication Endpoints (5)**
 
@@ -359,7 +359,7 @@ import { Button } from "@workspace/ui/components/button"
 
 ---
 
-## 🚀 **Getting Started**
+## **Getting Started**
 
 ### Prerequisites
 - **Node.js 20+** and **pnpm** for frontend development
