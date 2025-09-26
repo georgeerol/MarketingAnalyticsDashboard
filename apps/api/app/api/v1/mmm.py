@@ -247,3 +247,34 @@ async def test_mmm_model(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"MMM test failed: {str(e)}"
         )
+
+
+@router.get("/debug")
+async def debug_mmm_model(
+    current_user = Depends(get_current_active_user_dep),
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
+):
+    """
+    Debug MMM model parameters and available data.
+    
+    This endpoint shows what parameters are actually available in the 
+    Google Meridian model for improving response curve generation.
+    """
+    try:
+        # Get debug information about model parameters
+        model = mmm_service._load_model()
+        debug_info = mmm_service._debug_model_parameters(model)
+        
+        return {
+            "debug_status": "success",
+            "model_debug": debug_info,
+            "message": "Model parameter debugging completed"
+        }
+        
+    except Exception as e:
+        logger.error(f"MMM debugging failed: {e}")
+        return {
+            "debug_status": "failed",
+            "error": str(e),
+            "message": "MMM model debugging encountered errors"
+        }
