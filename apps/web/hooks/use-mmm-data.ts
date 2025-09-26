@@ -127,21 +127,25 @@ export function useMMMData() {
     setLoading(true)
     setError(null)
     try {
-      // Get all contribution data to build channel summary
-      const contributionData = await fetchWithAuth('/mmm/contribution') as { summary: Record<string, any> }
+      // Get both contribution and response curves data to build accurate channel summary
+      const [contributionData, responseCurvesData] = await Promise.all([
+        fetchWithAuth('/mmm/contribution') as Promise<{ summary: Record<string, any> }>,
+        fetchWithAuth('/mmm/response-curves') as Promise<{ curves: Record<string, any> }>
+      ])
       const channels = await getChannels()
       
       const summary: Record<string, MMMChannel> = {}
       
       channels.forEach(channel => {
         const channelData = contributionData.summary[channel]
-        if (channelData) {
+        const curveData = responseCurvesData.curves[channel]
+        if (channelData && curveData) {
           summary[channel] = {
             name: channel,
             total_spend: channelData.total * 0.5, // Mock spend calculation
             total_contribution: channelData.total,
             contribution_share: channelData.total / Object.values(contributionData.summary).reduce((sum: number, ch: any) => sum + ch.total, 0),
-            efficiency: channelData.mean / (channelData.total * 0.5), // Mock efficiency
+            efficiency: curveData.efficiency, // Use real efficiency from response curves
             avg_weekly_spend: channelData.mean * 0.5,
             avg_weekly_contribution: channelData.mean
           }
