@@ -4,13 +4,11 @@ Authentication API routes.
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.schemas.auth import UserLogin, AuthResponse, Token
 from app.schemas.user import UserCreate, UserResponse
-from app.services.auth_service import AuthService, AuthenticationError
-from app.services.user_service import UserService
+from app.services.auth_service import AuthenticationError
+from app.services.interfaces import UserServiceProtocol, AuthServiceProtocol
 from app.api.deps import get_auth_service, get_user_service, get_current_active_user_dep
 
 router = APIRouter()
@@ -19,7 +17,7 @@ router = APIRouter()
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_data: UserCreate,
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Register a new user.
@@ -42,7 +40,7 @@ async def register_user(
 @router.post("/login", response_model=Token)
 async def login_oauth(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    auth_service: AuthService = Depends(get_auth_service)
+    auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
     """
     OAuth2 compatible login endpoint (for form-based authentication).
@@ -70,7 +68,7 @@ async def login_oauth(
 @router.post("/login-json", response_model=AuthResponse)
 async def login_json(
     login_data: UserLogin,
-    auth_service: AuthService = Depends(get_auth_service)
+    auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
     """
     JSON-based login endpoint (returns user data along with token).
@@ -104,7 +102,7 @@ async def get_current_user(
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
     current_user = Depends(get_current_active_user_dep),
-    auth_service: AuthService = Depends(get_auth_service)
+    auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
     """
     Refresh access token for current user.

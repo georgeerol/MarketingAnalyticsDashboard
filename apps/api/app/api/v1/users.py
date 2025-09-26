@@ -6,7 +6,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 
 from app.schemas.user import UserResponse, UserUpdate, UserListResponse
-from app.services.user_service import UserService
+from app.services.interfaces import UserServiceProtocol
 from app.api.deps import (
     get_user_service, 
     get_current_active_user_dep, 
@@ -22,7 +22,7 @@ async def get_users(
     pagination: dict = Depends(get_pagination_params),
     active_only: bool = Query(True, description="Filter active users only"),
     current_user = Depends(get_current_admin_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Get list of users (admin only).
@@ -53,7 +53,7 @@ async def get_users(
 async def get_user(
     user_id: int,
     current_user = Depends(get_current_admin_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Get user by ID (admin only).
@@ -77,7 +77,7 @@ async def update_user(
     user_id: int,
     user_data: UserUpdate,
     current_user = Depends(get_current_admin_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Update user information (admin only).
@@ -107,7 +107,7 @@ async def update_user(
 async def update_current_user(
     user_data: UserUpdate,
     current_user = Depends(get_current_active_user_dep),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Update current user's information.
@@ -140,7 +140,7 @@ async def update_current_user(
 async def deactivate_user(
     user_id: int,
     current_user = Depends(get_current_admin_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Deactivate a user (admin only).
@@ -169,7 +169,7 @@ async def deactivate_user(
 async def activate_user(
     user_id: int,
     current_user = Depends(get_current_admin_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserServiceProtocol = Depends(get_user_service)
 ):
     """
     Activate a user (admin only).

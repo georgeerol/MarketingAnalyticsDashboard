@@ -12,19 +12,26 @@ from app.models.user import User
 from app.services.user_service import UserService
 from app.services.auth_service import AuthService
 from app.services.mmm_service import MMMService
+from app.services.interfaces import (
+    UserServiceProtocol,
+    AuthServiceProtocol,
+    MMMServiceProtocol,
+)
 
 
-def get_user_service(db: Session = Depends(get_db)) -> UserService:
+def get_user_service(db: Session = Depends(get_db)) -> UserServiceProtocol:
     """Get user service instance."""
     return UserService(db)
 
 
-def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
+def get_auth_service(
+    user_service: UserServiceProtocol = Depends(get_user_service)
+) -> AuthServiceProtocol:
     """Get authentication service instance."""
-    return AuthService(db)
+    return AuthService(user_service)
 
 
-def get_mmm_service() -> MMMService:
+def get_mmm_service() -> MMMServiceProtocol:
     """Get MMM service instance."""
     return MMMService()
 

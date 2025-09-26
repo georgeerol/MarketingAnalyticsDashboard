@@ -5,15 +5,13 @@ Authentication service for handling login, token generation, and user authentica
 from datetime import timedelta
 from typing import Optional
 
-from sqlalchemy.orm import Session
-
 from app.models.user import User
 from app.schemas.auth import UserLogin, AuthResponse
 from app.schemas.user import UserResponse
 from app.core.security import verify_password, create_access_token
 from app.core.config import get_settings
 from app.core.logging import get_logger
-from app.services.user_service import UserService
+from app.services.interfaces import UserServiceProtocol
 
 settings = get_settings()
 logger = get_logger(__name__)
@@ -27,9 +25,8 @@ class AuthenticationError(Exception):
 class AuthService:
     """Service class for authentication operations."""
     
-    def __init__(self, db: Session):
-        self.db = db
-        self.user_service = UserService(db)
+    def __init__(self, user_service: UserServiceProtocol):
+        self.user_service = user_service
     
     def authenticate_user(self, email: str, password: str) -> Optional[User]:
         """

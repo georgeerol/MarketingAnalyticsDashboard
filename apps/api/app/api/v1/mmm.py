@@ -9,7 +9,8 @@ from app.schemas.mmm import (
     MMMStatus, MMMModelInfo, ContributionData, 
     ResponseCurveData, MMMChannelSummary
 )
-from app.services.mmm_service import MMMService, MMMModelError
+from app.services.mmm_service import MMMModelError
+from app.services.interfaces import MMMServiceProtocol
 from app.api.deps import get_mmm_service, get_current_active_user_dep
 
 router = APIRouter()
@@ -18,7 +19,7 @@ router = APIRouter()
 @router.get("/status", response_model=MMMStatus)
 async def get_mmm_status(
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Get the status of the MMM model.
@@ -31,7 +32,7 @@ async def get_mmm_status(
 @router.get("/info", response_model=MMMModelInfo)
 async def get_mmm_info(
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Get detailed information about the MMM model.
@@ -54,7 +55,7 @@ async def get_mmm_info(
 @router.get("/channels")
 async def get_media_channels(
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Get the list of media channels from the MMM model.
@@ -80,7 +81,7 @@ async def get_media_channels(
 async def get_contribution_data(
     channel: Optional[str] = Query(None, description="Specific channel to filter by"),
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Get media contribution data from the MMM model.
@@ -103,7 +104,7 @@ async def get_contribution_data(
 async def get_response_curves(
     channel: Optional[str] = Query(None, description="Specific channel to filter by"),
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Get response curve data from the MMM model.
@@ -125,7 +126,7 @@ async def get_response_curves(
 @router.get("/channels/summary")
 async def get_channel_summary(
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Get summary statistics for all channels.
@@ -148,7 +149,7 @@ async def get_channel_summary(
 @router.get("/explore")
 async def explore_mmm_model(
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Explore the MMM model structure and capabilities.
@@ -186,7 +187,7 @@ async def explore_mmm_model(
 @router.get("/test")
 async def test_mmm_model(
     current_user = Depends(get_current_active_user_dep),
-    mmm_service: MMMService = Depends(get_mmm_service)
+    mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
     """
     Test MMM model loading and basic functionality.
