@@ -5,13 +5,14 @@ These protocols define the contracts our services implement,
 enabling easy testing and future flexibility without overengineering.
 """
 
-from typing import Protocol, Optional, List, Dict, Any
+from typing import Protocol, Optional, List, Dict, Any, runtime_checkable
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.schemas.auth import UserLogin, AuthResponse
 from app.schemas.mmm import MMMStatus, MMMModelInfo, MMMChannelSummary
 
 
+@runtime_checkable
 class UserServiceProtocol(Protocol):
     """Protocol for user management operations."""
     
@@ -53,6 +54,7 @@ class UserServiceProtocol(Protocol):
         ...
 
 
+@runtime_checkable
 class AuthServiceProtocol(Protocol):
     """Protocol for authentication operations."""
     
@@ -73,6 +75,7 @@ class AuthServiceProtocol(Protocol):
         ...
 
 
+@runtime_checkable
 class MMMServiceProtocol(Protocol):
     """Protocol for MMM model operations."""
     
