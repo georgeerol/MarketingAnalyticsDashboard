@@ -2,16 +2,16 @@
 
 A production-ready **Media Mix Modeling (MMM) Dashboard** built with **SOLID principles** and **protocol-based architecture** for maximum testability, maintainability, and scalability.
 
-## 🏆 Architecture Highlights
+## Architecture Highlights
 
-- ✅ **Complete SOLID Implementation** - All 5 principles fully implemented
-- ✅ **Protocol-Based Design** - Full dependency inversion with Python protocols
-- ✅ **Real Google Meridian Integration** - Actual MMM model data processing
-- ✅ **Maximum Testability** - Comprehensive mock implementations for all services
-- ✅ **Type-Safe** - Full IDE support and compile-time checking
-- ✅ **Production-Ready** - Professional, scalable architecture
+- **Complete SOLID Implementation** - All 5 principles fully implemented
+- **Protocol-Based Design** - Full dependency inversion with Python protocols
+- **Real Google Meridian Integration** - Actual MMM model data processing
+- **Maximum Testability** - Comprehensive mock implementations for all services
+- **Type-Safe** - Full IDE support and compile-time checking
+- **Production-Ready** - Professional, scalable architecture
 
-## 🚀 Tech Stack
+## Tech Stack
 
 ### Backend (FastAPI)
 - **FastAPI** - Modern, fast web framework
@@ -33,7 +33,7 @@ A production-ready **Media Mix Modeling (MMM) Dashboard** built with **SOLID pri
 - **Turbo** - Monorepo build system
 - **pnpm** - Fast, efficient package manager
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── apps/
@@ -85,37 +85,37 @@ A production-ready **Media Mix Modeling (MMM) Dashboard** built with **SOLID pri
 └── README.md
 ```
 
-## 🎯 SOLID Principles Implementation
+## SOLID Principles Implementation
 
-### ✅ Single Responsibility Principle (SRP)
+### Single Responsibility Principle (SRP)
 - Each service has **one clear purpose**
 - `UserService` → User management only
 - `AuthService` → Authentication only  
 - `MMMService` → MMM model operations only
 
-### ✅ Open/Closed Principle (OCP)
+### Open/Closed Principle (OCP)
 - Services are **open for extension, closed for modification**
 - New implementations can be added without changing existing code
 - Protocol-based design enables easy feature additions
 
-### ✅ Liskov Substitution Principle (LSP)
+### Liskov Substitution Principle (LSP)
 - **Any protocol implementation is substitutable**
 - `MockUserService` can replace `UserService` seamlessly
 - Tests and production use the same interfaces
 
-### ✅ Interface Segregation Principle (ISP)
+### Interface Segregation Principle (ISP)
 - **Focused, specific protocol interfaces**
 - `UserServiceProtocol` only contains user operations
 - `AuthServiceProtocol` only contains auth operations
 - No forced dependencies on unused methods
 
-### ✅ Dependency Inversion Principle (DIP)
+### Dependency Inversion Principle (DIP)
 - **ALL layers depend on abstractions, not concretions**
 - Routes depend on `AuthServiceProtocol`, not `AuthService`
 - `AuthService` depends on `UserServiceProtocol`, not `UserService`
 - Complete dependency inversion achieved
 
-## 🧪 Protocol-Based Testing
+## Protocol-Based Testing
 
 ### Mock Implementations
 ```python
@@ -125,20 +125,20 @@ auth_service: AuthServiceProtocol = MockAuthService(user_service)
 mmm_service: MMMServiceProtocol = MockMMMService()
 
 # All implement their protocols
-assert isinstance(user_service, UserServiceProtocol)  # ✅
-assert isinstance(auth_service, AuthServiceProtocol)  # ✅
-assert isinstance(mmm_service, MMMServiceProtocol)    # ✅
+assert isinstance(user_service, UserServiceProtocol)  # True
+assert isinstance(auth_service, AuthServiceProtocol)  # True
+assert isinstance(mmm_service, MMMServiceProtocol)    # True
 ```
 
 ### Testing Benefits
-- ✅ **No External Dependencies** - Tests run without database/network/files
-- ✅ **Fast Execution** - Microsecond-level mock operations
-- ✅ **Predictable Results** - Deterministic behavior for reliable tests
-- ✅ **Easy Setup** - Simple mock creation with sensible defaults
-- ✅ **Complete Isolation** - Tests don't interfere with each other
-- ✅ **Error Simulation** - Easy to test error conditions and edge cases
+- **No External Dependencies** - Tests run without database/network/files
+- **Fast Execution** - Microsecond-level mock operations
+- **Predictable Results** - Deterministic behavior for reliable tests
+- **Easy Setup** - Simple mock creation with sensible defaults
+- **Complete Isolation** - Tests don't interfere with each other
+- **Error Simulation** - Easy to test error conditions and edge cases
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - **Node.js 20+**
@@ -161,10 +161,10 @@ pnpm dev
 ```
 
 This starts:
-- 🐘 **PostgreSQL** (port 5432)
-- 🔧 **Adminer** (port 8080) - Database UI
-- 🚀 **FastAPI** (port 8000) - Backend API
-- ⚛️ **Next.js** (port 3000) - Frontend
+- **PostgreSQL** (port 5432)
+- **Adminer** (port 8080) - Database UI
+- **FastAPI** (port 8000) - Backend API
+- **Next.js** (port 3000) - Frontend
 
 ### First Time Setup
 
@@ -182,23 +182,23 @@ pnpm seed
 - **Email:** `test@example.com`
 - **Password:** `test12345`
 
-## 📊 MMM Dashboard Features
+## MMM Dashboard Features
 
 ### Real Google Meridian Integration
-- ✅ **Actual MMM Model** - Uses real `saved_mmm.pkl` file
-- ✅ **5 Media Channels** - Google Search, Display, Facebook, Instagram, YouTube
-- ✅ **156 Time Periods** - Weekly contribution data
-- ✅ **Real Calculations** - ROI × Media Spend for contributions
-- ✅ **Response Curves** - Saturation analysis with real model parameters
+- **Actual MMM Model** - Uses real `saved_mmm.pkl` file
+- **5 Media Channels** - Google Search, Display, Facebook, Instagram, YouTube
+- **156 Time Periods** - Weekly contribution data
+- **Real Calculations** - ROI × Media Spend for contributions
+- **Response Curves** - Saturation analysis with real model parameters
 
 ### Dashboard Capabilities
-- 📈 **Contribution Analysis** - Channel contribution over time
-- 📊 **Response Curves** - Spend vs. conversion relationships
-- 🎯 **Channel Summary** - Performance metrics and efficiency scores
-- 📋 **Model Status** - Real-time model health and information
-- 🔍 **Channel Explorer** - Detailed channel-specific analysis
+- **Contribution Analysis** - Channel contribution over time
+- **Response Curves** - Spend vs. conversion relationships
+- **Channel Summary** - Performance metrics and efficiency scores
+- **Model Status** - Real-time model health and information
+- **Channel Explorer** - Detailed channel-specific analysis
 
-## 🔧 Development
+## Development
 
 ### API Development
 ```bash
@@ -237,7 +237,7 @@ from app.services.interfaces import UserServiceProtocol
 from tests.mocks import MockUserService
 
 user_service = MockUserService()
-assert isinstance(user_service, UserServiceProtocol)  # ✅
+assert isinstance(user_service, UserServiceProtocol)  # True
 
 # Test service composition
 from tests.mocks import MockAuthService
@@ -245,10 +245,10 @@ auth_service = MockAuthService(user_service)
 
 # Test authentication
 user = auth_service.authenticate_user("admin@test.com", "admin_password")
-assert user.is_admin  # ✅
+assert user.is_admin  # True
 ```
 
-## 🏗️ Architecture Patterns
+## Architecture Patterns
 
 ### Dependency Injection Flow
 ```
@@ -343,7 +343,7 @@ cd apps/api && uv run pytest tests/protocol_tests/
 - **Protocol Tests** - Interface compliance and flexibility
 - **E2E Tests** - Full application workflow testing
 
-## 🚀 Production Deployment
+## Production Deployment
 
 ### Environment Variables
 ```bash
@@ -369,14 +369,14 @@ docker build -t mmm-web apps/web/
 docker-compose up -d
 ```
 
-## 🤝 Contributing
+## Contributing
 
 ### Code Standards
-- ✅ **SOLID Principles** - All new code must follow SOLID principles
-- ✅ **Protocol-Based** - Use protocols for all service interfaces
-- ✅ **Type Safety** - Full type annotations required
-- ✅ **Testing** - Comprehensive test coverage with mocks
-- ✅ **Documentation** - Clear docstrings and comments
+- **SOLID Principles** - All new code must follow SOLID principles
+- **Protocol-Based** - Use protocols for all service interfaces
+- **Type Safety** - Full type annotations required
+- **Testing** - Comprehensive test coverage with mocks
+- **Documentation** - Clear docstrings and comments
 
 ### Adding New Features
 1. **Define Protocol** - Create interface in `services/interfaces.py`
@@ -386,11 +386,11 @@ docker-compose up -d
 5. **Create Routes** - Add API endpoints using protocols
 6. **Write Tests** - Unit, integration, and protocol tests
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
-## 🎉 Acknowledgments
+## Acknowledgments
 
 - **SOLID Principles** - Robert C. Martin
 - **Clean Architecture** - Robert C. Martin  
@@ -402,4 +402,4 @@ This project is licensed under the MIT License.
 
 ---
 
-**Built with ❤️ using SOLID principles and protocol-based architecture for maximum maintainability and testability.**
+**Built using SOLID principles and protocol-based architecture for maximum maintainability and testability.**

@@ -66,10 +66,10 @@ async def startup_event():
     """Initialize application on startup."""
     try:
         await init_db()
-        print(f"✅ Database initialized successfully")
-        print(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION} started")
-        print(f"📚 API docs available at: /docs")
-        print(f"🔗 API v1 prefix: {settings.API_V1_PREFIX}")
+        print(f"Database initialized successfully")
+        print(f"{settings.APP_NAME} v{settings.APP_VERSION} started")
+        print(f"API docs available at: /docs")
+        print(f"API v1 prefix: {settings.API_V1_PREFIX}")
     except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
+        print(f"Database initialization failed: {e}")
         # Don't fail startup, just log the error
