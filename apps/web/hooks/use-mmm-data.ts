@@ -62,6 +62,9 @@ export function useMMMData() {
     })
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication failed. Please log in again.')
+      }
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     

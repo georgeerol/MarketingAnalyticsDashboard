@@ -99,7 +99,7 @@ export function SimpleContributionChart() {
         const chartData = Object.entries(summary).map(([channel, data], index) => ({
           name: channel.replace(/_/g, ' '),
           value: Math.round(data.total_contribution),
-          color: COLORS[index % COLORS.length]
+          color: COLORS[index % COLORS.length] || '#8884D8'
         }))
         
         chartData.sort((a, b) => b.value - a.value)
@@ -365,23 +365,29 @@ export function SimpleMMInsights() {
         const topPerformer = sortedByEfficiency[0]
         const underPerformer = sortedByEfficiency[sortedByEfficiency.length - 1]
 
-        const generatedInsights = [
-          {
+        const generatedInsights = []
+        
+        if (topPerformer) {
+          generatedInsights.push({
             type: 'success',
             title: `${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
             description: `With an efficiency of ${topPerformer[1].efficiency.toFixed(2)}, this channel delivers the highest ROI.`
-          },
-          {
+          })
+        }
+        
+        if (underPerformer && underPerformer !== topPerformer) {
+          generatedInsights.push({
             type: 'warning',
             title: `${underPerformer[0].replace(/_/g, ' ')} needs optimization`,
             description: `Low efficiency of ${underPerformer[1].efficiency.toFixed(2)} suggests room for improvement.`
-          },
-          {
-            type: 'info',
-            title: 'Model Coverage',
-            description: `Analysis covers ${info.total_weeks} weeks across ${info.channels.length} channels.`
-          }
-        ]
+          })
+        }
+        
+        generatedInsights.push({
+          type: 'info',
+          title: 'Model Coverage',
+          description: `Analysis covers ${info.total_weeks} weeks across ${info.channels.length} channels.`
+        })
 
         setInsights(generatedInsights)
       } catch (err) {

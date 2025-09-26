@@ -16,15 +16,18 @@ export default function DashboardPage() {
       router.push("/login")
       return
     }
-    checkAuth()
-  }, [token, router, checkAuth])
+    // Only check auth once when component mounts if we have a token
+    if (token && !user) {
+      checkAuth()
+    }
+  }, [token, router])
 
   const handleLogout = () => {
     logout()
     router.push("/login")
   }
 
-  if (!user) {
+  if (!user || !token) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

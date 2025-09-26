@@ -11,12 +11,11 @@ export default function Page() {
 
   useEffect(() => {
     if (token) {
-      checkAuth()
       router.push("/dashboard")
     } else {
       router.push("/login")
     }
-  }, [token, router, checkAuth])
+  }, [token, router])
 
   return (
     <div className="flex items-center justify-center min-h-svh">
