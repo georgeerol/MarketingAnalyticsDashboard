@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { useAuth } from "@/lib/auth"
+import { ContributionChart } from "@/components/mmm/contribution-chart"
+import { ResponseCurves } from "@/components/mmm/response-curves"
+import { MMMInsights } from "@/components/mmm/mmm-insights"
 
 export default function DashboardPage() {
   const { user, token, logout, checkAuth } = useAuth()
@@ -99,61 +102,31 @@ export default function DashboardPage() {
                 </div>
                 <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                   <h3 className="font-medium text-purple-900 dark:text-purple-100">
-                    Next Steps
+                    Model Status
                   </h3>
                   <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
-                    MMM model integration coming soon
+                    ✅ MMM Model: Active
                   </p>
                   <p className="text-sm text-purple-700 dark:text-purple-300">
-                    Phase 2: Dashboard features
+                    📊 Data: 105 weeks, 10 channels
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Placeholder Cards for Future Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Channel Performance</CardTitle>
-              <CardDescription>
-                View media channel effectiveness
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-sm text-gray-500">Coming in Phase 2</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* MMM Analytics Components */}
+          <div className="md:col-span-2 lg:col-span-2">
+            <ContributionChart />
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Response Curves</CardTitle>
-              <CardDescription>
-                Analyze diminishing returns
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-sm text-gray-500">Coming in Phase 2</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="md:col-span-2 lg:col-span-1">
+            <ResponseCurves />
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>MMM Insights</CardTitle>
-              <CardDescription>
-                Model recommendations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-sm text-gray-500">Coming in Phase 2</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="md:col-span-2 lg:col-span-3">
+            <MMMInsights />
+          </div>
         </div>
       </main>
     </div>
