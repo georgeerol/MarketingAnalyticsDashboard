@@ -1,5 +1,5 @@
 """
-Authentication service for handling login, token generation, and user authentication.
+Handles user authentication and JWT tokens.
 """
 
 from datetime import timedelta
@@ -23,21 +23,16 @@ class AuthenticationError(Exception):
 
 
 class AuthService:
-    """Service class for authentication operations."""
+    """Handles login, logout, and token generation."""
     
     def __init__(self, user_service: UserServiceProtocol):
         self.user_service = user_service
     
     def authenticate_user(self, email: str, password: str) -> Optional[User]:
         """
-        Authenticate a user with email and password.
+        Check if email/password combo is valid.
         
-        Args:
-            email: User's email address
-            password: User's plain text password
-            
-        Returns:
-            User instance if authentication successful, None otherwise
+        Returns User if valid, None if not.
         """
         user = self.user_service.get_user_by_email(email)
         
@@ -58,16 +53,9 @@ class AuthService:
     
     def login(self, login_data: UserLogin) -> AuthResponse:
         """
-        Perform user login and generate access token.
+        Log in user and return JWT token.
         
-        Args:
-            login_data: User login credentials
-            
-        Returns:
-            Authentication response with token and user data
-            
-        Raises:
-            AuthenticationError: If authentication fails
+        Raises AuthenticationError if login fails.
         """
         user = self.authenticate_user(login_data.email, login_data.password)
         

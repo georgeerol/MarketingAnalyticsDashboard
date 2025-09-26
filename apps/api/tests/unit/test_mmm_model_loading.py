@@ -215,7 +215,7 @@ class TestMMMModelDataExtraction:
 
     @pytest.fixture
     def mock_meridian_model(self):
-        """Create a comprehensive mock Meridian model."""
+        """Create mock Meridian model for testing."""
         mock_model = Mock()
         
         # Basic model properties

@@ -1,8 +1,7 @@
 """
-Service interface protocols for dependency injection and testing.
+Service protocols for dependency injection.
 
-These protocols define the contracts our services implement,
-enabling easy testing and future flexibility without overengineering.
+Defines interfaces that services implement for easier testing.
 """
 
 from typing import Protocol, Optional, List, Dict, Any, runtime_checkable

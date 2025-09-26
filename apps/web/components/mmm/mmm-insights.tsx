@@ -1,12 +1,5 @@
 /**
- * @fileoverview MMM Insights Component
- * 
- * Advanced insights component that provides comprehensive analysis of Media Mix Modeling data.
- * Generates AI-powered recommendations, channel performance insights, and actionable next steps
- * for marketing optimization based on real MMM model data.
- * 
- * @author MMM Dashboard Team
- * @version 1.0.0
+ * MMM insights and recommendations component
  */
 
 'use client'
@@ -16,65 +9,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { Loader2, Lightbulb, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, Search, Target } from 'lucide-react'
 
-/**
- * Represents a marketing insight generated from MMM analysis
- * @interface Insight
- */
 interface Insight {
-  /** Type of insight affecting display styling */
   type: 'success' | 'warning' | 'info'
-  /** Main insight title */
   title: string
-  /** Detailed insight description */
   description: string
-  /** Optional recommended action */
   action?: string
-  /** Icon component to display with the insight */
   icon: React.ReactNode
 }
 
-/**
- * Represents a channel-specific recommendation
- * @interface ChannelRecommendation
- */
 interface ChannelRecommendation {
-  /** Marketing channel name */
   channel: string
-  /** Recommended action for the channel */
   action: 'increase' | 'decrease' | 'maintain'
-  /** Reasoning behind the recommendation */
   reason: string
-  /** Expected impact level of implementing the recommendation */
   impact: 'high' | 'medium' | 'low'
 }
 
 /**
- * MMM Insights Component
+ * Main insights component with recommendations
  * 
- * Comprehensive insights dashboard that analyzes MMM data to generate actionable
- * marketing recommendations. This component processes channel performance data,
- * identifies top and underperforming channels, and provides strategic recommendations
- * for budget optimization.
- * 
- * Key Features:
- * - Automatic insight generation from MMM model data
- * - Top performer identification with efficiency metrics
- * - Underperformer analysis with optimization suggestions
- * - Budget reallocation recommendations
- * - Channel-specific action items with impact assessment
- * - Model information display (coverage, data quality)
- * 
- * @component
- * @returns {JSX.Element} Complete insights dashboard with recommendations
- * 
- * @example
- * ```tsx
- * <MMMInsights />
- * ```
- * 
- * @see {@link useMMMData} for data fetching
- * @see {@link Insight} for insight data structure
- * @see {@link ChannelRecommendation} for recommendation structure
+ * Analyzes channel performance and shows insights like
+ * "Google Search is your top performer" with action items.
  */
 export function MMMInsights() {
   const { getChannelSummary, getMMMInfo, loading, error } = useMMMData()

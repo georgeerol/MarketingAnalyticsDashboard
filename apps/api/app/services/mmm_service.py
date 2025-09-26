@@ -1,5 +1,5 @@
 """
-MMM (Media Mix Modeling) service for handling Google Meridian model operations.
+Loads and processes Google Meridian MMM models.
 """
 
 import pickle
@@ -25,7 +25,7 @@ class MMMModelError(Exception):
 
 
 class MMMService:
-    """Service class for MMM model operations and data processing."""
+    """Loads MMM models and extracts channel data."""
     
     def __init__(self):
         self.model_path = settings.MMM_MODEL_FULL_PATH
@@ -33,12 +33,7 @@ class MMMService:
         self._is_loaded = False
     
     def get_model_status(self) -> MMMStatus:
-        """
-        Get the status of the MMM model.
-        
-        Returns:
-            MMMStatus with current model status information
-        """
+        """Check if model file exists and can be loaded."""
         try:
             file_exists = self.model_path.exists()
             
@@ -70,15 +65,7 @@ class MMMService:
             )
     
     def get_model_info(self) -> MMMModelInfo:
-        """
-        Get detailed information about the MMM model.
-        
-        Returns:
-            MMMModelInfo with model details
-            
-        Raises:
-            MMMModelError: If model cannot be loaded
-        """
+        """Get model metadata like channels, training period, etc."""
         try:
             model = self._load_model()
             
@@ -108,12 +95,7 @@ class MMMService:
             raise MMMModelError(f"Failed to get model info: {str(e)}")
     
     def get_channel_names(self) -> List[str]:
-        """
-        Get list of media channel names from the model.
-        
-        Returns:
-            List of channel names
-        """
+        """Get list of channel names from the model."""
         try:
             return self._get_channel_names()
         except Exception as e:
@@ -122,13 +104,9 @@ class MMMService:
     
     def get_contribution_data(self, channel: Optional[str] = None) -> Dict[str, Any]:
         """
-        Get contribution data for channels from the real model.
+        Get contribution data for channels.
         
-        Args:
-            channel: Optional specific channel name to filter by
-            
-        Returns:
-            Dictionary with contribution data
+        If channel is specified, returns data for just that channel.
         """
         try:
             model = self._load_model()

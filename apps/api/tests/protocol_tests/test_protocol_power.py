@@ -1,8 +1,5 @@
 """
-Comprehensive tests demonstrating the power of protocol-based architecture.
-
-These tests showcase how dependency inversion makes testing easier, more reliable,
-and more maintainable.
+Tests showing how protocols make testing easier.
 """
 
 import pytest
@@ -13,17 +10,10 @@ from tests.mocks import MockUserService, MockAuthService, MockMMMService
 
 
 class TestProtocolBasedTesting:
-    """
-    Test suite demonstrating the benefits of protocol-based testing.
-    """
+    """Tests showing protocol benefits."""
     
     def test_easy_service_mocking(self, mock_user_service: UserServiceProtocol):
-        """
-        Test how easy it is to mock services with protocols.
-        
-        This test shows that we can use any implementation of UserServiceProtocol
-        without changing our test code.
-        """
+        """Test that we can easily mock services with protocols."""
         # Test basic functionality
         users = mock_user_service.get_users()
         assert len(users) >= 2  # Should have default test users
