@@ -1,12 +1,5 @@
 /**
- * @fileoverview MMM Dashboard Simple Charts Components
- * 
- * This module provides simplified chart components for the Media Mix Modeling (MMM) dashboard.
- * It includes contribution charts, response curves, and AI-powered insights components
- * that visualize marketing channel performance and provide actionable recommendations.
- * 
- * @author MMM Dashboard Team
- * @version 1.0.0
+ * Simple chart components for the MMM dashboard
  */
 
 'use client'
@@ -18,44 +11,24 @@ import { useAuth } from '@/lib/auth'
 import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight, Rocket, BarChart3, Search, BarChart2 } from 'lucide-react'
 
 /**
- * Represents an insight generated from MMM analysis
- * @interface Insight
+ * Data structure for insights shown to users
  */
 interface Insight {
-  /** The type of insight - determines styling and icon */
+  /** success, warning, or info - affects styling */
   type: 'success' | 'warning' | 'info'
-  /** The main title/heading of the insight */
+  /** Insight title */
   title: string
-  /** Detailed description explaining the insight */
+  /** Insight description */
   description: string
-  /** Optional React icon component to display */
+  /** Icon to show */
   icon?: React.ReactNode
 }
 
 /**
- * Enhanced bar chart component with performance indicators
+ * Bar chart with optional performance badges
  * 
- * Renders a horizontal bar chart with optional performance indicators that show
- * channel efficiency ratings (High Performer, Underperformer, Average) based on
- * ROI metrics compared to the average efficiency across all channels.
- * 
- * @param {Object} props - Component properties
- * @param {Array<{name: string, value: number, color: string, efficiency?: number}>} props.data - Chart data array
- * @param {string} props.title - Chart title to display
- * @param {boolean} [props.showPerformance=false] - Whether to show performance indicators
- * @returns {JSX.Element} Rendered bar chart component
- * 
- * @example
- * ```tsx
- * <SimpleBarChart 
- *   data={[
- *     {name: "Google Search", value: 15420, color: "#0088FE", efficiency: 2.5},
- *     {name: "Facebook", value: 9876, color: "#00C49F", efficiency: 1.8}
- *   ]}
- *   title="Channel Contributions"
- *   showPerformance={true}
- * />
- * ```
+ * Shows horizontal bars for each data item. If showPerformance is true,
+ * adds badges like "High Performer" based on efficiency vs average.
  */
 function SimpleBarChart({ data, title, showPerformance = false }: { 
   data: Array<{name: string, value: number, color: string, efficiency?: number}>, 
@@ -180,22 +153,9 @@ function SimpleLineChart({ data, title }: { data: Array<{x: number, y: number}>,
 }
 
 /**
- * Simple Contribution Chart Component
+ * Shows channel contributions in a bar chart
  * 
- * Displays a horizontal bar chart showing the contribution values of different marketing channels.
- * Fetches data from the MMM API and visualizes channel performance with color-coded bars
- * and optional efficiency indicators. Includes loading and error states.
- * 
- * @component
- * @returns {JSX.Element} A card containing the contribution chart with channel data
- * 
- * @example
- * ```tsx
- * <SimpleContributionChart />
- * ```
- * 
- * @see {@link useMMMData} for data fetching hook
- * @see {@link SimpleBarChart} for the underlying chart component
+ * Fetches channel data and displays it with performance indicators.
  */
 export function SimpleContributionChart() {
   const { getChannelSummary, getResponseCurves, loading, error } = useMMMData()
@@ -332,28 +292,10 @@ export function SimpleContributionChart() {
 }
 
 /**
- * Simple Response Curves Component
+ * Interactive response curves chart
  * 
- * Interactive component that displays response curves for marketing channels, showing the
- * relationship between spend and response (ROI). Users can select different channels from
- * a dropdown to view their individual response curves, saturation points, and efficiency metrics.
- * 
- * Features:
- * - Channel selection dropdown
- * - SVG-based curve visualization
- * - Saturation point and efficiency display
- * - Real-time data updates when switching channels
- * 
- * @component
- * @returns {JSX.Element} A card containing the response curves interface and visualization
- * 
- * @example
- * ```tsx
- * <SimpleResponseCurves />
- * ```
- * 
- * @see {@link useMMMData} for data fetching
- * @see {@link useAuth} for authentication state
+ * Shows spend vs response curves for each channel. User can pick
+ * which channel to view from a dropdown.
  */
 export function SimpleResponseCurves() {
   const { getResponseCurves, getChannels, loading, error } = useMMMData()
@@ -514,32 +456,10 @@ export function SimpleResponseCurves() {
 }
 
 /**
- * Simple MMM Insights Component
+ * Generates insights from MMM data
  * 
- * AI-powered insights component that analyzes MMM data and generates actionable
- * recommendations for marketing optimization. Combines channel summary data,
- * response curves, and model information to provide intelligent insights about:
- * 
- * - Top performing channels with efficiency metrics
- * - Underperforming channels needing optimization
- * - Budget reallocation opportunities
- * - Saturation warnings for channels near diminishing returns
- * - Overall portfolio performance statistics
- * 
- * The component automatically generates insights based on real MMM model data
- * and presents them in an easy-to-understand format with actionable next steps.
- * 
- * @component
- * @returns {JSX.Element} A card containing AI-generated insights and recommendations
- * 
- * @example
- * ```tsx
- * <SimpleMMInsights />
- * ```
- * 
- * @see {@link useMMMData} for MMM data access
- * @see {@link useAuth} for authentication
- * @see {@link Insight} for insight data structure
+ * Looks at channel performance and creates recommendations like
+ * "increase spend on Google Search" or "Facebook is underperforming".
  */
 export function SimpleMMInsights() {
   const { getChannelSummary, getMMMInfo, getResponseCurves, loading, error } = useMMMData()
