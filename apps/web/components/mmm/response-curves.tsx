@@ -26,15 +26,22 @@ export function ResponseCurves() {
   const [channels, setChannels] = useState<string[]>([])
 
   useEffect(() => {
+    let isMounted = true
+    
     const fetchData = async () => {
       try {
         // Get all channels first
         const channelList = await getChannels()
+        
+        if (!isMounted) return
+        
         setChannels(channelList)
         setSelectedChannel(channelList[0] || '')
 
         // Get response curves for all channels
         const allCurves = await getResponseCurves() as { curves: Record<string, any> }
+        
+        if (!isMounted) return
         
         const curveData = Object.entries(allCurves.curves).map(([channel, data]) => ({
           channel: channel.replace(/_/g, ' '),
@@ -54,7 +61,11 @@ export function ResponseCurves() {
     }
 
     fetchData()
-  }, [getResponseCurves, getChannels])
+    
+    return () => {
+      isMounted = false
+    }
+  }, []) // Remove dependencies to prevent infinite loop
 
   if (loading) {
     return (

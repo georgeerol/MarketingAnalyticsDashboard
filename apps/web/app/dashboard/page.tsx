@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { useAuth } from "@/lib/auth"
-import { ContributionChart } from "@/components/mmm/contribution-chart"
-import { ResponseCurves } from "@/components/mmm/response-curves"
-import { MMMInsights } from "@/components/mmm/mmm-insights"
+import { SimpleContributionChart, SimpleResponseCurves, SimpleMMInsights } from "@/components/mmm/simple-charts"
 
 export default function DashboardPage() {
   const { user, token, logout, checkAuth } = useAuth()
@@ -117,15 +115,15 @@ export default function DashboardPage() {
 
           {/* MMM Analytics Components */}
           <div className="md:col-span-2 lg:col-span-2">
-            <ContributionChart />
+            <SimpleContributionChart />
           </div>
 
           <div className="md:col-span-2 lg:col-span-1">
-            <ResponseCurves />
+            <SimpleResponseCurves />
           </div>
 
           <div className="md:col-span-2 lg:col-span-3">
-            <MMMInsights />
+            <SimpleMMInsights />
           </div>
         </div>
       </main>

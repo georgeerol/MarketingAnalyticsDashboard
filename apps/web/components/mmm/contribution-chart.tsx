@@ -25,9 +25,14 @@ export function ContributionChart() {
   const [viewType, setViewType] = useState<'bar' | 'pie'>('bar')
 
   useEffect(() => {
+    let isMounted = true
+    
     const fetchData = async () => {
       try {
         const summary = await getChannelSummary()
+        
+        if (!isMounted) return
+        
         const chartData = Object.entries(summary).map(([channel, data], index) => ({
           name: channel.replace(/_/g, ' '),
           contribution: Math.round(data.total_contribution),
@@ -45,7 +50,11 @@ export function ContributionChart() {
     }
 
     fetchData()
-  }, [getChannelSummary])
+    
+    return () => {
+      isMounted = false
+    }
+  }, []) // Remove getChannelSummary from dependencies to prevent infinite loop
 
   if (loading) {
     return (

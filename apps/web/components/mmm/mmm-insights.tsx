@@ -27,12 +27,16 @@ export function MMMInsights() {
   const [modelInfo, setModelInfo] = useState<any>(null)
 
   useEffect(() => {
+    let isMounted = true
+    
     const generateInsights = async () => {
       try {
         const [summary, info] = await Promise.all([
           getChannelSummary(),
           getMMMInfo()
         ])
+        
+        if (!isMounted) return
         
         setModelInfo(info)
 
@@ -119,6 +123,8 @@ export function MMMInsights() {
           }
         })
 
+        if (!isMounted) return
+        
         setInsights(generatedInsights)
         setRecommendations(generatedRecommendations.slice(0, 6)) // Limit to 6 recommendations
       } catch (err) {
@@ -127,7 +133,11 @@ export function MMMInsights() {
     }
 
     generateInsights()
-  }, [getChannelSummary, getMMMInfo])
+    
+    return () => {
+      isMounted = false
+    }
+  }, []) // Remove dependencies to prevent infinite loop
 
   if (loading) {
     return (
