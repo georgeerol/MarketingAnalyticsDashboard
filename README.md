@@ -86,6 +86,18 @@ This will:
 - Start FastAPI backend (port 8000)
 - Start Next.js frontend (port 3000)
 
+**3. Stop all services:**
+```bash
+pnpm stop
+```
+
+This will:
+- Stop all Node.js processes (Next.js frontend)
+- Stop all Python processes (FastAPI backend)
+- Stop all Docker containers (PostgreSQL, Adminer)
+- Clean up all processes and free up ports
+- Verify all ports are available
+
 ### 🔧 Manual Setup (Alternative)
 
 **Start database only:**

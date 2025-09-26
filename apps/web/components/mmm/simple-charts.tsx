@@ -183,7 +183,9 @@ export function SimpleResponseCurves() {
   const [curveData, setCurveData] = useState<Array<{x: number, y: number}>>([])
   const [saturationPoint, setSaturationPoint] = useState<number>(0)
   const [efficiency, setEfficiency] = useState<number>(0)
+  const [allCurvesData, setAllCurvesData] = useState<Record<string, any>>({})
 
+  // Initial data fetch
   useEffect(() => {
     let isMounted = true
     
@@ -200,16 +202,12 @@ export function SimpleResponseCurves() {
         
         if (!isMounted) return
         
+        setAllCurvesData(allCurves.curves)
+        
+        // Set initial data for first channel
         const firstChannel = channelList[0]
         if (firstChannel && allCurves.curves[firstChannel]) {
-          const data = allCurves.curves[firstChannel]
-          const points = data.spend.slice(0, 20).map((spend: number, index: number) => ({
-            x: spend,
-            y: data.response[index]
-          }))
-          setCurveData(points)
-          setSaturationPoint(data.saturation_point)
-          setEfficiency(data.efficiency)
+          updateChannelData(firstChannel, allCurves.curves)
         }
       } catch (err) {
         console.error('Failed to fetch response curves:', err)
@@ -222,6 +220,26 @@ export function SimpleResponseCurves() {
       isMounted = false
     }
   }, [])
+
+  // Update data when selected channel changes
+  useEffect(() => {
+    if (selectedChannel && allCurvesData[selectedChannel]) {
+      updateChannelData(selectedChannel, allCurvesData)
+    }
+  }, [selectedChannel, allCurvesData])
+
+  const updateChannelData = (channel: string, curvesData: Record<string, any>) => {
+    const data = curvesData[channel]
+    if (data) {
+      const points = data.spend.slice(0, 20).map((spend: number, index: number) => ({
+        x: spend,
+        y: data.response[index]
+      }))
+      setCurveData(points)
+      setSaturationPoint(data.saturation_point)
+      setEfficiency(data.efficiency)
+    }
+  }
 
   if (loading) {
     return (

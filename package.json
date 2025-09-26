@@ -7,7 +7,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "seed": "cd apps/api && pnpm seed"
+    "seed": "cd apps/api && pnpm seed",
+    "stop": "node scripts/shutdown.js"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

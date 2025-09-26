@@ -145,20 +145,17 @@ async def get_response_curves(
         if curves_data is None:
             raise HTTPException(status_code=404, detail="No response curve data found in MMM model")
         
-        if channel and isinstance(curves_data, dict) and channel in curves_data:
+        # curves_data is already in format {'curves': {...}} from mmm_loader
+        if channel and isinstance(curves_data, dict) and 'curves' in curves_data and channel in curves_data['curves']:
             # Return curves for specific channel
             return {
                 "channel": channel,
-                "curves": curves_data[channel],
+                "curves": curves_data['curves'][channel],
                 "message": f"Response curves for {channel}"
             }
         else:
-            # Return all response curves
-            return {
-                "curves": curves_data,
-                "channels": list(curves_data.keys()) if isinstance(curves_data, dict) else "Unknown structure",
-                "message": "All response curves data"
-            }
+            # Return all response curves - curves_data already has the right structure
+            return curves_data
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting response curves: {str(e)}")
