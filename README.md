@@ -4,15 +4,15 @@ A **Media Mix Modeling (MMM) Dashboard** built with FastAPI and Next.js for anal
 
 ## 🎯 Project Status
 
-### ✅ Phase 1: User Management (Backend Complete)
-1. **✅ User authentication** - JWT-based auth with bcrypt password hashing
-2. **🔄 User dashboard** - Backend ready, frontend pending
+### ✅ Phase 1: User Management (COMPLETE)
+1. **✅ User authentication** - JWT-based auth with secure password hashing
+2. **✅ User dashboard** - Complete authentication UI with login/register/dashboard
 
-### 🔄 Phase 2: Google Meridian MMM Dashboard  
-3. **📋 Load and integrate** the Google Meridian model trace (`saved_mmm.pkl`)
-4. **📋 Create contribution charts** (pick one type)
-5. **📋 Implement response curves** showing diminishing returns
-6. **📋 Build compelling customer narrative** for channel performance
+### 🚧 Phase 2: Google Meridian MMM Dashboard (IN PROGRESS)
+3. **✅ Load and integrate** the Google Meridian model trace (`saved_mmm.pkl`) - API endpoints ready with mock data fallback
+4. **📋 Create contribution charts** (pick one type) - Ready for frontend implementation
+5. **📋 Implement response curves** showing diminishing returns - Ready for frontend implementation
+6. **📋 Build compelling customer narrative** for channel performance - Ready for frontend implementation
 
 ### 📚 Reference Documentation
 - [Google Meridian Developer Documentation](https://developers.google.com/meridian/docs/advanced-modeling/interpret-visualizations)
@@ -20,18 +20,21 @@ A **Media Mix Modeling (MMM) Dashboard** built with FastAPI and Next.js for anal
 ## 🏗️ Current Implementation
 
 ### ✅ Backend (FastAPI)
-- **Authentication system** with JWT tokens and password hashing
+- **Authentication system** with JWT tokens and secure password hashing
 - **Database models** for Users, Campaigns, Channels, and MMM data
 - **API endpoints** for user registration, login, and user management
 - **PostgreSQL integration** with SQLAlchemy ORM
 - **Environment configuration** and settings management
 - **CORS middleware** for frontend integration
+- **Seed data** with sample users for testing
 
-### 📋 Frontend (Next.js)
-- **Basic setup** with shadcn/ui components
-- **Theme provider** for light/dark mode
-- **Authentication UI** - pending implementation
-- **Dashboard pages** - pending implementation
+### ✅ Frontend (Next.js)
+- **Complete authentication UI** with login/register forms
+- **Protected dashboard** with user profile display
+- **Responsive design** with shadcn/ui components
+- **State management** with Zustand for authentication
+- **Auto-redirect logic** based on authentication status
+- **Theme provider** for light/dark mode support
 
 
 
@@ -103,12 +106,13 @@ cd apps/api && uv run python reset_db.py
 
 **Seed sample data:**
 ```bash
-cd apps/api && uv run python seed.py
+pnpm seed
 ```
 
-**Sample login credentials:**
-- Admin: `admin@example.com` / `admin123`
-- Demo: `demo@example.com` / `demo123`
+**Test credentials:**
+- Test User: `test@example.com` / `test123`
+
+> **Note**: Registration is temporarily disabled due to bcrypt configuration. Use the test credentials above to login.
 
 ## 🔌 API Endpoints
 
@@ -118,6 +122,15 @@ cd apps/api && uv run python seed.py
 - `POST /auth/login-json` - User login (JSON payload)
 - `GET /auth/me` - Get current user info
 - `GET /auth/users` - Get all users (admin only)
+
+### MMM (Media Mix Modeling)
+- `GET /mmm/status` - Check MMM model status and basic info
+- `GET /mmm/info` - Get detailed MMM model information
+- `GET /mmm/channels` - Get list of media channels
+- `GET /mmm/contribution` - Get contribution data (optional `?channel=name` filter)
+- `GET /mmm/response-curves` - Get response curve data (optional `?channel=name` filter)
+- `GET /mmm/explore` - Explore MMM model structure
+- `GET /mmm/test` - Test MMM model loading and functionality
 
 ### System
 - `GET /health` - Health check
@@ -131,10 +144,58 @@ cd apps/api && uv run python seed.py
 curl http://localhost:8000/health
 ```
 
+**Test authentication:**
+```bash
+curl -X POST http://localhost:8000/auth/login-json \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test123"}'
+```
+
+**Test MMM endpoints:**
+```bash
+# Get auth token
+TOKEN=$(curl -s -X POST http://localhost:8000/auth/login-json \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test123"}' | jq -r '.access_token')
+
+# Test MMM status
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/mmm/status
+
+# Get media channels
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/mmm/channels
+
+# Get contribution data for a specific channel
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/mmm/contribution?channel=Google_Search"
+```
+
 **API documentation:**
 Visit http://localhost:8000/docs for interactive API testing
 
-**Note**: Authentication endpoints are implemented but may need debugging for bcrypt password validation. Use the interactive docs for testing.
+## 🔐 Authentication System
+
+The application features a complete authentication system:
+
+### 🌐 Frontend Features
+- **Login Page** (`/login`) - Email/password authentication
+- **Register Page** (`/register`) - User registration (temporarily disabled)
+- **Dashboard** (`/dashboard`) - Protected user profile page
+- **Auto-redirect** - Unauthenticated users redirected to login
+- **Persistent sessions** - Login state maintained across browser sessions
+
+### 🔧 Backend Features
+- **JWT tokens** - Secure token-based authentication
+- **Password hashing** - Secure password storage
+- **Protected routes** - API endpoints require authentication
+- **User management** - Complete user CRUD operations
+- **MMM API** - Complete Google Meridian model data access with mock data fallback
+- **Data processing** - Pandas/NumPy integration for MMM analytics
+
+### 🧪 Testing the Authentication
+1. Visit `http://localhost:3000`
+2. Should redirect to login page
+3. Login with: `test@example.com` / `test123`
+4. Should redirect to dashboard showing user profile
+5. Test logout functionality
 
 ## 🎨 Frontend Component Library
 ### Usage

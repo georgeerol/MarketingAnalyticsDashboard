@@ -177,3 +177,12 @@ apps/api/alembic/__pycache__/
 
 # PostgreSQL data
 packages/docker/postgres-volume/
+
+# MMM Model Data
+# Keep directory structure but ignore large model files
+apps/api/data/models/*.pkl
+apps/api/data/models/*.joblib
+apps/api/data/models/*.h5
+apps/api/data/samples/*.csv
+apps/api/data/samples/*.json
+!apps/api/data/README.md

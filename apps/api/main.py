@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
 from routes.auth import router as auth_router
+from routes.mmm import router as mmm_router
 from database import init_db
 
 settings = get_settings()
@@ -22,6 +23,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(mmm_router)
 
 @app.get("/health")
 async def health():
