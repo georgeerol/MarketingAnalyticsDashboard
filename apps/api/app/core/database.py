@@ -71,5 +71,5 @@ async def init_db() -> None:
     """Initialize database tables."""
     async with async_engine.begin() as conn:
         # Import all models here to ensure they are registered
-        from app.models import user, campaign, mmm
+        from app.models import user, mmm
         await conn.run_sync(Base.metadata.create_all)

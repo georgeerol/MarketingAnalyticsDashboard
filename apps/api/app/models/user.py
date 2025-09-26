@@ -21,8 +21,6 @@ class User(BaseModel, TimestampMixin):
     role = Column(String, default="user")  # user, admin
     is_active = Column(Boolean, default=True)
     
-    # Relationships
-    campaigns = relationship("Campaign", back_populates="owner")
     
     def __repr__(self) -> str:
         """String representation of the user."""

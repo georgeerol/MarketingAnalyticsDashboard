@@ -3,7 +3,7 @@ Reset database tables - drop and recreate all tables.
 """
 
 import asyncio
-from database import Base, async_engine
+from app.core.database import Base, async_engine
 
 async def reset_database():
     """Drop and recreate all database tables."""
@@ -11,7 +11,7 @@ async def reset_database():
     
     async with async_engine.begin() as conn:
         # Import all models to ensure they are registered
-        from models import User, Campaign, Channel, ChannelPerformance, ResponseCurve, MMMModelData, CampaignPerformance
+        from app.models import User, ResponseCurve, MMMModelData
         
         # Drop all tables
         await conn.run_sync(Base.metadata.drop_all)

@@ -22,9 +22,10 @@ from typing import List, Dict, Any
 sys.path.append(str(Path(__file__).parent))
 
 # Import database and models
-from database import SessionLocal, init_db
-from models import User, Campaign, Channel, ChannelPerformance, ResponseCurve
-from auth_utils import hash_password
+from sqlalchemy import select
+from app.core.database import AsyncSessionLocal, init_db
+from app.models import User, ResponseCurve
+from app.core.security import hash_password
 
 
 async def seed_users() -> None:
@@ -68,36 +69,36 @@ async def seed_users() -> None:
     print(" Seeding users...")
     
     # Create database session
-    db = SessionLocal()
-    
-    try:
-        for user_data in sample_users:
-            print(f"  → Creating user: {user_data['email']}")
+    async with AsyncSessionLocal() as db:
+        try:
+            for user_data in sample_users:
+                print(f"  → Creating user: {user_data['email']}")
+                
+                # Check if user already exists
+                result = await db.execute(
+                    select(User).filter(User.email == user_data['email'])
+                )
+                existing_user = result.scalar_one_or_none()
+                if existing_user:
+                    print(f"    User {user_data['email']} already exists, skipping...")
+                    continue
+                
+                hashed_password = hash_password(user_data['password'])
+                user = User(
+                    email=user_data['email'],
+                    hashed_password=hashed_password,
+                    full_name=user_data['full_name'],
+                    role=user_data['role'],
+                    is_active=user_data['is_active'],
+                    company=user_data['company']
+                )
+                db.add(user)
             
-            # Check if user already exists
-            existing_user = db.query(User).filter(User.email == user_data['email']).first()
-            if existing_user:
-                print(f"    User {user_data['email']} already exists, skipping...")
-                continue
-            
-            hashed_password = hash_password(user_data['password'])
-            user = User(
-                email=user_data['email'],
-                hashed_password=hashed_password,
-                full_name=user_data['full_name'],
-                role=user_data['role'],
-                is_active=user_data['is_active'],
-                company=user_data['company']
-            )
-            db.add(user)
-        
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        print(f"Error creating users: {e}")
-        raise
-    finally:
-        db.close()
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            print(f"Error creating users: {e}")
+            raise
     
     print(f" Created {len(sample_users)} users")
 

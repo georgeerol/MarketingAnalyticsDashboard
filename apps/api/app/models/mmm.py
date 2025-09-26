@@ -35,14 +35,11 @@ class ResponseCurve(BaseModel, TimestampMixin):
     __tablename__ = "response_curves"
     
     # Curve data
-    channel_id = Column(Integer, ForeignKey("channels.id"))
+    channel_name = Column(String, nullable=False)  # Store channel name directly
     spend_level = Column(Float, nullable=False)
     predicted_conversions = Column(Float, nullable=False)
     marginal_roi = Column(Float, nullable=True)
     
-    # Relationships
-    channel = relationship("Channel", back_populates="response_curves")
-    
     def __repr__(self) -> str:
         """String representation of response curve."""
-        return f"<ResponseCurve(id={self.id}, channel_id={self.channel_id}, spend_level={self.spend_level})>"
+        return f"<ResponseCurve(id={self.id}, channel_name='{self.channel_name}', spend_level={self.spend_level})>"
