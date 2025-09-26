@@ -1,315 +1,523 @@
 """
-Unit tests for MMM model loading and data processing.
+Unit tests for MMM model loading and real Google Meridian integration.
 """
 
 import pytest
-from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
-import pandas as pd
+from pathlib import Path
 import numpy as np
 import sys
 
 # Add the parent directory to sys.path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from mmm_utils import MMMModelLoader
-from mmm_mock_data import generate_mock_mmm_data, get_mock_channels
+from app.services.mmm_service import MMMService, MMMModelError
+from app.schemas.mmm import MMMStatus, MMMModelInfo
 
 
-class TestMMMModelLoader:
-    """Test cases for MMMModelLoader class."""
-
-    @pytest.mark.unit
-    def test_init_default_path(self):
-        """Test MMMModelLoader initialization with default path."""
-        loader = MMMModelLoader()
-        assert loader.model_path.name == "saved_mmm.pkl"
-        assert not loader.use_mock_data
-        assert loader._model_data is None
-
-    @pytest.mark.unit
-    def test_init_custom_path(self):
-        """Test MMMModelLoader initialization with custom path."""
-        custom_path = Path("/custom/path/model.pkl")
-        loader = MMMModelLoader(model_path=custom_path)
-        assert loader.model_path == custom_path
-
-    @pytest.mark.unit
-    def test_init_mock_data_flag(self):
-        """Test MMMModelLoader initialization with mock data flag."""
-        loader = MMMModelLoader(use_mock_data=True)
-        assert loader.use_mock_data
+class TestMMMModelLoading:
+    """Test MMM model loading functionality."""
 
     @pytest.mark.unit
     @pytest.mark.mmm
-    def test_load_model_mock_data(self, mock_mmm_loader):
-        """Test loading model with mock data."""
-        model_data = mock_mmm_loader.load_model()
+    def test_mmm_service_initialization(self):
+        """Test MMM service initialization."""
+        service = MMMService()
         
-        assert model_data is not None
-        assert isinstance(model_data, dict)
-        assert "model_info" in model_data
-        assert "channels" in model_data["model_info"]
+        assert service is not None
+        assert service._model_data is None
+        assert service._is_loaded is False
+        assert service.model_path is not None
+        assert isinstance(service.model_path, Path)
 
     @pytest.mark.unit
     @pytest.mark.mmm
-    def test_load_model_file_not_exists(self):
-        """Test loading model when file doesn't exist."""
-        non_existent_path = Path("/non/existent/path.pkl")
-        loader = MMMModelLoader(model_path=non_existent_path)
+    def test_model_path_configuration(self):
+        """Test that model path is correctly configured."""
+        service = MMMService()
         
-        model_data = loader.load_model()
-        
-        # Should fallback to mock data
-        assert model_data is not None
-        assert isinstance(model_data, dict)
+        # Check that path ends with the expected model file
+        assert str(service.model_path).endswith("saved_mmm.pkl")
+        assert service.model_path.name == "saved_mmm.pkl"
 
     @pytest.mark.unit
     @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    def test_model_status_file_exists(self, mock_exists):
+        """Test model status when file exists."""
+        mock_exists.return_value = True
+        service = MMMService()
+        
+        status = service.get_model_status()
+        
+        assert isinstance(status, MMMStatus)
+        assert status.status == "success"
+        assert status.file_exists is True
+        assert status.model_info is not None
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    def test_model_status_file_missing(self, mock_exists):
+        """Test model status when file is missing."""
+        mock_exists.return_value = False
+        service = MMMService()
+        
+        status = service.get_model_status()
+        
+        assert isinstance(status, MMMStatus)
+        assert status.status == "error"
+        assert status.file_exists is False
+        assert "not found" in status.message
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    def test_load_model_file_not_found(self, mock_exists):
+        """Test model loading when file doesn't exist."""
+        mock_exists.return_value = False
+        service = MMMService()
+        
+        with pytest.raises(MMMModelError, match="MMM model file not found"):
+            service._load_model()
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
     @patch('meridian.model.model.load_mmm')
-    def test_load_model_real_meridian_success(self, mock_load_mmm, mmm_model_path):
-        """Test successful loading of real Meridian model."""
-        # Mock the Meridian model object
+    def test_load_model_success(self, mock_load_mmm, mock_exists):
+        """Test successful model loading."""
+        mock_exists.return_value = True
+        
+        # Create a mock Meridian model
         mock_model = Mock()
-        mock_model.__class__.__name__ = "Meridian"
+        mock_model.n_times = 156
+        mock_model.n_media_channels = 5
+        
+        # Mock inference data with posterior
+        mock_posterior = Mock()
+        mock_posterior.data_vars = ['roi_m', 'alpha_m', 'beta_m']
+        mock_inference_data = Mock()
+        mock_inference_data.posterior = mock_posterior
+        mock_model.inference_data = mock_inference_data
+        
+        # Mock media tensors
+        mock_media_tensors = Mock()
+        mock_spend_tensor = Mock()
+        mock_spend_tensor.numpy.return_value = np.random.rand(40, 156, 5)
+        mock_media_tensors.media_spend = mock_spend_tensor
+        mock_model.media_tensors = mock_media_tensors
+        
         mock_load_mmm.return_value = mock_model
         
-        loader = MMMModelLoader(model_path=mmm_model_path)
+        service = MMMService()
+        loaded_model = service._load_model()
         
-        # Mock file existence
-        with patch.object(Path, 'exists', return_value=True):
-            model_data = loader.load_model()
-        
-        assert model_data == mock_model
-        mock_load_mmm.assert_called_once_with(str(mmm_model_path))
+        assert loaded_model is not None
+        assert service._is_loaded is True
+        assert service._model_data is mock_model
+        mock_load_mmm.assert_called_once()
 
     @pytest.mark.unit
     @pytest.mark.mmm
-    def test_get_media_channels_mock_data(self, mock_mmm_loader):
-        """Test getting media channels from mock data."""
-        channels = mock_mmm_loader.get_media_channels()
+    @patch('app.services.mmm_service.Path.exists')
+    def test_load_model_meridian_not_available(self, mock_exists):
+        """Test model loading when Meridian package is not available."""
+        mock_exists.return_value = True
+        
+        service = MMMService()
+        
+        with patch('app.services.mmm_service.load_mmm', side_effect=ImportError("No module named 'meridian'")):
+            with pytest.raises(MMMModelError, match="Google Meridian package not available"):
+                service._load_model()
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    def test_model_caching(self):
+        """Test that model loading is cached."""
+        service = MMMService()
+        
+        # Mock a loaded model
+        mock_model = Mock()
+        service._model_data = mock_model
+        service._is_loaded = True
+        
+        # Second call should return cached model
+        cached_model = service._load_model()
+        assert cached_model is mock_model
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_channel_names_from_model(self, mock_load_mmm, mock_exists):
+        """Test extracting channel names from model."""
+        mock_exists.return_value = True
+        
+        # Create mock model with n_media_channels
+        mock_model = Mock()
+        mock_model.n_media_channels = 3
+        mock_load_mmm.return_value = mock_model
+        
+        service = MMMService()
+        channels = service._get_channel_names()
         
         assert isinstance(channels, list)
-        assert len(channels) > 0
-        expected_channels = get_mock_channels()
-        assert channels == expected_channels
+        assert len(channels) == 3
+        assert all(channel.startswith("Channel") for channel in channels)
 
     @pytest.mark.unit
     @pytest.mark.mmm
-    def test_get_media_channels_real_model(self):
-        """Test getting media channels from real Meridian model."""
-        # Mock a real Meridian model
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_model_info_real_model(self, mock_load_mmm, mock_exists):
+        """Test getting model info from real model."""
+        mock_exists.return_value = True
+        
+        # Create comprehensive mock model
         mock_model = Mock()
-        mock_model.__class__.__module__ = "meridian.model.model"
+        mock_model.n_times = 156
         mock_model.n_media_channels = 5
-        mock_model._input_data = Mock()
-        # Provide actual media names to avoid fallback
-        mock_model._input_data.media_names = ['Channel_1', 'Channel_2', 'Channel_3', 'Channel_4', 'Channel_5']
+        mock_load_mmm.return_value = mock_model
         
-        loader = MMMModelLoader()
-        loader._model_data = mock_model
+        service = MMMService()
+        info = service.get_model_info()
         
-        channels = loader.get_media_channels()
+        assert isinstance(info, MMMModelInfo)
+        assert info.model_type == "Google Meridian"
+        assert info.data_source == "real_model"
+        assert info.total_weeks == 156
+        assert len(info.channels) == 5
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    def test_get_basic_model_info(self):
+        """Test getting basic model information."""
+        service = MMMService()
         
-        assert isinstance(channels, list)
+        with patch.object(service.model_path, 'exists', return_value=True):
+            with patch.object(service.model_path, 'stat') as mock_stat:
+                mock_stat.return_value.st_size = 1024
+                
+                info = service._get_basic_model_info()
+                
+                assert isinstance(info, dict)
+                assert "file_path" in info
+                assert "file_exists" in info
+                assert "file_size" in info
+                assert info["file_exists"] is True
+                assert info["file_size"] == 1024
+                assert info["use_mock_data"] is False
+
+
+class TestMMMModelDataExtraction:
+    """Test data extraction from real MMM model."""
+
+    @pytest.fixture
+    def mock_meridian_model(self):
+        """Create a comprehensive mock Meridian model."""
+        mock_model = Mock()
+        
+        # Basic model properties
+        mock_model.n_times = 156
+        mock_model.n_media_channels = 5
+        
+        # Mock inference data with posterior
+        mock_posterior = Mock()
+        mock_posterior.data_vars = ['roi_m', 'alpha_m', 'beta_m', 'contribution_n']
+        
+        # Mock ROI data
+        mock_roi = Mock()
+        mock_roi.mean.return_value.values = np.array([2.5, 1.8, 3.2, 2.1, 2.9])
+        mock_posterior.__getitem__ = Mock(return_value=mock_roi)
+        
+        mock_inference_data = Mock()
+        mock_inference_data.posterior = mock_posterior
+        mock_model.inference_data = mock_inference_data
+        
+        # Mock media tensors
+        mock_media_tensors = Mock()
+        mock_spend_tensor = Mock()
+        mock_spend_tensor.numpy.return_value = np.random.rand(40, 156, 5) * 1000
+        mock_media_tensors.media_spend = mock_spend_tensor
+        mock_model.media_tensors = mock_media_tensors
+        
+        return mock_model
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_contribution_data_real_calculation(self, mock_load_mmm, mock_exists, mock_meridian_model):
+        """Test contribution data calculation from real model."""
+        mock_exists.return_value = True
+        mock_load_mmm.return_value = mock_meridian_model
+        
+        service = MMMService()
+        contribution_data = service.get_contribution_data()
+        
+        assert isinstance(contribution_data, dict)
+        assert "channels" in contribution_data
+        assert "data" in contribution_data
+        assert "summary" in contribution_data
+        assert "shape" in contribution_data
+        
+        # Check that we have data for all channels
+        assert len(contribution_data["channels"]) == 5
+        assert len(contribution_data["data"]) == 5
+        assert len(contribution_data["summary"]) == 5
+        
+        # Check data structure
+        for channel in contribution_data["channels"]:
+            assert channel in contribution_data["data"]
+            assert channel in contribution_data["summary"]
+            
+            # Check that contribution data is a list of numbers
+            channel_data = contribution_data["data"][channel]
+            assert isinstance(channel_data, list)
+            assert len(channel_data) == 156  # Should have 156 time periods
+            
+            # Check summary statistics
+            summary = contribution_data["summary"][channel]
+            assert "mean" in summary
+            assert "total" in summary
+            assert "max" in summary
+            assert "min" in summary
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_contribution_data_specific_channel(self, mock_load_mmm, mock_exists, mock_meridian_model):
+        """Test getting contribution data for a specific channel."""
+        mock_exists.return_value = True
+        mock_load_mmm.return_value = mock_meridian_model
+        
+        service = MMMService()
+        contribution_data = service.get_contribution_data(channel="Channel0")
+        
+        assert len(contribution_data["channels"]) == 1
+        assert contribution_data["channels"][0] == "Channel0"
+        assert "Channel0" in contribution_data["data"]
+        assert "Channel0" in contribution_data["summary"]
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_contribution_data_invalid_channel(self, mock_load_mmm, mock_exists, mock_meridian_model):
+        """Test getting contribution data for invalid channel."""
+        mock_exists.return_value = True
+        mock_load_mmm.return_value = mock_meridian_model
+        
+        service = MMMService()
+        
+        with pytest.raises(MMMModelError, match="not found in model"):
+            service.get_contribution_data(channel="InvalidChannel")
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_response_curves_real_model(self, mock_load_mmm, mock_exists, mock_meridian_model):
+        """Test getting response curves from real model."""
+        mock_exists.return_value = True
+        mock_load_mmm.return_value = mock_meridian_model
+        
+        service = MMMService()
+        curves_data = service.get_response_curves()
+        
+        assert isinstance(curves_data, dict)
+        assert "curves" in curves_data
+        assert len(curves_data["curves"]) == 5
+        
+        # Check curve structure for each channel
+        for channel, curve in curves_data["curves"].items():
+            assert "spend" in curve
+            assert "response" in curve
+            assert "saturation_point" in curve
+            assert "efficiency" in curve
+            assert "adstock_rate" in curve
+            
+            assert isinstance(curve["spend"], list)
+            assert isinstance(curve["response"], list)
+            assert len(curve["spend"]) == len(curve["response"])
+            assert len(curve["spend"]) > 0
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_get_channel_summary_real_model(self, mock_load_mmm, mock_exists, mock_meridian_model):
+        """Test getting channel summary from real model."""
+        mock_exists.return_value = True
+        mock_load_mmm.return_value = mock_meridian_model
+        
+        service = MMMService()
+        summary = service.get_channel_summary()
+        
+        assert isinstance(summary, dict)
+        assert len(summary) == 5
+        
+        # Check summary structure for each channel
+        for channel, channel_summary in summary.items():
+            assert hasattr(channel_summary, 'name')
+            assert hasattr(channel_summary, 'total_spend')
+            assert hasattr(channel_summary, 'total_contribution')
+            assert hasattr(channel_summary, 'contribution_share')
+            assert hasattr(channel_summary, 'efficiency')
+            assert hasattr(channel_summary, 'avg_weekly_spend')
+            assert hasattr(channel_summary, 'avg_weekly_contribution')
+            
+            assert channel_summary.name == channel
+            assert channel_summary.total_spend >= 0
+            assert channel_summary.total_contribution >= 0
+            assert 0 <= channel_summary.contribution_share <= 1
+
+
+class TestMMMModelErrorHandling:
+    """Test error handling in MMM model operations."""
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    def test_mmm_model_error_creation(self):
+        """Test MMMModelError exception creation."""
+        error_msg = "Test error message"
+        error = MMMModelError(error_msg)
+        
+        assert isinstance(error, Exception)
+        assert str(error) == error_msg
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_model_loading_exception_handling(self, mock_load_mmm, mock_exists):
+        """Test handling of exceptions during model loading."""
+        mock_exists.return_value = True
+        mock_load_mmm.side_effect = Exception("Model loading failed")
+        
+        service = MMMService()
+        
+        with pytest.raises(MMMModelError, match="Failed to load MMM model"):
+            service._load_model()
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_contribution_data_missing_roi(self, mock_load_mmm, mock_exists):
+        """Test handling when ROI data is missing from model."""
+        mock_exists.return_value = True
+        
+        # Create model without ROI data
+        mock_model = Mock()
+        mock_posterior = Mock()
+        mock_posterior.data_vars = ['alpha_m', 'beta_m']  # No roi_m
+        mock_inference_data = Mock()
+        mock_inference_data.posterior = mock_posterior
+        mock_model.inference_data = mock_inference_data
+        
+        mock_load_mmm.return_value = mock_model
+        
+        service = MMMService()
+        
+        with pytest.raises(MMMModelError, match="No ROI data found"):
+            service.get_contribution_data()
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    def test_get_model_info_loading_error(self, mock_exists):
+        """Test get_model_info when model loading fails."""
+        mock_exists.return_value = True
+        
+        service = MMMService()
+        
+        with patch.object(service, '_load_model', side_effect=Exception("Loading failed")):
+            with pytest.raises(MMMModelError, match="Failed to get model info"):
+                service.get_model_info()
+
+
+class TestMMMModelIntegration:
+    """Integration tests for MMM model with realistic scenarios."""
+
+    @pytest.mark.unit
+    @pytest.mark.mmm
+    @patch('app.services.mmm_service.Path.exists')
+    @patch('meridian.model.model.load_mmm')
+    def test_full_model_workflow(self, mock_load_mmm, mock_exists):
+        """Test complete model workflow from loading to data extraction."""
+        mock_exists.return_value = True
+        
+        # Create realistic mock model
+        mock_model = Mock()
+        mock_model.n_times = 156
+        mock_model.n_media_channels = 5
+        
+        # Mock posterior with realistic data
+        mock_posterior = Mock()
+        mock_posterior.data_vars = ['roi_m', 'alpha_m', 'beta_m']
+        
+        mock_roi = Mock()
+        mock_roi.mean.return_value.values = np.array([2.5, 1.8, 3.2, 2.1, 2.9])
+        mock_posterior.__getitem__ = Mock(return_value=mock_roi)
+        
+        mock_inference_data = Mock()
+        mock_inference_data.posterior = mock_posterior
+        mock_model.inference_data = mock_inference_data
+        
+        # Mock media tensors with realistic spend data
+        mock_media_tensors = Mock()
+        mock_spend_tensor = Mock()
+        spend_data = np.random.rand(40, 156, 5) * 1000  # Realistic spend values
+        mock_spend_tensor.numpy.return_value = spend_data
+        mock_media_tensors.media_spend = mock_spend_tensor
+        mock_model.media_tensors = mock_media_tensors
+        
+        mock_load_mmm.return_value = mock_model
+        
+        service = MMMService()
+        
+        # Test complete workflow
+        status = service.get_model_status()
+        assert status.status == "success"
+        
+        info = service.get_model_info()
+        assert info.model_type == "Google Meridian"
+        assert info.data_source == "real_model"
+        
+        channels = service.get_channel_names()
         assert len(channels) == 5
-        assert all(channel.startswith("Channel_") for channel in channels)
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_model_info_mock_data(self, mock_mmm_loader):
-        """Test getting model info from mock data."""
-        info = mock_mmm_loader.get_model_info()
         
-        assert isinstance(info, dict)
-        assert "file_path" in info
-        assert "data_source" in info
-        assert info["is_real_model"] == False
+        contribution = service.get_contribution_data()
+        assert len(contribution["channels"]) == 5
+        
+        curves = service.get_response_curves()
+        assert len(curves["curves"]) == 5
+        
+        summary = service.get_channel_summary()
+        assert len(summary) == 5
 
     @pytest.mark.unit
     @pytest.mark.mmm
-    def test_get_model_info_real_model(self, mmm_model_path):
-        """Test getting model info from real Meridian model."""
-        # Mock a real Meridian model
+    def test_service_state_consistency(self):
+        """Test that service maintains consistent state across operations."""
+        service = MMMService()
+        
+        # Initially not loaded
+        assert service._is_loaded is False
+        assert service._model_data is None
+        
+        # Mock successful loading
         mock_model = Mock()
-        mock_model.__class__.__module__ = "meridian.model.model"
+        service._model_data = mock_model
+        service._is_loaded = True
         
-        loader = MMMModelLoader(model_path=mmm_model_path)
-        loader._model_data = mock_model
+        # State should be maintained
+        assert service._is_loaded is True
+        assert service._model_data is mock_model
         
-        with patch.object(Path, 'exists', return_value=True), \
-             patch.object(Path, 'stat') as mock_stat:
-            mock_stat.return_value.st_size = 32 * 1024 * 1024  # 32MB
-            
-            info = loader.get_model_info()
-        
-        assert isinstance(info, dict)
-        assert info["data_source"] == "real_meridian_model"
-        assert info["is_real_model"] == True
-        assert info["file_size_mb"] == 32.0
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_contribution_data_mock(self, mock_mmm_loader):
-        """Test getting contribution data from mock model."""
-        contrib_data = mock_mmm_loader.get_contribution_data()
-        
-        assert contrib_data is not None
-        assert isinstance(contrib_data, pd.DataFrame)
-        assert len(contrib_data.columns) > 0
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_contribution_data_real_model(self):
-        """Test getting contribution data from real Meridian model."""
-        # Mock a real Meridian model
-        mock_model = Mock()
-        mock_model.__class__.__module__ = "meridian.model.model"
-        
-        loader = MMMModelLoader()
-        loader._model_data = mock_model
-        
-        # Mock the get_media_channels method
-        with patch.object(loader, 'get_media_channels', return_value=['Channel_1', 'Channel_2']):
-            contrib_data = loader.get_contribution_data()
-        
-        assert contrib_data is not None
-        assert isinstance(contrib_data, pd.DataFrame)
-        assert list(contrib_data.columns) == ['Channel_1', 'Channel_2']
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_response_curves_mock(self, mock_mmm_loader):
-        """Test getting response curves from mock model."""
-        curves = mock_mmm_loader.get_response_curves()
-        
-        assert curves is not None
-        assert isinstance(curves, dict)
-        # Mock data returns response curves directly, not nested under "curves" key
-        # Check for channel names instead
-        channels = mock_mmm_loader.get_media_channels()
-        assert len(curves) > 0
-        # At least some channels should have response curves
-        assert any(channel in curves for channel in channels)
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_response_curves_real_model(self):
-        """Test getting response curves from real Meridian model."""
-        # Mock a real Meridian model
-        mock_model = Mock()
-        mock_model.__class__.__module__ = "meridian.model.model"
-        
-        loader = MMMModelLoader()
-        loader._model_data = mock_model
-        
-        # Mock the get_media_channels method
-        with patch.object(loader, 'get_media_channels', return_value=['Channel_1', 'Channel_2']):
-            curves = loader.get_response_curves()
-        
-        assert curves is not None
-        assert isinstance(curves, dict)
-        assert "curves" in curves
-        assert len(curves["curves"]) == 2
-
-
-class TestMMMDataProcessing:
-    """Test cases for MMM data processing functions."""
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_generate_mock_mmm_data(self):
-        """Test mock MMM data generation."""
-        mock_data = generate_mock_mmm_data()
-        
-        assert isinstance(mock_data, dict)
-        required_keys = ["model_info", "spend_data", "contribution_data", 
-                        "response_curves", "channel_summary", "model_fit"]
-        
-        for key in required_keys:
-            assert key in mock_data
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_mock_channels(self):
-        """Test getting mock channel names."""
-        channels = get_mock_channels()
-        
-        assert isinstance(channels, list)
-        assert len(channels) == 10
-        assert "Google_Search" in channels
-        assert "Facebook" in channels
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_contribution_data_structure(self, sample_contribution_data):
-        """Test contribution data has correct structure."""
-        df = pd.DataFrame(sample_contribution_data)
-        
-        assert isinstance(df, pd.DataFrame)
-        assert len(df.columns) == 5
-        assert all(col.startswith("Channel_") for col in df.columns)
-        assert df.shape[0] > 0
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_response_curves_structure(self, sample_response_curves):
-        """Test response curves have correct structure."""
-        curves = sample_response_curves
-        
-        assert "curves" in curves
-        assert isinstance(curves["curves"], dict)
-        
-        for channel, curve_data in curves["curves"].items():
-            assert "spend" in curve_data
-            assert "response" in curve_data
-            assert "saturation_point" in curve_data
-            assert "efficiency" in curve_data
-            assert len(curve_data["spend"]) == len(curve_data["response"])
-
-
-class TestMMMErrorHandling:
-    """Test error handling in MMM functionality."""
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_load_model_import_error(self, mmm_model_path):
-        """Test handling of ImportError when Meridian package is missing."""
-        loader = MMMModelLoader(model_path=mmm_model_path)
-        
-        with patch.object(Path, 'exists', return_value=True), \
-             patch('meridian.model.model.load_mmm', side_effect=ImportError("No module named 'meridian'")):
-            
-            model_data = loader.load_model()
-            
-            # Should fallback to mock data
-            assert model_data is not None
-            assert isinstance(model_data, dict)
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_load_model_generic_error(self, mmm_model_path):
-        """Test handling of generic errors during model loading."""
-        loader = MMMModelLoader(model_path=mmm_model_path)
-        
-        with patch.object(Path, 'exists', return_value=True), \
-             patch('meridian.model.model.load_mmm', side_effect=Exception("Generic error")):
-            
-            model_data = loader.load_model()
-            
-            # Should fallback to mock data
-            assert model_data is not None
-            assert isinstance(model_data, dict)
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_channels_no_model_loaded(self):
-        """Test getting channels when no model is loaded."""
-        loader = MMMModelLoader(use_mock_data=True)
-        # Don't load the model
-        
-        channels = loader.get_media_channels()
-        
-        # Should still return channels (loads model automatically)
-        assert isinstance(channels, list)
-        assert len(channels) > 0
+        # Subsequent calls should use cached model
+        cached_model = service._load_model()
+        assert cached_model is mock_model

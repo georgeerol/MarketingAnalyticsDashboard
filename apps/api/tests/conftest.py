@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import from new refactored structure
-from main import app
+from app.main import app
 from app.core.database import get_db, Base
 from app.models.user import User
 from app.core.security import hash_password
