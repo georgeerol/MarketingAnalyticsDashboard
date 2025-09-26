@@ -1,32 +1,74 @@
+/**
+ * @fileoverview MMM Data Hook
+ * 
+ * Custom React hook for fetching and managing Media Mix Modeling (MMM) data.
+ * Provides a centralized interface for accessing MMM API endpoints with
+ * authentication, loading states, and error handling.
+ * 
+ * @author MMM Dashboard Team
+ * @version 1.0.0
+ */
+
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth'
 
+/**
+ * MMM Channel data structure containing performance metrics
+ * @interface MMMChannel
+ */
 interface MMMChannel {
+  /** Channel name (e.g., 'Google Search', 'Facebook') */
   name: string
+  /** Total spend amount for the channel */
   total_spend: number
+  /** Total contribution value generated */
   total_contribution: number
+  /** Share of total contribution (0-1) */
   contribution_share: number
+  /** Channel efficiency (ROI metric) */
   efficiency: number
+  /** Average weekly spend */
   avg_weekly_spend: number
+  /** Average weekly contribution */
   avg_weekly_contribution: number
 }
 
+/**
+ * MMM Contribution data for a specific channel
+ * @interface MMMContribution
+ */
 interface MMMContribution {
+  /** Channel name */
   channel: string
+  /** Time series contribution data */
   data: number[]
+  /** Statistical summary of contribution data */
   summary: {
+    /** Mean contribution value */
     mean: number
+    /** Total contribution */
     total: number
+    /** Maximum contribution value */
     max: number
+    /** Minimum contribution value */
     min: number
   }
 }
 
+/**
+ * MMM Response Curve data showing spend vs response relationship
+ * @interface MMMResponseCurve
+ */
 interface MMMResponseCurve {
+  /** Channel name */
   channel: string
+  /** Response curve data points */
   curves: {
+    /** Spend values (x-axis) */
     spend: number[]
+    /** Response values (y-axis) */
     response: number[]
+    /** Saturation point where diminishing returns begin */
     saturation_point: number
     efficiency: number
     adstock_rate: number
@@ -46,6 +88,61 @@ interface MMMInfo {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const API_V1_PREFIX = '/api/v1'
 
+/**
+ * MMM Data Hook
+ * 
+ * Custom React hook that provides a comprehensive interface for fetching and managing
+ * Media Mix Modeling data from the backend API. Handles authentication, loading states,
+ * error management, and provides methods for accessing all MMM endpoints.
+ * 
+ * Features:
+ * - Automatic authentication token handling
+ * - Centralized loading and error state management
+ * - Type-safe API responses
+ * - Consistent error handling across all endpoints
+ * - Support for both summary and detailed MMM data
+ * 
+ * Available Methods:
+ * - getChannels(): Get list of available marketing channels
+ * - getChannelSummary(): Get performance summary for all channels
+ * - getContributionData(): Get contribution time series data
+ * - getResponseCurves(): Get response curve data for optimization
+ * - getMMMInfo(): Get model metadata and information
+ * - getMMMStatus(): Get current model status
+ * 
+ * @returns {Object} Hook interface with data fetching methods and state
+ * 
+ * @example
+ * ```tsx
+ * function MMMDashboard() {
+ *   const { getChannelSummary, getResponseCurves, loading, error } = useMMMData()
+ *   const [channels, setChannels] = useState([])
+ *   
+ *   useEffect(() => {
+ *     const fetchData = async () => {
+ *       try {
+ *         const summary = await getChannelSummary()
+ *         setChannels(Object.entries(summary))
+ *       } catch (err) {
+ *         console.error('Failed to fetch channel data:', err)
+ *       }
+ *     }
+ *     
+ *     fetchData()
+ *   }, [])
+ *   
+ *   if (loading) return <div>Loading...</div>
+ *   if (error) return <div>Error: {error}</div>
+ *   
+ *   return <ChannelChart data={channels} />
+ * }
+ * ```
+ * 
+ * @see {@link useAuth} for authentication state
+ * @see {@link MMMChannel} for channel data structure
+ * @see {@link MMMContribution} for contribution data structure
+ * @see {@link MMMResponseCurve} for response curve data structure
+ */
 export function useMMMData() {
   const { token } = useAuth()
   const [loading, setLoading] = useState(false)
