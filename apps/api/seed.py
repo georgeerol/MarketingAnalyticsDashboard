@@ -24,7 +24,7 @@ sys.path.append(str(Path(__file__).parent))
 # Import database and models
 from database import SessionLocal, init_db
 from models import User, Campaign, Channel, ChannelPerformance, ResponseCurve
-from auth import hash_password
+from auth_utils import hash_password
 
 
 async def seed_users() -> None:

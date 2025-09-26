@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
-from schemas import UserCreate, UserResponse, Token, UserLogin
-from auth import (
+from schemas import UserCreate, UserResponse, Token, UserLogin, AuthResponse
+from auth_utils import (
     authenticate_user,
     create_access_token,
     get_current_active_user,
@@ -79,9 +79,9 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Sessi
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/login-json", response_model=Token)
+@router.post("/login-json", response_model=AuthResponse)
 async def login_user_json(user_data: UserLogin, db: Session = Depends(get_db)):
-    """Login user with JSON payload and return access token."""
+    """Login user with JSON payload and return access token with user data."""
     
     user = authenticate_user(db, user_data.email, user_data.password)
     if not user:
@@ -102,7 +102,11 @@ async def login_user_json(user_data: UserLogin, db: Session = Depends(get_db)):
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": user
+    }
 
 
 @router.get("/me", response_model=UserResponse)
