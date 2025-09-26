@@ -21,10 +21,10 @@ from typing import List, Dict, Any
 # Add the parent directory to Python path for imports
 sys.path.append(str(Path(__file__).parent))
 
-# TODO: Import these once models are created
-# from api.database import get_db_session, engine
-# from api.models import User, Campaign, Channel
-# from api.auth import hash_password
+# Import database and models
+from database import SessionLocal, init_db
+from models import User, Campaign, Channel, ChannelPerformance, ResponseCurve
+from auth import hash_password
 
 
 async def seed_users() -> None:
@@ -67,19 +67,37 @@ async def seed_users() -> None:
     
     print(" Seeding users...")
     
-    # TODO: Implement user creation once User model is ready
-    for user_data in sample_users:
-        print(f"  → Creating user: {user_data['email']}")
-        # hashed_password = hash_password(user_data['password'])
-        # user = User(
-        #     email=user_data['email'],
-        #     hashed_password=hashed_password,
-        #     full_name=user_data['full_name'],
-        #     role=user_data['role'],
-        #     is_active=user_data['is_active'],
-        #     company=user_data['company']
-        # )
-        # session.add(user)
+    # Create database session
+    db = SessionLocal()
+    
+    try:
+        for user_data in sample_users:
+            print(f"  → Creating user: {user_data['email']}")
+            
+            # Check if user already exists
+            existing_user = db.query(User).filter(User.email == user_data['email']).first()
+            if existing_user:
+                print(f"    User {user_data['email']} already exists, skipping...")
+                continue
+            
+            hashed_password = hash_password(user_data['password'])
+            user = User(
+                email=user_data['email'],
+                hashed_password=hashed_password,
+                full_name=user_data['full_name'],
+                role=user_data['role'],
+                is_active=user_data['is_active'],
+                company=user_data['company']
+            )
+            db.add(user)
+        
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error creating users: {e}")
+        raise
+    finally:
+        db.close()
     
     print(f" Created {len(sample_users)} users")
 
@@ -264,8 +282,10 @@ async def main() -> None:
     print("=" * 50)
     
     try:
-        # TODO: Initialize database connection once database setup is ready
-        # async with get_db_session() as session:
+        # Initialize database tables
+        await init_db()
+        print("Database tables initialized")
+        print()
         
         # Clear existing data (optional - comment out for production)
         # await clear_database()

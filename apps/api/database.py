@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from api.config import get_settings
+from config import get_settings
 
 settings = get_settings()
 
@@ -55,5 +55,5 @@ async def init_db():
     """Initialize database tables."""
     async with async_engine.begin() as conn:
         # Import all models here to ensure they are registered
-        from api.models import User, Campaign, Channel
+        from models import User, Campaign, Channel
         await conn.run_sync(Base.metadata.create_all)
