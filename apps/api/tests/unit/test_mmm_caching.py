@@ -5,7 +5,7 @@ Tests for MMM model caching functionality.
 import pytest
 from unittest.mock import patch, MagicMock
 import time
-from app.services.mmm_service import MMMService
+from app.services.mmm_service import MMMService, _load_model_cached
 
 
 class TestMMMCaching:
@@ -39,6 +39,9 @@ class TestMMMCaching:
     
     def test_caching_performance_improvement(self):
         """Test that caching provides performance improvement."""
+        # Clear cache to ensure clean test
+        _load_model_cached.cache_clear()
+        
         service = MMMService()
         
         # Mock the model loading with a delay to simulate real loading time
@@ -71,6 +74,9 @@ class TestMMMCaching:
     
     def test_cache_with_different_service_instances(self):
         """Test that cache works across different service instances."""
+        # Clear cache to ensure clean test
+        _load_model_cached.cache_clear()
+        
         # Mock the model
         mock_model = MagicMock()
         mock_model.media_names = ['Channel0', 'Channel1', 'Channel2']
@@ -90,6 +96,9 @@ class TestMMMCaching:
     
     def test_cache_handles_exceptions(self):
         """Test that caching handles exceptions properly."""
+        # Clear cache to ensure clean test
+        _load_model_cached.cache_clear()
+        
         service = MMMService()
         
         with patch('meridian.model.model.load_mmm', side_effect=Exception("Load failed")):
@@ -103,15 +112,14 @@ class TestMMMCaching:
     
     def test_cache_with_file_not_found(self):
         """Test caching behavior when model file doesn't exist."""
-        service = MMMService()
+        # Clear cache to ensure clean test
+        _load_model_cached.cache_clear()
         
-        # Mock path.exists to return False
-        with patch.object(service.model_path, 'exists', return_value=False):
-            # Should raise MMMModelError
-            from app.services.mmm_service import MMMModelError
-            
-            with pytest.raises(MMMModelError, match="MMM model file not found"):
-                service._load_model()
+        # Test the global function directly with a non-existent path
+        from app.services.mmm_service import MMMModelError
+        
+        with pytest.raises(MMMModelError, match="MMM model file not found"):
+            _load_model_cached("/fake/nonexistent/path/model.pkl")
     
     def test_cache_integration_with_get_channels(self):
         """Test that caching works with higher-level service methods."""
@@ -135,6 +143,37 @@ class TestMMMCaching:
                 # we still verify the caching behavior
                 assert mock_load.call_count <= 1
     
+    def test_global_cache_function_directly(self):
+        """Test the global _load_model_cached function directly."""
+        mock_model = MagicMock()
+        mock_model.media_names = ['Channel0', 'Channel1', 'Channel2']
+        
+        with patch('meridian.model.model.load_mmm', return_value=mock_model) as mock_load:
+            with patch('pathlib.Path.exists', return_value=True):
+                # Clear any existing cache
+                _load_model_cached.cache_clear()
+                
+                # Test cache info
+                initial_info = _load_model_cached.cache_info()
+                assert initial_info.hits == 0
+                assert initial_info.misses == 0
+                
+                # First call - should be a cache miss
+                model1 = _load_model_cached("/fake/path/model.pkl")
+                after_first = _load_model_cached.cache_info()
+                assert after_first.hits == 0
+                assert after_first.misses == 1
+                
+                # Second call - should be a cache hit
+                model2 = _load_model_cached("/fake/path/model.pkl")
+                after_second = _load_model_cached.cache_info()
+                assert after_second.hits == 1
+                assert after_second.misses == 1
+                
+                # Verify model was only loaded once
+                assert mock_load.call_count == 1
+                assert model1 is model2
+    
     @pytest.mark.performance
     def test_realistic_caching_scenario(self):
         """Test a realistic caching scenario with multiple API calls."""
@@ -149,6 +188,9 @@ class TestMMMCaching:
             return mock_model
         
         with patch('meridian.model.model.load_mmm', side_effect=realistic_load_mock) as mock_load:
+            # Clear cache to ensure clean test
+            _load_model_cached.cache_clear()
+            
             # Simulate multiple rapid API calls (like dashboard loading)
             start_time = time.time()
             

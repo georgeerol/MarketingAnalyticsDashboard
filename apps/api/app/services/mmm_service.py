@@ -25,6 +25,30 @@ class MMMModelError(Exception):
     pass
 
 
+@lru_cache(maxsize=1)
+def _load_model_cached(model_path: str) -> Any:
+    """Global cached function to load the MMM model."""
+    from pathlib import Path
+    
+    model_path_obj = Path(model_path)
+    if not model_path_obj.exists():
+        raise MMMModelError(f"MMM model file not found at {model_path}")
+    
+    try:
+        # Load with Google Meridian
+        from meridian.model.model import load_mmm
+        logger.info(f"Loading Google Meridian MMM model from {model_path}")
+        model_data = load_mmm(str(model_path))
+        logger.info("Successfully loaded Google Meridian MMM model")
+        return model_data
+        
+    except ImportError as e:
+        raise MMMModelError(f"Google Meridian package not available: {e}")
+    except Exception as e:
+        logger.error(f"Error loading MMM model: {e}")
+        raise MMMModelError(f"Failed to load MMM model: {str(e)}")
+
+
 class MMMService:
     """Loads MMM models and extracts channel data."""
     
@@ -259,25 +283,9 @@ class MMMService:
             logger.error(f"Error getting channel summary: {e}")
             raise MMMModelError(f"Failed to get channel summary: {str(e)}")
     
-    @lru_cache(maxsize=1)
     def _load_model(self) -> Any:
         """Load the Google Meridian MMM model with caching to prevent repeated disk reads."""
-        if not self.model_path.exists():
-            raise MMMModelError(f"MMM model file not found at {self.model_path}")
-        
-        try:
-            # Load with Google Meridian
-            from meridian.model.model import load_mmm
-            logger.info(f"Loading Google Meridian MMM model from {self.model_path}")
-            model_data = load_mmm(str(self.model_path))
-            logger.info("Successfully loaded Google Meridian MMM model")
-            return model_data
-            
-        except ImportError as e:
-            raise MMMModelError(f"Google Meridian package not available: {e}")
-        except Exception as e:
-            logger.error(f"Error loading MMM model: {e}")
-            raise MMMModelError(f"Failed to load MMM model: {str(e)}")
+        return _load_model_cached(str(self.model_path))
     
     def _get_channel_names(self) -> List[str]:
         """Extract channel names from the loaded model."""
