@@ -6,7 +6,11 @@
     "dev": "uv run python -m uvicorn app.main:app --host localhost --port 8000 --reload",
     "seed": "uv run python seed.py",
     "start": "uv run uvicorn app.main:app --host 0.0.0.0 --port 8000",
-    "install": "uv sync"
+    "install": "uv sync",
+    "inspect-model": "uv run python scripts/inspect_model.py",
+    "inspect-model:json": "uv run python scripts/inspect_model.py --format json",
+    "inspect-model:file": "uv run python scripts/inspect_model.py --output-file model_inspection.txt",
+    "inspect-model:json-file": "uv run python scripts/inspect_model.py --format json --output-file model_inspection.json"
   },
   "devDependencies": {}
 }

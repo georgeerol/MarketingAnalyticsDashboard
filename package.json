@@ -8,7 +8,11 @@
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "seed": "cd apps/api && pnpm seed",
-    "stop": "node scripts/shutdown.js"
+    "stop": "node scripts/shutdown.js",
+    "inspect-model": "cd apps/api && pnpm inspect-model",
+    "inspect-model:json": "cd apps/api && pnpm inspect-model:json",
+    "inspect-model:file": "cd apps/api && pnpm inspect-model:file",
+    "inspect-model:json-file": "cd apps/api && pnpm inspect-model:json-file"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

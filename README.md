@@ -390,6 +390,30 @@ This will:
 - Start Next.js frontend (port 3000) with Turbopack
 - Create test users for immediate access
 
+### 🔍 Model Inspection Tools
+
+Inspect the MMM model data structure and parameters:
+
+```bash
+# Display model data in terminal
+pnpm inspect-model
+
+# Output as JSON to terminal
+pnpm inspect-model:json
+
+# Save to text file
+pnpm inspect-model:file
+
+# Save as JSON file
+pnpm inspect-model:json-file
+```
+
+The inspection tool provides:
+- 📊 Model structure and metadata
+- 🎯 Channel insights (saturation points, efficiency, adstock rates)
+- 📈 Response curve parameters
+- 📋 Contribution data summary
+
 ### 🔑 Login Credentials
 
 The system comes with pre-configured test users for immediate access:
