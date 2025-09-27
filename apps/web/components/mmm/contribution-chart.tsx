@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Loader2, TrendingUp, DollarSign } from 'lucide-react'
+import { formatChannelName } from '@/lib/format-channel'
 
 interface ChannelData {
   name: string
@@ -34,7 +35,7 @@ export function ContributionChart() {
         if (!isMounted) return
         
         const chartData = Object.entries(summary).map(([channel, data], index) => ({
-          name: channel.replace(/_/g, ' '),
+          name: formatChannelName(channel),
           contribution: Math.round(data.total_contribution),
           share: Math.round(data.contribution_share * 100),
           efficiency: Math.round(data.efficiency * 100) / 100,

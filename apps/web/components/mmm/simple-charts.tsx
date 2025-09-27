@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { useAuth } from '@/lib/auth'
+import { formatChannelName } from '@/lib/format-channel'
 import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight, Rocket, BarChart3, Search, BarChart2 } from 'lucide-react'
 
 /**
@@ -185,7 +186,7 @@ export function SimpleContributionChart() {
                             responseCurves.curves[channel as keyof typeof responseCurves.curves]?.efficiency || 0
           
           return {
-            name: channel.replace(/_/g, ' '),
+            name: formatChannelName(channel),
             value: Math.round(data.total_contribution),
             color: COLORS[index % COLORS.length] || '#8884D8',
             efficiency: efficiency
@@ -414,7 +415,7 @@ export function SimpleResponseCurves() {
           >
             {channels.map(channel => (
               <option key={channel} value={channel}>
-                {channel.replace(/_/g, ' ')}
+                {formatChannelName(channel)}
               </option>
             ))}
           </select>

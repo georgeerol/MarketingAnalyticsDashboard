@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { Loader2, TrendingDown, Target, Zap, BarChart3 } from 'lucide-react'
+import { formatChannelName } from '@/lib/format-channel'
 
 interface CurveData {
   spend: number
@@ -44,7 +45,7 @@ export function ResponseCurves() {
         if (!isMounted) return
         
         const curveData = Object.entries(allCurves.curves).map(([channel, data]) => ({
-          channel: channel.replace(/_/g, ' '),
+          channel: formatChannelName(channel),
           data: data.spend.map((spend: number, index: number) => ({
             spend: Math.round(spend),
             response: Math.round(data.response[index])
@@ -95,7 +96,7 @@ export function ResponseCurves() {
     )
   }
 
-  const selectedCurve = curves.find(c => c.channel === selectedChannel.replace(/_/g, ' '))
+  const selectedCurve = curves.find(c => c.channel === formatChannelName(selectedChannel))
   const maxResponse = selectedCurve ? Math.max(...selectedCurve.data.map(d => d.response)) : 0
 
   return (
@@ -116,7 +117,7 @@ export function ResponseCurves() {
           >
             {channels.map(channel => (
               <option key={channel} value={channel}>
-                {channel.replace(/_/g, ' ')}
+                {formatChannelName(channel)}
               </option>
             ))}
           </select>
