@@ -73,47 +73,66 @@ Visit `http://localhost:3000` and log in with:
 
 ### Data Flow
 
+Standard web app flow - browser talks to frontend, frontend calls API, API hits database:
+
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │   Browser   │───▶│  Next.js    │───▶│   FastAPI   │
 │             │    │  Frontend   │    │   Backend   │
 └─────────────┘    └─────────────┘    └─────────────┘
-                           │                   │
-                           │                   ▼
-                           │            ┌─────────────┐
-                           │            │ PostgreSQL  │
-                           │            │  Database   │
-                           │            └─────────────┘
-                           │                   │
-                           ▼                   ▼
-                   ┌─────────────┐    ┌─────────────┐
-                   │   Zustand   │    │ Google MMM  │
-                   │    Store    │    │ Model (32MB)│
-                   └─────────────┘    └─────────────┘
+                          │                   │
+                          │                   ▼
+                          │            ┌─────────────┐
+                          │            │ PostgreSQL  │
+                          │            │  Database   │
+                          │            └─────────────┘
+                          │                   │
+                          ▼                   ▼
+                  ┌─────────────┐    ┌─────────────┐
+                  │   Zustand   │    │ Google MMM  │
+                  │    Store    │    │ Model (32MB)│
+                  └─────────────┘    └─────────────┘
 ```
 
+- User clicks stuff in browser, Next.js handles it
+- Frontend makes API calls to get MMM data and handle login
+- FastAPI stores user data and MMM results in PostgreSQL
+- The 32MB model file gets loaded and cached in memory
+- Zustand keeps login state so you don't get logged out on refresh
+
 ### MMM Processing Pipeline
+
+How the MMM model gets processed (the performance improvement is pretty significant):
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │ saved_mmm   │───▶│ Model Cache │───▶│ Response    │
 │ .pkl (32MB) │    │ (LRU)       │    │ Curves      │
 └─────────────┘    └─────────────┘    └─────────────┘
-       │                   │                   │
-       │                   ▼                   ▼
-       │            ┌─────────────┐    ┌─────────────┐
-       │            │ Channel     │    │ Hill        │
-       │            │ Analysis    │    │ Saturation  │
-       │            └─────────────┘    └─────────────┘
-       │                   │                   │
-       ▼                   ▼                   ▼
+      │                   │                   │
+      │                   ▼                   ▼
+      │            ┌─────────────┐    ┌─────────────┐
+      │            │ Channel     │    │ Hill        │
+      │            │ Analysis    │    │ Saturation  │
+      │            └─────────────┘    └─────────────┘
+      │                   │                   │
+      ▼                   ▼                   ▼
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │ Contribution│    │ Smart       │    │ Export      │
 │ Charts      │    │ Insights    │    │ Reports     │
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
+- First time loading the 32MB pickle file takes ~3 seconds (ouch)
+- After that it's cached, so requests are ~40-50ms (much better)
+- Pulls out 5 marketing channels with their actual parameters from the model
+- Generates those Hill curves showing when you hit diminishing returns
+- Analyzes which channels are doing well and suggests budget changes
+- Can export the recommendations as JSON, CSV, or text files
+
 ### Authentication Flow
+
+Pretty standard auth flow, but with auto-login after signup (nice UX touch):
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
@@ -128,7 +147,15 @@ Visit `http://localhost:3000` and log in with:
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
+- Sign up and you're automatically logged in (no need to login again)
+- JWT tokens expire after 30 minutes, passwords hashed with bcrypt
+- Zustand keeps you logged in when you refresh the page
+- Can't access dashboard or MMM data without being logged in
+- Basic security stuff: CORS, input validation, etc.
+
 ### Protocol-Based Architecture
+
+Used Python protocols to make testing easier (can swap in mock services):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -159,6 +186,12 @@ Visit `http://localhost:3000` and log in with:
 │ • Protocol-based dependency injection                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+- Protocols define what each service should do (like interfaces)
+- Real services do the actual work in production
+- Mock services are fake ones for testing (so tests don't hit the real database)
+- FastAPI's dependency injection picks the right one automatically
+- Makes the code easier to test and change later
 
 ## Key Components
 
