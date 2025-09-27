@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { useAuth } from '@/lib/auth'
 import { formatChannelName } from '@/lib/format-channel'
-import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight, Rocket, BarChart3, Search, BarChart2 } from 'lucide-react'
+import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight, Rocket, BarChart3, Search, BarChart2, Download } from 'lucide-react'
 
 /**
  * Data structure for insights shown to users
@@ -467,6 +467,7 @@ export function SimpleMMInsights() {
   const { token } = useAuth()
   const [insights, setInsights] = useState<Insight[]>([])
   const [modelInfo, setModelInfo] = useState<any>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     if (!token) return // Don't fetch data if not authenticated
@@ -569,6 +570,51 @@ export function SimpleMMInsights() {
     }
   }, [token])
 
+  const handleExport = async (format: 'json' | 'csv' | 'txt' = 'txt') => {
+    setIsExporting(true)
+    
+    try {
+      if (!token) {
+        alert('Please log in to export recommendations')
+        return
+      }
+
+      const response = await fetch(`http://localhost:8000/api/v1/export/insights?format=${format}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status}`)
+      }
+
+      // Create blob and download
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `mmm_insights_${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.${format}`
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      console.log('Export successful!')
+      
+    } catch (error) {
+      console.error('Export failed:', error)
+      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   if (loading) {
     return (
       <Card>
@@ -660,8 +706,22 @@ export function SimpleMMInsights() {
           <p className="text-sm text-gray-700 mb-3">
             Focus on optimizing your top-performing channels while improving efficiency in underperforming areas.
           </p>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
-            Export Recommendations
+          <button 
+            onClick={() => handleExport('txt')}
+            disabled={isExporting}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Export Recommendations
+              </>
+            )}
           </button>
         </div>
       </CardContent>
