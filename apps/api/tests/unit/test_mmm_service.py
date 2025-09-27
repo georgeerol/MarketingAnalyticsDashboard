@@ -31,7 +31,7 @@ class TestMMMService:
     @pytest.mark.mmm
     def test_get_model_status_file_exists(self, mmm_service: MMMService):
         """Test getting model status when file exists."""
-        with patch.object(mmm_service.model_path, 'exists', return_value=True):
+        with patch('pathlib.Path.exists', return_value=True):
             status = mmm_service.get_model_status()
             
             assert isinstance(status, MMMStatus)
@@ -42,7 +42,7 @@ class TestMMMService:
     @pytest.mark.mmm
     def test_get_model_status_file_missing(self, mmm_service: MMMService):
         """Test getting model status when file is missing."""
-        with patch.object(mmm_service.model_path, 'exists', return_value=False):
+        with patch('pathlib.Path.exists', return_value=False):
             status = mmm_service.get_model_status()
             
             assert isinstance(status, MMMStatus)
@@ -157,8 +157,9 @@ class TestMMMService:
     @pytest.mark.mmm
     def test_generate_response_curve(self, mmm_service: MMMService):
         """Test generating response curve for a channel."""
-        channel = "TestChannel"
-        curve = mmm_service._generate_response_curve(channel)
+        channel = "Channel0"  # Use a real channel name
+        model = mmm_service._load_model()
+        curve = mmm_service._generate_response_curve_from_model(model, channel)
         
         assert isinstance(curve, dict)
         assert "spend" in curve

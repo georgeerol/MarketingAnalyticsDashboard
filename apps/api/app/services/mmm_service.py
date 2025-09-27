@@ -235,9 +235,10 @@ class MMMService:
                 
                 # Calculate spend metrics
                 if total_spend_data is not None and i < total_spend_data.shape[-1]:
-                    channel_spend = total_spend_data[..., i].mean()
-                    total_spend = float(np.sum(channel_spend))
-                    avg_weekly_spend = float(np.mean(channel_spend))
+                    import tensorflow as tf
+                    channel_spend = tf.reduce_mean(total_spend_data[..., i])
+                    total_spend = float(tf.reduce_sum(channel_spend))
+                    avg_weekly_spend = float(channel_spend)
                 else:
                     # Fallback calculations
                     total_spend = ch_summary["total"] * 1000  # Rough estimate
