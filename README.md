@@ -39,7 +39,7 @@ Visit `http://localhost:3000` and log in with:
 
 ### MMM Analytics Dashboard
 
-- **Real Model Data**: Loads actual Google Meridian model (32.3MB `saved_mmm.pkl`)
+- **Real Model Data**: Loads actual Google Meridian model (32MB `saved_mmm.pkl`)
 - **Contribution Charts**: Visual breakdown of channel performance with bar/pie charts
 - **Response Curves**: Hill saturation curves showing diminishing returns for each channel
 - **Smart Insights**: AI-generated recommendations for budget optimization
