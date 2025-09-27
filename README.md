@@ -1,653 +1,477 @@
-# shadcn/ui monorepo template
+# MMM Dashboard
 
-## Recent Updates
+A professional Media Mix Modeling analytics platform built with FastAPI and Next.js.
 
-**Latest Improvements (September 2025):**
-- **Seamless Registration**: New users are automatically logged in after registration - no manual login step required
-- **Enhanced User Experience**: Registration → Auto-Login → Dashboard access in one smooth flow
-- **Professional Validation**: Comprehensive email, password, and duplicate user validation
-- **Performance Optimized**: 95%+ improvement with intelligent model caching (3+ seconds → 40-50ms)
-- **Clean Codebase**: Removed emojis, centralized constants, and improved logging throughout
+## What This Is
 
-## Task
-Implement user authentication.
-Implement a user dashboard.
+This project implements a complete MMM (Media Mix Modeling) dashboard that loads real Google Meridian model data and provides actionable marketing insights. Users can register, log in, and analyze channel performance through interactive charts and AI-generated recommendations.
 
-## General structure
-- apps
-    - api: fastapi
-    - web: nextjs frontend
-- packages
-    - ui: shadcn component library
-    - docker: dockerized database setup 
-
-## Getting started
-Use the monorepo setup. 
-Run: **pnpm turbo run install** 
-- installs dependencies for nextjs (/apps/web)
-- installs dependencies for fastapi (/apps/api)
-
-Run: **pnpm turbo run dev** 
-- spins up docker-compose /packages/docker
-    - 5432 for database
-    - 8080 for adminer (db ui)
-- starts fastapi dev server
-- starts next applicaiton in dev
- 
-
-## Frontend component library
-### Usage
+## Quick Start
 
 ```bash
-pnpm dlx shadcn@latest init
+# 1. Install dependencies
+pnpm install
+
+# 2. Set up required files (see Required Setup Files section below)
+#    - Place saved_mmm.pkl in apps/api/data/models/
+#    - Create .env.local files
+
+# 3. Start all services (database, API, frontend)
+pnpm dev
+
+# 4. Seed the database with test users
+pnpm seed
 ```
 
-### Adding components
+Visit `http://localhost:3000` and log in with:
+- **Email**: `test@example.com`
+- **Password**: `test123`
 
-To add components to your app, run the following command at the root of your `web` app:
+## Features
 
-```bash
-pnpm dlx shadcn@latest add button -c apps/web
+### Authentication & User Management
+- Secure JWT-based authentication with bcrypt password hashing
+- User registration with automatic login
+- Session persistence across page refreshes
+- Professional login/registration UI
+
+### MMM Analytics Dashboard
+- **Real Model Data**: Loads actual Google Meridian model (32.3MB `saved_mmm.pkl`)
+- **Contribution Charts**: Visual breakdown of channel performance with bar/pie charts
+- **Response Curves**: Hill saturation curves showing diminishing returns for each channel
+- **Smart Insights**: AI-generated recommendations for budget optimization
+- **Export Functionality**: Download insights in JSON, CSV, or TXT formats
+
+### Performance & Quality
+- **95% Performance Improvement**: Intelligent model caching (3+ seconds → 40-50ms)
+- **Comprehensive Testing**: 38+ unit and integration tests
+- **Clean Architecture**: Service interfaces, centralized constants, structured logging
+- **Production Ready**: Docker setup, proper error handling, security best practices
+
+## Project Structure
+
 ```
-
-This will place the ui components in the `packages/ui/src/components` directory.
-
-### Tailwind
-
-Your `tailwind.config.ts` and `globals.css` are already set up to use the components from the `ui` package.
-
-### Using components
-
-To use the components in your app, import them from the `ui` package.
-
-```tsx
-import { Button } from "@workspace/ui/components/button"
+├── apps/
+│   ├── api/          # FastAPI backend
+│   │   ├── app/      # Application code
+│   │   ├── data/     # MMM model files
+│   │   └── tests/    # Test suite
+│   └── web/          # Next.js frontend
+│       ├── app/      # App router pages
+│       ├── components/ # React components
+│       └── hooks/    # Custom hooks
+├── packages/
+│   ├── ui/           # Shared component library
+│   └── docker/       # Database setup
 ```
-
-
----
-# Implementation Response: georgeerol/ui monorepo 
-
-
-## Requirements
-
-- Implement user authentication and dashboard  
-- Load and integrate Google Meridian model trace (`saved_mmm.pkl`)  
-- Build contribution charts for channel performance  
-- Add response curves to show diminishing returns  
-- Provide clear customer-facing insights and recommendations  
-- Ensure full testing (unit, integration, and coverage)  
-- Set up CI/CD for production readiness  
-
----
-
-## Project Status
-
-### Phase 1 – User Management
-
-| Task | Description | Status |
-|------|-------------|---------|
-| 1.1 | User Authentication | Secure login with JWT and password hashing | Complete |
-| 1.2 | User Dashboard | Login, registration, and basic dashboard UI | Complete |
-
-### Phase 2 – MMM Dashboard
-
-| Task | Description | Status |
-|------|-------------|---------|
-| 2.1 | Load & Integrate Model | Connected Google Meridian model trace file | Complete |
-| 2.2 | Contribution Charts | Visual breakdown of channel performance | Complete |
-| 2.3 | Response Curves | Analysis of spend vs. returns | Complete |
-| 2.4 | Customer Narrative | Insights and recommendations view | Complete |
-
-
-### Phase 3 – Testing & QA
-
-| Task | Description | Status |
-|------|-------------|---------|
-| 3.1 | Unit Tests | Coverage for MMM features and authentication | Complete |
-| 3.2 | Integration Tests | Verified API endpoints and database connections | Complete |
-| 3.3 | Test Coverage | 38 tests with full coverage | Complete |
-| 3.4 | CI/CD Setup | Ready for production pipeline | Complete 
-
-## Phase 4 – Refactoring & Bug Fixes
-
-| Task | Description | Status |
-|------|-------------|---------|
-| 4.1 | Code Cleanup | Clean up code, improve structure | Complete |
-| 4.2 | Bug Fixes | Fix issues found during testing | Complete |
-| 4.3 | Performance Tuning | Optimize queries and response times | Planned |
-| 4.4 | Documentation Update | Update docs to sound more natural | Complete |
 
 ## System Architecture
 
+### Data Flow
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Browser   │───▶│  Next.js    │───▶│   FastAPI   │
+│             │    │  Frontend   │    │   Backend   │
+└─────────────┘    └─────────────┘    └─────────────┘
+                           │                   │
+                           │                   ▼
+                           │            ┌─────────────┐
+                           │            │ PostgreSQL  │
+                           │            │  Database   │
+                           │            └─────────────┘
+                           │                   │
+                           ▼                   ▼
+                   ┌─────────────┐    ┌─────────────┐
+                   │   Zustand   │    │ Google MMM  │
+                   │    Store    │    │ Model (32MB)│
+                   └─────────────┘    └─────────────┘
+```
+
+### MMM Processing Pipeline
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ saved_mmm   │───▶│ Model Cache │───▶│ Response    │
+│ .pkl (32MB) │    │ (LRU)       │    │ Curves      │
+└─────────────┘    └─────────────┘    └─────────────┘
+       │                   │                   │
+       │                   ▼                   ▼
+       │            ┌─────────────┐    ┌─────────────┐
+       │            │ Channel     │    │ Hill        │
+       │            │ Analysis    │    │ Saturation  │
+       │            └─────────────┘    └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Contribution│    │ Smart       │    │ Export      │
+│ Charts      │    │ Insights    │    │ Reports     │
+└─────────────┘    └─────────────┘    └─────────────┘
+```
+
+### Authentication Flow
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Registration│───▶│ Auto-Login  │───▶│  Dashboard  │
+│    Form     │    │  (JWT)      │    │   Access    │
+└─────────────┘    └─────────────┘    └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Validation  │    │ Token       │    │ Session     │
+│ & Hashing   │    │ Storage     │    │ Persistence │
+└─────────────┘    └─────────────┘    └─────────────┘
+```
+
+### Protocol-Based Architecture
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MMM Dashboard Architecture                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐ │
-│  │   Next.js Web   │    │   FastAPI       │    │ PostgreSQL   │ │
-│  │   Frontend      │◄──►│   Backend       │◄──►│ Database     │ │
-│  │                 │    │                 │    │              │ │
-│  │ • Dashboard UI  │    │ • JWT Auth      │    │ • User Data  │ │
-│  │ • MMM Charts    │    │ • MMM API       │    │ • MMM Models │ │
-│  │ • Auth Forms    │    │ • Data Processing│    │ • Analytics  │ │
-│  └─────────────────┘    └─────────────────┘    └──────────────┘ │
-│           │                       │                      │      │
-│           │              ┌─────────────────┐             │      │
-│           │              │ Google Meridian │             │      │
-│           │              │ MMM Model       │             │      │
-│           │              │ (32.3MB pkl)    │             │      │
-│           │              └─────────────────┘             │      │
-│           │                       │                      │      │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                    Docker Environment                       │ │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │ │
-│  │  │   Web:3000  │  │  API:8000   │  │  PostgreSQL:5432    │ │ │
-│  │  │   Adminer   │  │   Docs      │  │  Adminer:8080       │ │ │
-│  │  └─────────────┘  └─────────────┘  └─────────────────────┘ │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### MMM Data Flow Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      MMM Data Processing Flow                   │
+│                    Service Protocol Layer                       │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │ ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
-│ │ Google Meridian │    │ MMM Model       │    │ Dashboard    │  │
-│ │ saved_mmm.pkl   │───►│ Loader          │───►│ Components   │  │
-│ │ (32.3MB)        │    │                 │    │              │  │
+│ │ UserService     │    │ AuthService     │    │ MMMService   │  │
+│ │ Protocol        │    │ Protocol        │    │ Protocol     │  │
 │ └─────────────────┘    └─────────────────┘    └──────────────┘  │
 │          │                       │                      │       │
-│          │              ┌─────────────────┐             │       │
-│          │              │ Fallback System │             │       │
-│          └─────────────►│ Mock Data Gen   │─────────────┘       │
-│                         │ (Development)   │                     │
-│                         └─────────────────┘                     │
+│          ▼                       ▼                      ▼       │
+│ ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
+│ │ UserService     │    │ AuthService     │    │ MMMService   │  │
+│ │ Implementation  │    │ Implementation  │    │ Implementation│  │
+│ └─────────────────┘    └─────────────────┘    └──────────────┘  │
+│          │                       │                      │       │
+│          ▼                       ▼                      ▼       │
+│ ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
+│ │ Mock Service    │    │ Mock Service    │    │ Mock Service │  │
+│ │ (Testing)       │    │ (Testing)       │    │ (Testing)    │  │
+│ └─────────────────┘    └─────────────────┘    └──────────────┘  │
 │                                                                 │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │                   Data Extraction Pipeline                  │ │
-│ │                                                             │ │
-│ │  Real Model ──► Channel Names ──► Contribution Data        │ │
-│ │      │              │                    │                 │ │
-│ │      │              │                    ▼                 │ │
-│ │      │              │            Response Curves           │ │
-│ │      │              │                    │                 │ │
-│ │      │              │                    ▼                 │ │
-│ │      │              └──────────► Saturation Points         │ │
-│ │      │                                   │                 │ │
-│ │      └─────────────────────────────────► Efficiency Scores │ │
-│ └─────────────────────────────────────────────────────────────┘ │
+│ Benefits:                                                       │
+│ • Dependency Inversion Principle (SOLID)                       │
+│ • Easy testing with mock implementations                       │
+│ • Clean separation of concerns                                 │
+│ • Protocol-based dependency injection                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
----
+## Key Components
 
-### Authentication & Security Flow
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Authentication Security Flow                  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ ┌─────────────┐    ┌─────────────┐    ┌─────────────────────┐   │
-│ │   Login     │───►│ JWT Token   │───►│ Protected Routes    │   │
-│ │   Form      │    │ Generation  │    │ (MMM Dashboard)     │   │
-│ └─────────────┘    └─────────────┘    └─────────────────────┘   │
-│        │                  │                       │             │
-│        │                  │              ┌─────────────────┐    │
-│        │                  │              │ Token Validation│    │
-│        │                  │              │ Middleware      │    │
-│        │                  │              └─────────────────┘    │
-│        │                  │                       │             │
-│ ┌─────────────┐    ┌─────────────┐    ┌─────────────────────┐   │
-│ │ Password    │    │ Bcrypt      │    │ Database            │   │
-│ │ Input       │───►│ Hashing     │───►│ Storage             │   │
-│ └─────────────┘    └─────────────┘    └─────────────────────┘   │
-│                                                                 │
-│ Security Features:                                              │
-│ • JWT tokens with expiration                                    │
-│ • Bcrypt password hashing                                       │
-│ • Protected API endpoints                                       │
-│ • SQL injection protection                                      │
-│ • CORS middleware                                               │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### **Key Components**
-
-#### **1. Protocol-Based Architecture**
+### 1. Protocol-Based Architecture
 - **Service Interfaces**: `UserServiceProtocol`, `AuthServiceProtocol`, `MMMServiceProtocol`
 - **Dependency Injection**: Protocol-based DI in `api/deps.py`
 - **Mock Implementations**: Complete mock services for testing
 - **SOLID Compliance**: All 5 principles fully implemented
 
-#### **2. MMM Model Integration**
+### 2. MMM Model Integration
 - **Real Model**: 32.3MB Google Meridian model (`saved_mmm.pkl`)
 - **Data Processing**: Contribution data, response curves, channel analysis
 - **Channel Support**: 5-channel analysis from real model data
 - **Smart Fallback**: Automatic fallback to mock data when needed
 
-#### **3. Authentication System**
+### 3. Authentication System
 - **JWT Tokens**: Secure token-based auth with bcrypt hashing
 - **Protected Routes**: All MMM endpoints require authentication
 - **User Management**: Complete CRUD operations
-- **Session Management**: 30-minute token expiration
+- **Session Management**: 30-minute token expiration with persistence
 
-#### **4. Interactive Dashboard**
+### 4. Interactive Dashboard
 - **Contribution Charts**: Visual breakdown of channel performance
 - **Response Curves**: Diminishing returns analysis with saturation points
-- **AI Insights**: Automated recommendations and performance analysis
-- **Real-time Data**: Live updates from MMM API endpoints
+- **Smart Insights**: AI-generated recommendations and performance analysis
+- **Export Functionality**: Download insights in JSON, CSV, or TXT formats
 
-#### **5. API Layer (20 Endpoints)**
-- **Authentication**: `/auth/register`, `/auth/login`, `/auth/me`
-- **User Management**: `/users/`, `/users/{id}`
-- **MMM Analytics**: `/mmm/status`, `/mmm/info`, `/mmm/channels`, `/mmm/contribution`, `/mmm/response-curves`
-- **System**: `/health`, `/docs`, `/mmm/explore`, `/mmm/test`
+## API Endpoints
 
----
+### Authentication
+- `POST /api/v1/auth/register` - User registration with auto-login
+- `POST /api/v1/auth/login` - User login (OAuth2 form)
+- `GET /api/v1/auth/me` - Get current user info
 
-## **API Documentation**
+### MMM Analytics
+- `GET /api/v1/mmm/status` - Model status and info
+- `GET /api/v1/mmm/channels` - Channel summary data
+- `GET /api/v1/mmm/contribution` - Contribution analysis
+- `GET /api/v1/mmm/response-curves` - Response curve data
+- `GET /api/v1/export/insights` - Export recommendations
 
-### **Authentication Endpoints (5)**
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/register` | POST | User registration with auto-login (returns JWT token) |
-| `/auth/login` | POST | User login (OAuth2 form) |
-| `/auth/login-json` | POST | User login (JSON payload) |
-| `/auth/me` | GET | Get current user info |
-| `/auth/refresh` | POST | Refresh JWT token |
-
-### **User Management Endpoints (2)**
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/users/` | GET | Get all users (admin only, with pagination) |
-| `/users/{id}` | GET | Get specific user by ID (admin only) |
-
-### **MMM (Media Mix Modeling) Endpoints (10)**
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/mmm/status` | GET | Check MMM model status and basic info |
-| `/mmm/info` | GET | Get detailed MMM model information |
-| `/mmm/channels` | GET | Get list of media channels |
-| `/mmm/channels/summary` | GET | Get channel performance summary |
-| `/mmm/contribution` | GET | Get contribution data (optional `?channel=name` filter) |
-| `/mmm/response-curves` | GET | Get response curve data (optional `?channel=name` filter) |
-| `/mmm/explore` | GET | Explore MMM model structure and capabilities |
-| `/mmm/test` | GET | Test MMM model loading and functionality |
-
-### **System Endpoints (3)**
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check endpoint |
-| `/` | GET | API root with basic info |
-| `/docs` | GET | Interactive Swagger/OpenAPI documentation |
-
-**Total: 20 Endpoints** across authentication, user management, MMM analytics, and system health.
-
-#### **Authentication Request Format**
-
-```json
-{
-  "email": "test@example.com",
-  "password": "test123"
-}
-```
-
-#### **Authentication Response Format**
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer",
-  "user": {
-    "id": 1,
-    "email": "test@example.com",
-    "full_name": "Test User",
-    "company": "Test Company",
-    "role": "user",
-    "is_active": true,
-    "created_at": "2024-01-01T00:00:00Z"
-  }
-}
-```
-
-#### **MMM Contribution Response Format**
-
-```json
-{
-  "channels": ["Google_Search", "Google_Display", "Facebook", "Instagram", "YouTube"],
-  "data": [
-    {
-      "Google_Search": 15420.5,
-      "Google_Display": 12340.2,
-      "Facebook": 9876.1,
-      "Instagram": 7654.3,
-      "YouTube": 5432.8
-    }
-  ],
-  "summary": {
-    "Google_Search": {
-      "mean": 15420.5,
-      "total": 802665.0,
-      "max": 18500.2,
-      "min": 12340.1
-    }
-  },
-  "shape": [52, 5]
-}
-```
-
-#### **MMM Response Curves Format**
-
-```json
-{
-  "curves": {
-    "Google_Search": {
-      "spend": [0, 5000, 10000, 15000, 20000],
-      "response": [0, 3200, 5800, 7600, 8900],
-      "saturation_point": 45000.0,
-      "efficiency": 0.75
-    }
-  }
-}
-```
-
----
-
-## **Getting Started**
+## Development
 
 ### Prerequisites
-- **Node.js 20+** and **pnpm** for frontend development
-- **Python 3.12** for backend development (exactly 3.12, not 3.13)
-- **Docker Desktop** for database and services
-- **uv** for Python package management (recommended)
+- Node.js 20+
+- Python 3.11+
+- Docker & Docker Compose
+- pnpm
 
-### Quick Start
+### Required Setup Files
+
+#### 1. MMM Model File
+Place your Google Meridian MMM model file at:
+```
+apps/api/data/models/saved_mmm.pkl
+```
+
+**Note**: The model file (`saved_mmm.pkl`) is required for MMM analytics. Without it, the system will use mock data for development.
+
+#### 2. Environment Configuration
+
+**Backend Configuration** - Create `.env.local` in the project root:
 ```bash
-# 1. Install dependencies
+# .env.local
+
+# Database connection string
+# Format: postgresql://username:password@host:port/database_name
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mmm_db
+
+# Enable debug mode for development (shows detailed error messages)
+DEBUG=true
+
+# Environment identifier (development, staging, production)
+ENVIRONMENT=development
+
+# Secret key for JWT token signing (change this to a random string in production)
+SECRET_KEY=your-secret-key-here
+
+# CORS allowed origins (comma-separated for multiple origins)
+ALLOWED_ORIGINS=http://localhost:3000
+```
+
+**Frontend Configuration** - Create `.env.local` in `apps/web/`:
+```bash
+# apps/web/.env.local
+
+# Backend API URL (where the FastAPI server is running)
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+**Important Notes:**
+- **SECRET_KEY**: Generate a secure random string for production (e.g., using `openssl rand -hex 32`)
+- **DATABASE_URL**: Matches the PostgreSQL credentials in `docker-compose.yml`
+- **NEXT_PUBLIC_API_URL**: Must match the FastAPI server address and port
+
+### Commands
+
+#### Essential Commands
+```bash
+# Install dependencies
 pnpm install
 
-# 2. Start development environment
+# Start development servers (API + Web + Database)
 pnpm dev
 
-# 3. Seed the database with test users
+# Stop all services
+pnpm stop
+
+# Build for production
+pnpm build
+```
+
+#### Database Commands
+```bash
+# Seed database with test users
 pnpm seed
 
-# 4. Access the dashboard
-# Frontend: http://localhost:3000
-# Login with: test@example.com / test123
+# Reset database (drop all tables and recreate)
+cd apps/api && uv run python reset_db.py
+
+# Create tables only
+cd apps/api && uv run python -c "from app.core.database import init_db; init_db()"
+
+# Check database connection
+cd apps/api && uv run python -c "from app.core.database import get_db; print('Database connected!')"
 ```
 
-This will:
-- Install dependencies for all apps and packages
-- Spin up PostgreSQL database (port 5432) and Adminer UI (port 8080)
-- Start FastAPI backend (port 8000) with Google Meridian integration
-- Start Next.js frontend (port 3000) with Turbopack
-- Create test users for immediate access
-
-### Model Inspection Tools
-
-Inspect the MMM model data structure and parameters:
-
-```bash
-# Display model data in terminal
-pnpm inspect-model
-
-# Output as JSON to terminal
-pnpm inspect-model:json
-
-# Save to text file
-pnpm inspect-model:file
-
-# Save as JSON file
-pnpm inspect-model:json-file
-```
-
-The inspection tool provides:
-- Model structure and metadata
-- Channel insights (saturation points, efficiency, adstock rates)
-- Response curve parameters
-- Contribution data summary
-
-### Login Credentials
-
-The system comes with pre-configured test users for immediate access:
-
-| User Type | Email | Password | Description |
-|-----------|-------|----------|-------------|
-| **Test User** | `test@example.com` | `test123` | Standard user account (recommended for testing) |
-| **Admin User** | `admin@example.com` | `admin123` | Administrator with full access |
-| **Demo User** | `demo@example.com` | `demo123` | Demo account for presentations |
-| **Marketing Manager** | `marketer@example.com` | `marketer123` | Marketing role example |
-| **Data Analyst** | `analyst@example.com` | `analyst123` | Analyst role example |
-
-> **Quick Access**: Use `test@example.com` / `test123` to get started immediately.
-
-### User Registration
-
-The system features a seamless registration experience:
-
-- **Instant Access**: New users are automatically logged in after successful registration
-- **No Manual Login**: Skip the extra step - register and go straight to the dashboard
-- **Comprehensive Validation**: Email format, password strength, and duplicate email checks
-- **Professional UI**: Clean, modern registration form with real-time error feedback
-
-**Registration Flow**: `Register → Auto-Login → Dashboard Access`
-
-Visit `http://localhost:3000/register` to create a new account.
-
-### Dashboard Features
-
-Once logged in, you'll have access to:
-
-- **Contribution Charts**: Visual breakdown of channel performance with real MMM data
-- **Response Curves**: Diminishing returns analysis showing optimal spend ranges
-- **MMM Insights**: AI-generated recommendations and performance analysis
-- **Real-time Data**: Live updates from Google Meridian MMM model (32.3MB)
-- **Channel Analysis**: Detailed metrics for 5 marketing channels
-
-### Performance Optimizations
-
-The system includes intelligent caching for optimal performance:
-
-#### **Model Caching**
-- **LRU Cache**: MMM model cached in memory after first load using `@lru_cache(maxsize=1)`
-- **Performance Impact**: 95%+ improvement in response times after initial load
-- **Before**: 3+ seconds per request (32MB model loaded from disk each time)
-- **After**: 40-50ms per request (model served from memory cache)
-
-#### **Performance Metrics**
-| Metric | Before Caching | After Caching | Improvement |
-|--------|---------------|---------------|-------------|
-| **First Request** | ~3.9 seconds | ~3.9 seconds | Same (expected) |
-| **Subsequent Requests** | ~3.9 seconds each | ~40-50ms | **95-99% faster** |
-| **Memory Usage** | Minimal | +32MB | Acceptable trade-off |
-| **User Experience** | Slow on every load | Near-instantaneous after first visit | **Dramatically improved** |
-
-#### **Technical Implementation**
-```python
-@lru_cache(maxsize=1)
-def _load_model(self) -> Any:
-    """Load the Google Meridian MMM model with caching."""
-    # Model loaded once, served from cache thereafter
-```
-
-This optimization addresses the biggest performance bottleneck in the system, making the dashboard responsive for production use.
-
-### API Testing
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Get auth token
-curl -X POST http://localhost:8000/auth/login-json \
-  -H "Content-Type: application/json" \
-  -d '{"email": "test@example.com", "password": "test123"}'
-```
-
-### Manual Setup (Alternative)
-
-**Start database only:**
-```bash
-cd packages/docker && docker-compose up -d
-```
-
-**Start backend:**
-```bash
-cd apps/api && uv run uvicorn main:app --host localhost --port 8000 --reload
-```
-
-**Start frontend:**
-```bash
-cd apps/web && pnpm dev
-```
-
-### API Testing Examples
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Get auth token
-TOKEN=$(curl -s -X POST http://localhost:8000/auth/login-json \
-  -H "Content-Type: application/json" \
-  -d '{"email": "test@example.com", "password": "test123"}' | jq -r '.access_token')
-
-# Test MMM status
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/mmm/status
-
-# Get media channels
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/mmm/channels
-
-# Get contribution data for a specific channel
-curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/mmm/contribution?channel=Google_Search"
-```
-
-### Available Service URLs
-
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | http://localhost:3000 | Next.js MMM Dashboard |
-| **Backend API** | http://localhost:8000 | FastAPI with auto-docs |
-| **API Documentation** | http://localhost:8000/docs | Interactive Swagger UI |
-| **Database Admin** | http://localhost:8080 | Adminer PostgreSQL UI |
-
----
-
-## Development Commands
-
-### Essential Commands
-```bash
-pnpm dev              # Start all services (recommended)
-pnpm build            # Build all applications
-pnpm lint             # Run linting across all packages
-pnpm stop             # Clean shutdown of all services
-```
-
-### Database Commands
-```bash
-pnpm seed                           # Seed sample data with test users
-cd apps/api && uv run python reset_db.py  # Reset database tables
-```
-
-### Testing Commands
-```bash
-cd apps/api && uv run pytest       # Run all tests
-cd apps/api && uv run pytest -m unit      # Run unit tests only
-cd apps/api && uv run pytest -m integration  # Run integration tests only
-cd apps/api && uv run pytest --cov=.      # Run tests with coverage
-```
-
----
-
-## Testing
-
-### **Test Architecture**
-- **Protocol-Based Testing**: Mock implementations for all services
-- **Comprehensive Coverage**: 137 tests across 16 test files
-- **Test Categories**: Unit, integration, and protocol-specific tests
-- **Async Support**: Full async/await testing with pytest-asyncio
-- **Mock Fixtures**: Consistent test data and protocol-based mocks
-
-### **Test Categories**
-
-| Category | Count | Description |
-|----------|-------|-------------|
-| **Unit Tests** | 50+ | Individual component and service tests |
-| **Integration Tests** | 70+ | Full API workflow and endpoint tests |
-| **Protocol Tests** | 12+ | Protocol compliance and mock validation |
-| **Authentication Tests** | 18+ | Security, JWT, and auth flow tests |
-| **MMM Tests** | 22+ | Model loading, data processing, and analytics |
-
-**Total: 137 Tests** across 16 test files with comprehensive coverage.
-
-### **Test Commands**
+#### Test Commands
 ```bash
 # Run all tests
 cd apps/api && uv run pytest
 
-# Run with coverage
-cd apps/api && uv run pytest --cov=. --cov-report=html
+# Run tests with coverage
+cd apps/api && uv run pytest --cov=app --cov-report=html
 
-# Run specific test categories
-cd apps/api && uv run pytest -m unit
-cd apps/api && uv run pytest -m integration
-cd apps/api && uv run pytest -m auth
-cd apps/api && uv run pytest -m mmm
+# Run specific test file
+cd apps/api && uv run pytest tests/unit/test_mmm_service.py
+
+# Run integration tests only
+cd apps/api && uv run pytest tests/integration/
+
+# Run unit tests only
+cd apps/api && uv run pytest tests/unit/
+
+# Run tests in verbose mode
+cd apps/api && uv run pytest -v
+
+# Run tests and stop on first failure
+cd apps/api && uv run pytest -x
 ```
 
----
-
-## Troubleshooting
-
-### Common Issues
-| Issue | Solution |
-|-------|----------|
-| "Cannot connect to Docker daemon" | Ensure Docker Desktop is running |
-| Containers fail to start | Try `pnpm stop && pnpm dev` |
-| Application not responding | Check logs and ensure all services are running |
-| Port conflicts (3000, 8000, 5432) | Stop other services or change ports in config |
-| Authentication fails | Verify test credentials: `test@example.com` / `test123` |
-| MMM model not loading | Check if `saved_mmm.pkl` exists, system falls back to mock data |
-
-### Debug Commands
+#### Code Quality Commands
 ```bash
-pnpm stop                          # Clean shutdown all services
-docker-compose logs                # View all container logs
-curl http://localhost:8000/health  # Test backend health
-curl http://localhost:3000         # Test frontend availability
+# Format code
+pnpm format
+
+# Lint code
+pnpm lint
+
+# Type checking (API)
+cd apps/api && uv run mypy app/
+
+# Type checking (Web)
+cd apps/web && pnpm type-check
 ```
 
-### Test Credentials
+#### Model Inspection Commands
+```bash
+# Display model info in terminal
+pnpm inspect-model
 
-| User Type | Email | Password | Use Case |
-|-----------|-------|----------|----------|
-| **Test User** | `test@example.com` | `test123` | **← Start here!** Standard testing account |
-| **Admin User** | `admin@example.com` | `admin123` | Administrator access |
-| **Demo User** | `demo@example.com` | `demo123` | Demo presentations |
-| **Marketing Manager** | `marketer@example.com` | `marketer123` | Marketing role testing |
-| **Data Analyst** | `analyst@example.com` | `analyst123` | Analyst role testing |
+# Save model analysis as JSON
+pnpm inspect-model:json-file
 
-> **Quick Start**: Use `test@example.com` / `test123` to access the MMM Dashboard immediately.
-> 
-> **Performance Note**: The first request may take 3-4 seconds to load the MMM model, but subsequent requests are lightning-fast (40-50ms) thanks to intelligent caching.
-> 
-> **Note**: All users are created automatically when you run `pnpm seed`. Registration is also available for creating new accounts.
+# Save model analysis as text file
+pnpm inspect-model:file
 
----
+# Display JSON format in terminal
+pnpm inspect-model:json
+```
+
+#### Debug Commands
+```bash
+# Check system status
+curl -s http://localhost:8000/health | jq  # API health with JSON formatting
+curl -s http://localhost:3000 | grep -o '<title>.*</title>'  # Web app status
+
+# Database debugging
+cd apps/api && uv run python -c "
+from app.core.database import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    result = conn.execute(text('SELECT version()'))
+    print('PostgreSQL:', result.fetchone()[0])
+"
+
+# Check database tables
+cd apps/api && uv run python -c "
+from app.core.database import engine
+from sqlalchemy import inspect
+inspector = inspect(engine)
+tables = inspector.get_table_names()
+print('Tables:', tables)
+for table in tables:
+    print(f'{table}: {len(inspector.get_columns(table))} columns')
+"
+
+# MMM model debugging
+cd apps/api && uv run python -c "
+from app.services.mmm_service import MMMService
+service = MMMService()
+try:
+    model = service._load_model()
+    print('Model loaded successfully')
+    print('Model type:', type(model))
+except Exception as e:
+    print('Model loading failed:', e)
+"
+
+# Check environment variables
+cd apps/api && uv run python -c "
+import os
+from app.core.config import settings
+print('Database URL:', settings.DATABASE_URL[:50] + '...')
+print('Debug mode:', settings.DEBUG)
+print('Environment:', os.getenv('ENVIRONMENT', 'development'))
+"
+
+# View recent logs
+cd apps/api && tail -f app.log  # If logging to file
+docker logs mmm-postgres-1 --tail 20  # Database logs
+
+# Network debugging
+netstat -tulpn | grep :8000  # Check API port
+netstat -tulpn | grep :3000  # Check Web port
+netstat -tulpn | grep :5432  # Check DB port
+
+# Memory and performance
+cd apps/api && uv run python -c "
+import psutil
+import os
+process = psutil.Process(os.getpid())
+print(f'Memory usage: {process.memory_info().rss / 1024 / 1024:.1f} MB')
+print(f'CPU usage: {process.cpu_percent()}%')
+"
+```
+
+#### Development Utilities
+```bash
+# Check API health
+curl http://localhost:8000/health
+
+# View API documentation
+open http://localhost:8000/docs
+
+# Access database UI (Adminer)
+open http://localhost:8080
+
+# Check running processes
+lsof -i :8000  # API server
+lsof -i :3000  # Web server
+lsof -i :5432  # PostgreSQL
+
+# Kill stuck processes
+lsof -ti:8000 | xargs kill -9  # Kill API
+lsof -ti:3000 | xargs kill -9  # Kill Web
+
+# Docker debugging
+docker ps  # Show running containers
+docker logs mmm-postgres-1  # Database logs
+docker exec -it mmm-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
+```
+
+### Test Users
+| Email | Password | Role |
+|-------|----------|------|
+| `test@example.com` | `test123` | Standard user |
+| `admin@example.com` | `admin123` | Administrator |
+| `demo@example.com` | `demo123` | Demo account |
+
+## Technical Stack
+
+**Backend**
+- FastAPI with Uvicorn
+- PostgreSQL with SQLAlchemy ORM
+- JWT authentication with bcrypt
+- Google Meridian MMM model integration
+- Comprehensive test suite (pytest)
+
+**Frontend**
+- Next.js 14 with App Router
+- TypeScript and Tailwind CSS
+- Zustand for state management
+- Recharts for data visualization
+- shadcn/ui component library
+
+**Infrastructure**
+- Docker Compose for local development
+- Turbo monorepo with pnpm workspaces
+- Automated testing and linting
+
+## Key Features Explained
+
+### Model Caching
+The system implements intelligent LRU caching for the MMM model:
+- **Before**: 3+ seconds per request (32MB model loaded from disk)
+- **After**: 40-50ms per request (model served from memory)
+- **Result**: 95%+ performance improvement
+
+### Response Curves
+Each marketing channel has unique Hill saturation curves showing:
+- Spend vs. returns relationship
+- Saturation points where additional spend becomes inefficient
+- Marginal ROI at different spend levels
+
+### Smart Insights
+The system analyzes channel performance and generates recommendations:
+- Identifies top and underperforming channels
+- Suggests budget reallocation opportunities
+- Warns about channels approaching saturation
+- Provides specific ROI and efficiency metrics
 
 ## Technical Decisions & Trade-offs
 
@@ -668,37 +492,18 @@ curl http://localhost:3000         # Test frontend availability
 |--------|---------|-------------------|
 | **Authentication** | JWT with 30min expiration | JWT with refresh tokens + rate limiting |
 | **Database** | Single PostgreSQL instance | PostgreSQL cluster with read replicas |
-| **Caching** | **LRU model caching (95%+ performance improvement)** | Redis for session and computed data caching |
+| **Caching** | LRU model caching (95%+ performance improvement) | Redis for session and computed data caching |
 | **Monitoring** | Basic logging | APM with Grafana/Prometheus |
 | **Deployment** | Docker Compose | Kubernetes with auto-scaling |
-
-#### Next Steps
-1. **Model caching** - **COMPLETED** (LRU cache providing 95%+ performance improvement)
-2. **User registration flow** - **COMPLETED** (seamless auto-login after registration)
-3. **Redis integration** for caching computed response curves and insights
-4. **Rate limiting** for API endpoints
-5. **Monitoring stack** with metrics and alerting
-6. **CI/CD pipeline** with automated testing and deployment
-7. **Load balancing** for high availability
-8. **Database optimization** with connection pooling and query optimization
 
 ### MMM Model Integration Strategy
 
 | What We're Optimizing | Current Implementation | Production Enhancement |
 |----------------------|------------------------|------------------------|
-| **Model Loading** | **LRU cached in memory (40-50ms after first load)** | Pre-load and cache model data in Redis |
+| **Model Loading** | LRU cached in memory (40-50ms after first load) | Pre-load and cache model data in Redis |
 | **Data Processing** | Real-time computation of response curves | Background processing with cached results |
 | **Channel Analysis** | Extract 5 channels from real model | Support dynamic channel configuration |
-| **Performance** | **40-50ms response times (95%+ improvement)** | <30ms with Redis and background processing |
-
-### Security & Monitoring
-
-| Security Area | Current Implementation | Production Enhancement |
-|---------------|------------------------|------------------------|
-| **Authentication** | JWT tokens with bcrypt hashing | Add refresh tokens and rate limiting |
-| **API Security** | CORS middleware and input validation | API gateway with throttling and WAF |
-| **Data Protection** | SQL injection protection via ORM | Encryption at rest and in transit |
-| **Monitoring** | Basic error logging | Comprehensive APM and security monitoring |
+| **Performance** | 40-50ms response times (95%+ improvement) | <30ms with Redis and background processing |
 
 ### Alternative Approaches Considered
 
@@ -709,47 +514,23 @@ curl http://localhost:3000         # Test frontend availability
 | **Real-time Updates** | WebSocket for live MMM updates | Real-time dashboard updates | Added complexity, not required | Polling is sufficient for MMM data |
 | **NoSQL Database** | MongoDB for MMM model storage | Better for unstructured model data | Different from relational user data | PostgreSQL JSON support is sufficient |
 
-### What Could Be Added
+## Production Considerations
 
-#### With More Time
-| Feature | Description |
-|---------|-------------|
-| **API Versioning** | Add `/api/v1/` prefix |
-| **Caching** | Redis for MMM computations |
-| **Real-time** | WebSocket for live updates |
-| **Analytics** | Historical trends and forecasting |
+This project is designed for easy production deployment:
+- Environment-based configuration
+- Docker containerization
+- Proper error handling and logging
+- Security best practices (CORS, input validation, password hashing)
+- Database migrations and seeding
+- Comprehensive test coverage
 
-#### With Different Requirements
-| Feature | Description |
-|---------|-------------|
-| **Multi-tenancy** | Support multiple organizations |
-| **Permissions** | Role-based access control |
-| **Export** | PDF/Excel export |
-| **Integrations** | Webhooks and APIs |
+For production scaling, consider:
+- Redis for session and computed data caching
+- Rate limiting for API endpoints
+- Load balancing and auto-scaling
+- Monitoring and alerting
+- CI/CD pipeline
 
-#### For Large Scale
+## License
 
-##### Dashboard Features
-| Feature | Description |
-|---------|-------------|
-| **Custom Dashboards** | User-configurable layouts |
-| **Interactive Charts** | Drill-down capabilities |
-| **Comparisons** | Side-by-side performance |
-| **Forecasting** | Predictive analytics |
-
-##### DevOps & Infrastructure
-| Feature | Description |
-|---------|-------------|
-| **CI/CD** | Automated testing and deployment |
-| **Kubernetes** | Container orchestration with auto-scaling |
-| **Monitoring** | Grafana/Prometheus observability |
-| **Backups** | Automated database backups |
-
----
-
-## Reference Documentation
-
-- [Google Meridian Developer Documentation](https://developers.google.com/meridian/docs/advanced-modeling/interpret-visualizations)
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+This project is for demonstration purposes. The Google Meridian model data is used under appropriate licensing terms.
