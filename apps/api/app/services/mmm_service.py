@@ -3,6 +3,7 @@ Loads and processes Google Meridian MMM models.
 """
 
 import pickle
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 import pandas as pd
@@ -29,8 +30,6 @@ class MMMService:
     
     def __init__(self):
         self.model_path = settings.MMM_MODEL_FULL_PATH
-        self._model_data = None
-        self._is_loaded = False
     
     def get_model_status(self) -> MMMStatus:
         """Check if model file exists and can be loaded."""
@@ -260,11 +259,9 @@ class MMMService:
             logger.error(f"Error getting channel summary: {e}")
             raise MMMModelError(f"Failed to get channel summary: {str(e)}")
     
+    @lru_cache(maxsize=1)
     def _load_model(self) -> Any:
-        """Load the Google Meridian MMM model."""
-        if self._is_loaded and self._model_data is not None:
-            return self._model_data
-        
+        """Load the Google Meridian MMM model with caching to prevent repeated disk reads."""
         if not self.model_path.exists():
             raise MMMModelError(f"MMM model file not found at {self.model_path}")
         
@@ -272,10 +269,9 @@ class MMMService:
             # Load with Google Meridian
             from meridian.model.model import load_mmm
             logger.info(f"Loading Google Meridian MMM model from {self.model_path}")
-            self._model_data = load_mmm(str(self.model_path))
-            self._is_loaded = True
+            model_data = load_mmm(str(self.model_path))
             logger.info("Successfully loaded Google Meridian MMM model")
-            return self._model_data
+            return model_data
             
         except ImportError as e:
             raise MMMModelError(f"Google Meridian package not available: {e}")
