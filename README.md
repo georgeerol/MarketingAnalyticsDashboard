@@ -35,7 +35,7 @@ Visit `http://localhost:3000` and log in with:
 - Secure JWT-based authentication with bcrypt password hashing
 - User registration with automatic login
 - Session persistence across page refreshes
-- Professional login/registration UI
+-  Login/registration UI
 
 ### MMM Analytics Dashboard
 
@@ -73,7 +73,7 @@ Visit `http://localhost:3000` and log in with:
 
 ### Data Flow
 
-Standard web app flow - browser talks to frontend, frontend calls API, API hits database:
+The application follows a standard three-tier architecture with clear data flow:
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
@@ -94,15 +94,16 @@ Standard web app flow - browser talks to frontend, frontend calls API, API hits 
                   └─────────────┘    └─────────────┘
 ```
 
-- User clicks stuff in browser, Next.js handles it
-- Frontend makes API calls to get MMM data and handle login
-- FastAPI stores user data and MMM results in PostgreSQL
-- The 32MB model file gets loaded and cached in memory
-- Zustand keeps login state so you don't get logged out on refresh
+- **Browser Layer**: User interface and client-side interactions
+- **Frontend Layer**: Next.js handles routing, authentication, and API communication
+- **Backend Layer**: FastAPI processes requests and manages business logic
+- **Data Layer**: PostgreSQL stores user data and session information
+- **Model Layer**: Google Meridian MMM model (32MB) cached in memory for performance
+- **State Management**: Zustand maintains authentication state across sessions
 
 ### MMM Processing Pipeline
 
-How the MMM model gets processed (the performance improvement is pretty significant):
+The MMM model processing pipeline demonstrates significant performance optimization through caching:
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
@@ -123,16 +124,16 @@ How the MMM model gets processed (the performance improvement is pretty signific
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-- First time loading the 32MB pickle file takes ~3 seconds (ouch)
-- After that it's cached, so requests are ~40-50ms (much better)
-- Pulls out 5 marketing channels with their actual parameters from the model
-- Generates those Hill curves showing when you hit diminishing returns
-- Analyzes which channels are doing well and suggests budget changes
-- Can export the recommendations as JSON, CSV, or text files
+- **Initial Load**: 32MB pickle file requires ~3 seconds for first-time loading
+- **Cached Performance**: Subsequent requests served in ~40-50ms (95% improvement)
+- **Channel Extraction**: Extracts 5 marketing channels with real model parameters
+- **Response Curves**: Generates Hill saturation curves showing diminishing returns
+- **Insights Generation**: Analyzes channel performance and provides optimization recommendations
+- **Export Capabilities**: Supports JSON, CSV, and text format exports
 
 ### Authentication Flow
 
-Pretty standard auth flow, but with auto-login after signup (nice UX touch):
+Authentication system with automatic login after registration for improved user experience:
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
@@ -147,15 +148,15 @@ Pretty standard auth flow, but with auto-login after signup (nice UX touch):
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-- Sign up and you're automatically logged in (no need to login again)
-- JWT tokens expire after 30 minutes, passwords hashed with bcrypt
-- Zustand keeps you logged in when you refresh the page
-- Can't access dashboard or MMM data without being logged in
-- Basic security stuff: CORS, input validation, etc.
+- **Automatic Login**: New users are immediately authenticated after successful registration
+- **JWT Security**: Tokens expire after 30 minutes with bcrypt password hashing
+- **Session Persistence**: Zustand maintains authentication state across page refreshes
+- **Protected Routes**: Dashboard and MMM endpoints require valid authentication
+- **Security Measures**: CORS protection, input validation, and secure headers
 
 ### Protocol-Based Architecture
 
-Used Python protocols to make testing easier (can swap in mock services):
+Implementation uses Python protocols for dependency inversion and enhanced testability:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -187,11 +188,11 @@ Used Python protocols to make testing easier (can swap in mock services):
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-- Protocols define what each service should do (like interfaces)
-- Real services do the actual work in production
-- Mock services are fake ones for testing (so tests don't hit the real database)
-- FastAPI's dependency injection picks the right one automatically
-- Makes the code easier to test and change later
+- **Protocol Definitions**: Abstract interfaces define service contracts and expected behavior
+- **Production Implementations**: Concrete services handle actual business logic and data operations
+- **Test Implementations**: Mock services provide isolated testing without external dependencies
+- **Dependency Injection**: FastAPI automatically resolves and injects appropriate service implementations
+- **Maintainability**: Loose coupling enables easier testing, modification, and extension
 
 ## Key Components
 
@@ -244,7 +245,7 @@ Used Python protocols to make testing easier (can swap in mock services):
 ### Prerequisites
 
 - Node.js 20+
-- Python 3.11+
+- Python 3.12
 - Docker & Docker Compose
 - pnpm
 
