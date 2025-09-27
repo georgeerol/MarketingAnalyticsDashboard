@@ -68,10 +68,10 @@ export function LoginForm() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 pt-6">
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full mt-4" 
             disabled={isLoading}
           >
             {isLoading ? "Signing in..." : "Sign In"}
