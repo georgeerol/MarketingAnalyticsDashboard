@@ -33,6 +33,14 @@ async def seed_users() -> None:
     
     sample_users = [
         {
+            "email": "test@example.com",
+            "password": "test123",
+            "full_name": "Test User",
+            "role": "user",
+            "is_active": True,
+            "company": "Test Corp"
+        },
+        {
             "email": "admin@example.com",
             "password": "admin123",
             "full_name": "Admin User",
@@ -303,6 +311,7 @@ async def main() -> None:
         print(" Database seeding completed successfully!")
         print()
         print("Sample login credentials:")
+        print("  Test:  test@example.com / test123")
         print("  Admin: admin@example.com / admin123")
         print("  Demo:  demo@example.com / demo123")
         print("  Marketing: marketer@example.com / marketer123")
