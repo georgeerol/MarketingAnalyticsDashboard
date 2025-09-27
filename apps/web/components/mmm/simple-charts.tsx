@@ -443,7 +443,7 @@ export function SimpleResponseCurves() {
           </div>
         </div>
 
-        <SimpleLineChart data={curveData} title={`${selectedChannel.replace(/_/g, ' ')} Response Curve`} />
+        <SimpleLineChart data={curveData} title={`${formatChannelName(selectedChannel)} Response Curve`} />
         
         <div className="mt-4 p-3 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800">
@@ -505,7 +505,7 @@ export function SimpleMMInsights() {
           
           generatedInsights.push({
             type: 'success',
-            title: `${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
+            title: `${formatChannelName(topPerformer[0])} is your top performer`,
             icon: <Rocket className="h-5 w-5" />,
             description: `ROI: ${topEfficiency.toFixed(2)} (${((topEfficiency - avgEfficiency) / avgEfficiency * 100).toFixed(0)}% above average). Saturation at $${saturationPoint.toLocaleString()}. Consider increasing spend up to this threshold.`
           })
@@ -517,7 +517,7 @@ export function SimpleMMInsights() {
           
           generatedInsights.push({
             type: 'warning',
-            title: `${underPerformer[0].replace(/_/g, ' ')} underperforming`,
+            title: `${formatChannelName(underPerformer[0])} underperforming`,
             icon: <AlertTriangle className="h-5 w-5" />,
             description: `ROI: ${underEfficiency.toFixed(2)} (${potentialGain}% below average). Optimize targeting, creative, or reduce spend and reallocate to higher-performing channels.`
           })
@@ -530,7 +530,7 @@ export function SimpleMMInsights() {
             type: 'info',
             title: `Budget Optimization Opportunity`,
             icon: <Lightbulb className="h-5 w-5" />,
-            description: `Shifting budget from ${underPerformer[0].replace(/_/g, ' ')} to ${topPerformer[0].replace(/_/g, ' ')} could improve ROI by ${efficiencyGap.toFixed(2)}x per dollar spent.`
+            description: `Shifting budget from ${formatChannelName(underPerformer[0])} to ${formatChannelName(topPerformer[0])} could improve ROI by ${efficiencyGap.toFixed(2)}x per dollar spent.`
           })
         }
         
@@ -545,7 +545,7 @@ export function SimpleMMInsights() {
             type: 'warning',
             title: `Saturation Alert`,
             icon: <BarChart2 className="h-5 w-5" />,
-            description: `${nearSaturation.map(([name]) => name.replace(/_/g, ' ')).join(', ')} ${nearSaturation.length === 1 ? 'has' : 'have'} low saturation points. Monitor spend levels to avoid diminishing returns.`
+            description: `${nearSaturation.map(([name]) => formatChannelName(name)).join(', ')} ${nearSaturation.length === 1 ? 'has' : 'have'} low saturation points. Monitor spend levels to avoid diminishing returns.`
           })
         }
         

@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { Loader2, Lightbulb, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, Search, Target } from 'lucide-react'
+import { formatChannelName } from '@/lib/format-channel'
 
 interface Insight {
   type: 'success' | 'warning' | 'info'
@@ -66,14 +67,14 @@ export function MMMInsights() {
         if (topPerformer) {
           generatedInsights.push({
             type: 'success',
-            title: `${topPerformer[0].replace(/_/g, ' ')} is your top performer`,
+            title: `${formatChannelName(topPerformer[0])} is your top performer`,
             description: `With an efficiency of ${topPerformer[1].efficiency.toFixed(2)}, this channel delivers the highest ROI.`,
             action: 'Consider increasing investment',
             icon: <CheckCircle className="h-5 w-5" />
           })
 
           generatedRecommendations.push({
-            channel: topPerformer[0].replace(/_/g, ' '),
+            channel: formatChannelName(topPerformer[0]),
             action: 'increase',
             reason: 'Highest efficiency and strong performance',
             impact: 'high'
@@ -84,14 +85,14 @@ export function MMMInsights() {
         if (underPerformer && underPerformer[1].efficiency < 0.5) {
           generatedInsights.push({
             type: 'warning',
-            title: `${underPerformer[0].replace(/_/g, ' ')} needs optimization`,
+            title: `${formatChannelName(underPerformer[0])} needs optimization`,
             description: `Low efficiency of ${underPerformer[1].efficiency.toFixed(2)} suggests room for improvement.`,
             action: 'Review targeting and creative',
             icon: <AlertTriangle className="h-5 w-5" />
           })
 
           generatedRecommendations.push({
-            channel: underPerformer[0].replace(/_/g, ' '),
+            channel: formatChannelName(underPerformer[0]),
             action: 'decrease',
             reason: 'Below average efficiency, needs optimization',
             impact: 'medium'
@@ -125,7 +126,7 @@ export function MMMInsights() {
         middlePerformers.forEach(([channel, data]) => {
           if (data.contribution_share > 0.1) { // Significant channels
             generatedRecommendations.push({
-              channel: channel.replace(/_/g, ' '),
+              channel: formatChannelName(channel),
               action: 'maintain',
               reason: 'Solid performance with growth potential',
               impact: 'medium'
