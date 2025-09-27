@@ -40,10 +40,12 @@ interface AuthState {
   user: User | null
   token: string | null
   isLoading: boolean
+  isHydrated: boolean
   login: (credentials: LoginCredentials) => Promise<void>
   register: (data: RegisterData) => Promise<void>
   logout: () => void
   checkAuth: () => Promise<void>
+  setHydrated: () => void
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -60,6 +62,7 @@ export const useAuth = create<AuthState>()(
       user: null,
       token: null,
       isLoading: false,
+      isHydrated: false,
 
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true })
@@ -144,6 +147,10 @@ export const useAuth = create<AuthState>()(
           set({ user: null, token: null })
         }
       },
+
+      setHydrated: () => {
+        set({ isHydrated: true })
+      },
     }),
     {
       name: 'auth-storage',
@@ -151,6 +158,9 @@ export const useAuth = create<AuthState>()(
         user: state.user, 
         token: state.token 
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated()
+      },
     }
   )
 )

@@ -9,10 +9,13 @@ import { SimpleContributionChart, SimpleResponseCurves, SimpleMMInsights } from 
 import { CheckCircle, BarChart3 } from "lucide-react"
 
 export default function DashboardPage() {
-  const { user, token, logout, checkAuth } = useAuth()
+  const { user, token, logout, checkAuth, isHydrated } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
+    // Wait for hydration before making auth decisions
+    if (!isHydrated) return
+    
     if (!token) {
       router.push("/login")
       return
@@ -21,14 +24,15 @@ export default function DashboardPage() {
     if (token && !user) {
       checkAuth()
     }
-  }, [token, router])
+  }, [token, router, isHydrated, user, checkAuth])
 
   const handleLogout = () => {
     logout()
     router.push("/login")
   }
 
-  if (!user || !token) {
+  // Show loading while hydrating or while we have a token but no user data
+  if (!isHydrated || (token && !user)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -37,6 +41,11 @@ export default function DashboardPage() {
         </div>
       </div>
     )
+  }
+
+  // If hydrated and no token, redirect will happen in useEffect
+  if (!token) {
+    return null
   }
 
   return (
