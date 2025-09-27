@@ -26,6 +26,10 @@ from sqlalchemy import select
 from app.core.database import AsyncSessionLocal, init_db
 from app.models import User, ResponseCurve
 from app.core.security import hash_password
+from app.core.logging import get_logger
+
+# Get logger
+logger = get_logger(__name__)
 
 
 async def seed_users() -> None:
@@ -74,13 +78,13 @@ async def seed_users() -> None:
         }
     ]
     
-    print(" Seeding users...")
+    logger.info("Seeding users...")
     
     # Create database session
     async with AsyncSessionLocal() as db:
         try:
             for user_data in sample_users:
-                print(f"  → Creating user: {user_data['email']}")
+                logger.info(f"Creating user: {user_data['email']}")
                 
                 # Check if user already exists
                 result = await db.execute(
@@ -88,7 +92,7 @@ async def seed_users() -> None:
                 )
                 existing_user = result.scalar_one_or_none()
                 if existing_user:
-                    print(f"    User {user_data['email']} already exists, skipping...")
+                    logger.info(f"User {user_data['email']} already exists, skipping")
                     continue
                 
                 hashed_password = hash_password(user_data['password'])
@@ -105,10 +109,10 @@ async def seed_users() -> None:
             await db.commit()
         except Exception as e:
             await db.rollback()
-            print(f"Error creating users: {e}")
+            logger.error(f"Error creating users: {e}")
             raise
     
-    print(f" Created {len(sample_users)} users")
+    logger.info(f"Created {len(sample_users)} users")
 
 
 async def seed_mmm_sample_data() -> None:
@@ -182,16 +186,16 @@ async def seed_mmm_sample_data() -> None:
         }
     ]
     
-    print("🌱 Seeding MMM sample data...")
+    logger.info("Seeding MMM sample data...")
     
     # TODO: Implement once MMM models are ready
     for channel in sample_channels:
-        print(f"  → Creating channel: {channel['name']}")
+        logger.info(f"Creating channel: {channel['name']}")
         
     for campaign in sample_campaigns:
-        print(f"  → Creating campaign: {campaign['name']}")
+        logger.info(f"Creating campaign: {campaign['name']}")
     
-    print(f" Created {len(sample_channels)} channels and {len(sample_campaigns)} campaigns")
+    logger.info(f"Created {len(sample_channels)} channels and {len(sample_campaigns)} campaigns")
 
 
 async def seed_mmm_performance_data() -> None:
@@ -264,61 +268,56 @@ async def seed_mmm_performance_data() -> None:
         }
     }
     
-    print("🌱 Seeding MMM performance data...")
+    logger.info("Seeding MMM performance data...")
     
     # TODO: Store this data in appropriate tables once models are ready
-    print("  → Creating contribution data...")
-    print("  → Creating response curve data...")
+    logger.info("Creating contribution data...")
+    logger.info("Creating response curve data...")
     
-    print(" Created sample performance data for visualizations")
+    logger.info("Created sample performance data for visualizations")
 
 
 async def clear_database() -> None:
     """Clear all data from the database (for development only)."""
     
-    print("  Clearing database...")
+    logger.info("Clearing database...")
     
     # TODO: Implement database clearing once models are ready
     # This should drop and recreate tables or delete all records
     
-    print(" Database cleared")
+    logger.info("Database cleared")
 
 
 async def main() -> None:
     """Main seeding function."""
     
-    print("🌱 Starting database seeding...")
-    print("=" * 50)
+    logger.info("Starting database seeding...")
+    logger.info("=" * 50)
     
     try:
         # Initialize database tables
         await init_db()
-        print("Database tables initialized")
-        print()
+        logger.info("Database tables initialized")
         
         # Clear existing data (optional - comment out for production)
         # await clear_database()
         
         # Seed all data
         await seed_users()
-        print()
         await seed_mmm_sample_data() 
-        print()
         await seed_mmm_performance_data()
         
-        print()
-        print("=" * 50)
-        print(" Database seeding completed successfully!")
-        print()
-        print("Sample login credentials:")
-        print("  Test:  test@example.com / test123")
-        print("  Admin: admin@example.com / admin123")
-        print("  Demo:  demo@example.com / demo123")
-        print("  Marketing: marketer@example.com / marketer123")
-        print("  Analyst: analyst@example.com / analyst123")
+        logger.info("=" * 50)
+        logger.info("Database seeding completed successfully!")
+        logger.info("Sample login credentials:")
+        logger.info("  Test:  test@example.com / test123")
+        logger.info("  Admin: admin@example.com / admin123")
+        logger.info("  Demo:  demo@example.com / demo123")
+        logger.info("  Marketing: marketer@example.com / marketer123")
+        logger.info("  Analyst: analyst@example.com / analyst123")
         
     except Exception as e:
-        print(f" Error during seeding: {e}")
+        logger.error(f"Error during seeding: {e}")
         raise
 
 

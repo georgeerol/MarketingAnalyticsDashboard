@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import sys
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -20,6 +21,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import numpy as np
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 import xarray as xr
 from app.services.mmm_service import MMMService
 
@@ -264,21 +269,20 @@ def main():
     os.environ.setdefault('JWT_SECRET_KEY', 'your-super-secret-jwt-key')
     
     try:
-        print("🔍 Loading MMM model...")
+        logger.info("Loading MMM model...")
         mmm_service = MMMService()
         
-        print("📊 Analyzing model structure...")
+        logger.info("Analyzing model structure...")
         model_data = mmm_service._load_model()
         model_info = inspect_model_structure(model_data)
         
-        print("🎯 Getting channel insights...")
+        logger.info("Getting channel insights...")
         channel_insights = get_channel_insights(mmm_service)
         
-        print("📈 Getting contribution summary...")
+        logger.info("Getting contribution summary...")
         contribution_summary = get_contribution_summary(mmm_service)
         
-        print("✅ Analysis complete!")
-        print()
+        logger.info("Analysis complete!")
         
         # Format output
         if args.format == "json":
@@ -288,7 +292,7 @@ def main():
         
         # Print to terminal (unless quiet)
         if not args.quiet:
-            print(output)
+            print(output)  # Keep print for output display
         
         # Save to file if specified
         if args.output_file:
@@ -298,10 +302,10 @@ def main():
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(output)
             
-            print(f"\n💾 Output saved to: {output_path.absolute()}")
+            logger.info(f"Output saved to: {output_path.absolute()}")
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        logger.error(f"Error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

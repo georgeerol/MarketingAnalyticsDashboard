@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.core.logging import setup_logging
+from app.core.logging import setup_logging, get_logger
 from app.core.database import init_db
 from app.api.v1 import api_router
 
@@ -15,6 +15,9 @@ setup_logging()
 
 # Get settings
 settings = get_settings()
+
+# Get logger
+logger = get_logger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -66,10 +69,10 @@ async def startup_event():
     """Initialize application on startup."""
     try:
         await init_db()
-        print(f"Database initialized successfully")
-        print(f"{settings.APP_NAME} v{settings.APP_VERSION} started")
-        print(f"API docs available at: /docs")
-        print(f"API v1 prefix: {settings.API_V1_PREFIX}")
+        logger.info("Database initialized successfully")
+        logger.info(f"{settings.APP_NAME} v{settings.APP_VERSION} started")
+        logger.info("API docs available at: /docs")
+        logger.info(f"API v1 prefix: {settings.API_V1_PREFIX}")
     except Exception as e:
-        print(f"Database initialization failed: {e}")
+        logger.error(f"Database initialization failed: {e}")
         # Don't fail startup, just log the error
