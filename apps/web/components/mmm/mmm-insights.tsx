@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { useMMMData } from '@/hooks/use-mmm-data'
 import { Loader2, Lightbulb, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, Search, Target } from 'lucide-react'
 import { formatChannelName } from '@/lib/format-channel'
+import { ExportDialog } from './export-dialog'
 
 interface Insight {
   type: 'success' | 'warning' | 'info'
@@ -290,9 +291,11 @@ export function MMMInsights() {
             Based on your MMM analysis, focus on optimizing your top-performing channels while 
             improving efficiency in underperforming areas.
           </p>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
-            Export Recommendations
-          </button>
+          <ExportDialog>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+              Export Recommendations
+            </button>
+          </ExportDialog>
         </div>
       </CardContent>
     </Card>

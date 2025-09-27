@@ -4,7 +4,7 @@ API v1 routes.
 
 from fastapi import APIRouter
 
-from app.api.v1 import auth, mmm, users
+from app.api.v1 import auth, mmm, users, export
 
 api_router = APIRouter()
 
@@ -12,3 +12,4 @@ api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
 api_router.include_router(mmm.router, prefix="/mmm", tags=["mmm"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(export.router, prefix="/export", tags=["export"])

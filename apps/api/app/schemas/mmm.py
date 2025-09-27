@@ -3,7 +3,7 @@ MMM (Media Mix Modeling) related Pydantic schemas.
 """
 
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, Dict, List
 
 from pydantic import BaseModel, Field
 
@@ -83,3 +83,19 @@ class MMMInsight(BaseModel):
     action: Optional[str] = Field(None, description="Recommended action")
     channel: Optional[str] = Field(None, description="Related channel")
     impact: Optional[str] = Field(None, description="Expected impact level")
+
+
+class MMMExportRequest(BaseModel):
+    """Schema for MMM export request."""
+    
+    format: str = Field("json", description="Export format (json, csv, txt)")
+    include_raw_data: bool = Field(False, description="Include raw model data")
+
+
+class MMMExportResponse(BaseModel):
+    """Schema for MMM export response."""
+    
+    success: bool = Field(..., description="Export success status")
+    message: str = Field(..., description="Export status message")
+    download_url: Optional[str] = Field(None, description="Download URL if applicable")
+    data: Optional[Dict[str, Any]] = Field(None, description="Export data if inline")
