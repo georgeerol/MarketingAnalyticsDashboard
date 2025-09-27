@@ -390,7 +390,7 @@ This will:
 - Start Next.js frontend (port 3000) with Turbopack
 - Create test users for immediate access
 
-### 🔍 Model Inspection Tools
+### Model Inspection Tools
 
 Inspect the MMM model data structure and parameters:
 
@@ -409,12 +409,12 @@ pnpm inspect-model:json-file
 ```
 
 The inspection tool provides:
-- 📊 Model structure and metadata
-- 🎯 Channel insights (saturation points, efficiency, adstock rates)
-- 📈 Response curve parameters
-- 📋 Contribution data summary
+- Model structure and metadata
+- Channel insights (saturation points, efficiency, adstock rates)
+- Response curve parameters
+- Contribution data summary
 
-### 🔑 Login Credentials
+### Login Credentials
 
 The system comes with pre-configured test users for immediate access:
 
@@ -428,27 +428,27 @@ The system comes with pre-configured test users for immediate access:
 
 > **Quick Access**: Use `test@example.com` / `test123` to get started immediately.
 
-### 📊 Dashboard Features
+### Dashboard Features
 
 Once logged in, you'll have access to:
 
-- **📈 Contribution Charts**: Visual breakdown of channel performance with real MMM data
-- **📉 Response Curves**: Diminishing returns analysis showing optimal spend ranges
-- **🎯 MMM Insights**: AI-generated recommendations and performance analysis
-- **⚡ Real-time Data**: Live updates from Google Meridian MMM model (32.3MB)
-- **🔍 Channel Analysis**: Detailed metrics for 5 marketing channels
+- **Contribution Charts**: Visual breakdown of channel performance with real MMM data
+- **Response Curves**: Diminishing returns analysis showing optimal spend ranges
+- **MMM Insights**: AI-generated recommendations and performance analysis
+- **Real-time Data**: Live updates from Google Meridian MMM model (32.3MB)
+- **Channel Analysis**: Detailed metrics for 5 marketing channels
 
-### ⚡ Performance Optimizations
+### Performance Optimizations
 
 The system includes intelligent caching for optimal performance:
 
-#### 🚀 **Model Caching**
+#### **Model Caching**
 - **LRU Cache**: MMM model cached in memory after first load using `@lru_cache(maxsize=1)`
 - **Performance Impact**: 95%+ improvement in response times after initial load
 - **Before**: 3+ seconds per request (32MB model loaded from disk each time)
 - **After**: 40-50ms per request (model served from memory cache)
 
-#### 📊 **Performance Metrics**
+#### **Performance Metrics**
 | Metric | Before Caching | After Caching | Improvement |
 |--------|---------------|---------------|-------------|
 | **First Request** | ~3.9 seconds | ~3.9 seconds | Same (expected) |
@@ -456,7 +456,7 @@ The system includes intelligent caching for optimal performance:
 | **Memory Usage** | Minimal | +32MB | Acceptable trade-off |
 | **User Experience** | Slow on every load | Near-instantaneous after first visit | **Dramatically improved** |
 
-#### 🎯 **Technical Implementation**
+#### **Technical Implementation**
 ```python
 @lru_cache(maxsize=1)
 def _load_model(self) -> Any:
@@ -609,7 +609,7 @@ curl http://localhost:8000/health  # Test backend health
 curl http://localhost:3000         # Test frontend availability
 ```
 
-### 🔑 Test Credentials
+### Test Credentials
 
 | User Type | Email | Password | Use Case |
 |-----------|-------|----------|----------|
@@ -651,7 +651,7 @@ curl http://localhost:3000         # Test frontend availability
 | **Deployment** | Docker Compose | Kubernetes with auto-scaling |
 
 #### Next Steps
-1. ✅ **Model caching** - **COMPLETED** (LRU cache providing 95%+ performance improvement)
+1. **Model caching** - **COMPLETED** (LRU cache providing 95%+ performance improvement)
 2. **Redis integration** for caching computed response curves and insights
 3. **Rate limiting** for API endpoints
 4. **Monitoring stack** with metrics and alerting

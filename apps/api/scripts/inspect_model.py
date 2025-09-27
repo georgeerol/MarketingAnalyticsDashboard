@@ -142,7 +142,7 @@ def format_text_output(model_info, channel_insights, contribution_summary, mmm_s
     output.append("")
     
     # Model Structure
-    output.append("📊 MODEL STRUCTURE")
+    output.append("MODEL STRUCTURE")
     output.append("-" * 40)
     output.append(f"Model Type: {model_info['model_type']}")
     
@@ -158,7 +158,7 @@ def format_text_output(model_info, channel_insights, contribution_summary, mmm_s
     # Model Info
     try:
         model_status = mmm_service.get_model_info()
-        output.append("📈 MODEL INFORMATION")
+        output.append("MODEL INFORMATION")
         output.append("-" * 40)
         if hasattr(model_status, '__dict__'):
             # Handle dataclass or object with attributes
@@ -178,46 +178,46 @@ def format_text_output(model_info, channel_insights, contribution_summary, mmm_s
         output.append("")
     
     # Channel Insights
-    output.append("🎯 CHANNEL INSIGHTS")
+    output.append("CHANNEL INSIGHTS")
     output.append("-" * 40)
     for channel, data in channel_insights.items():
         output.append(f"\n{channel}:")
         if 'error' in data:
-            output.append(f"  ❌ Error: {data['error']}")
+            output.append(f"  [ERROR] {data['error']}")
         else:
-            output.append(f"  💰 Saturation Point: {data.get('saturation_point', 'N/A')}")
-            output.append(f"  ⚡ Efficiency: {data.get('efficiency', 'N/A')}")
-            output.append(f"  📊 Adstock Rate: {data.get('adstock_rate', 'N/A')}")
-            output.append(f"  💸 Max Spend: {data.get('max_spend', 'N/A')}")
-            output.append(f"  📈 Max Response: {data.get('max_response', 'N/A')}")
+            output.append(f"  Saturation Point: {data.get('saturation_point', 'N/A')}")
+            output.append(f"  Efficiency: {data.get('efficiency', 'N/A')}")
+            output.append(f"  Adstock Rate: {data.get('adstock_rate', 'N/A')}")
+            output.append(f"  Max Spend: {data.get('max_spend', 'N/A')}")
+            output.append(f"  Max Response: {data.get('max_response', 'N/A')}")
     
     output.append("")
     
     # Contribution Summary
-    output.append("📊 CONTRIBUTION SUMMARY")
+    output.append("CONTRIBUTION SUMMARY")
     output.append("-" * 40)
     if 'error' in contribution_summary:
-        output.append(f"❌ Error: {contribution_summary['error']}")
+        output.append(f"[ERROR] {contribution_summary['error']}")
     else:
         output.append(f"Total Time Periods: {contribution_summary.get('total_periods', 'N/A')}")
         if contribution_summary.get('date_range'):
             output.append(f"Date Range: {contribution_summary['date_range']}")
         
         if contribution_summary.get('note'):
-            output.append(f"\n📝 Note: {contribution_summary['note']}")
+            output.append(f"\nNote: {contribution_summary['note']}")
         elif contribution_summary.get('channels'):
             output.append("\nChannel Contributions:")
             for channel, data in contribution_summary.get('channels', {}).items():
                 output.append(f"\n{channel}:")
-                output.append(f"  📊 Total: {data.get('total_contribution', 'N/A')}")
-                output.append(f"  📈 Average: {data.get('avg_contribution', 'N/A')}")
-                output.append(f"  🔝 Maximum: {data.get('max_contribution', 'N/A')}")
-                output.append(f"  🔻 Minimum: {data.get('min_contribution', 'N/A')}")
-                output.append(f"  📋 Data Points: {data.get('data_points', 'N/A')}")
+                output.append(f"  Total: {data.get('total_contribution', 'N/A')}")
+                output.append(f"  Average: {data.get('avg_contribution', 'N/A')}")
+                output.append(f"  Maximum: {data.get('max_contribution', 'N/A')}")
+                output.append(f"  Minimum: {data.get('min_contribution', 'N/A')}")
+                output.append(f"  Data Points: {data.get('data_points', 'N/A')}")
     
     # Raw Model Structure Details
     output.append("")
-    output.append("🔍 DETAILED MODEL STRUCTURE")
+    output.append("DETAILED MODEL STRUCTURE")
     output.append("-" * 40)
     for key, value in model_info['structure'].items():
         if key != 'posterior':  # Already covered above

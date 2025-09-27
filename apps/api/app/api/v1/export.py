@@ -228,7 +228,7 @@ def format_as_text(data: Dict[str, Any]) -> str:
     lines.append("")
     
     # Executive Summary
-    lines.append("📊 EXECUTIVE SUMMARY")
+    lines.append("EXECUTIVE SUMMARY")
     lines.append("-" * 40)
     summary = data['summary_statistics']
     lines.append(f"• Total Channels Analyzed: {summary['total_channels']}")
@@ -238,7 +238,7 @@ def format_as_text(data: Dict[str, Any]) -> str:
     lines.append("")
     
     # Channel Performance
-    lines.append("🎯 CHANNEL PERFORMANCE")
+    lines.append("CHANNEL PERFORMANCE")
     lines.append("-" * 40)
     for channel, perf in data['channel_performance'].items():
         lines.append(f"\n{channel}:")
@@ -251,10 +251,10 @@ def format_as_text(data: Dict[str, Any]) -> str:
     lines.append("")
     
     # Key Insights
-    lines.append("💡 KEY INSIGHTS")
+    lines.append("KEY INSIGHTS")
     lines.append("-" * 40)
     for i, insight in enumerate(data['insights'], 1):
-        icon = "✅" if insight['type'] == 'success' else "⚠️" if insight['type'] == 'warning' else "ℹ️"
+        icon = "[SUCCESS]" if insight['type'] == 'success' else "[WARNING]" if insight['type'] == 'warning' else "[INFO]"
         lines.append(f"\n{i}. {icon} {insight['title']}")
         lines.append(f"   {insight['description']}")
         if insight.get('action'):
@@ -263,10 +263,10 @@ def format_as_text(data: Dict[str, Any]) -> str:
     lines.append("")
     
     # Recommendations
-    lines.append("🚀 RECOMMENDATIONS")
+    lines.append("RECOMMENDATIONS")
     lines.append("-" * 40)
     for i, rec in enumerate(data['recommendations'], 1):
-        action_icon = "📈" if rec['action'] == 'increase' else "🔧" if rec['action'] == 'optimize' else "📊"
+        action_icon = "[INCREASE]" if rec['action'] == 'increase' else "[OPTIMIZE]" if rec['action'] == 'optimize' else "[ANALYZE]"
         impact_text = rec['impact'].upper()
         lines.append(f"\n{i}. {action_icon} {rec['channel']} - {rec['action'].upper()} ({impact_text} IMPACT)")
         lines.append(f"   Reason: {rec['reason']}")
