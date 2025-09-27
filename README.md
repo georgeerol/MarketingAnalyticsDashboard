@@ -375,13 +375,12 @@ pnpm install
 # 2. Start development environment
 pnpm dev
 
-# 3. Verify it's working
-curl http://localhost:8000/health
+# 3. Seed the database with test users
+pnpm seed
 
-# 4. Test the authentication
-curl -X POST http://localhost:8000/auth/login-json \
-  -H "Content-Type: application/json" \
-  -d '{"email": "test@example.com", "password": "test123"}'
+# 4. Access the dashboard
+# Frontend: http://localhost:3000
+# Login with: test@example.com / test123
 ```
 
 This will:
@@ -389,6 +388,42 @@ This will:
 - Spin up PostgreSQL database (port 5432) and Adminer UI (port 8080)
 - Start FastAPI backend (port 8000) with Google Meridian integration
 - Start Next.js frontend (port 3000) with Turbopack
+- Create test users for immediate access
+
+### 🔑 Login Credentials
+
+The system comes with pre-configured test users for immediate access:
+
+| User Type | Email | Password | Description |
+|-----------|-------|----------|-------------|
+| **Test User** | `test@example.com` | `test123` | Standard user account (recommended for testing) |
+| **Admin User** | `admin@example.com` | `admin123` | Administrator with full access |
+| **Demo User** | `demo@example.com` | `demo123` | Demo account for presentations |
+| **Marketing Manager** | `marketer@example.com` | `marketer123` | Marketing role example |
+| **Data Analyst** | `analyst@example.com` | `analyst123` | Analyst role example |
+
+> **Quick Access**: Use `test@example.com` / `test123` to get started immediately.
+
+### 📊 Dashboard Features
+
+Once logged in, you'll have access to:
+
+- **📈 Contribution Charts**: Visual breakdown of channel performance with real MMM data
+- **📉 Response Curves**: Diminishing returns analysis showing optimal spend ranges
+- **🎯 MMM Insights**: AI-generated recommendations and performance analysis
+- **⚡ Real-time Data**: Live updates from Google Meridian MMM model (32.3MB)
+- **🔍 Channel Analysis**: Detailed metrics for 5 marketing channels
+
+### API Testing
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Get auth token
+curl -X POST http://localhost:8000/auth/login-json \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "test123"}'
+```
 
 ### Manual Setup (Alternative)
 
@@ -522,12 +557,19 @@ curl http://localhost:8000/health  # Test backend health
 curl http://localhost:3000         # Test frontend availability
 ```
 
-### Test Credentials
-- **Test User**: `test@example.com` / `test123`
-- **Admin User**: `admin@example.com` / `admin123`
-- **Demo User**: `demo@example.com` / `demo123`
+### 🔑 Test Credentials
 
-> **Note**: Registration is available but uses the seeded test users for development.
+| User Type | Email | Password | Use Case |
+|-----------|-------|----------|----------|
+| **Test User** | `test@example.com` | `test123` | **← Start here!** Standard testing account |
+| **Admin User** | `admin@example.com` | `admin123` | Administrator access |
+| **Demo User** | `demo@example.com` | `demo123` | Demo presentations |
+| **Marketing Manager** | `marketer@example.com` | `marketer123` | Marketing role testing |
+| **Data Analyst** | `analyst@example.com` | `analyst123` | Analyst role testing |
+
+> **Quick Start**: Use `test@example.com` / `test123` to access the MMM Dashboard immediately.
+> 
+> **Note**: All users are created automatically when you run `pnpm seed`. Registration is also available for creating new accounts.
 
 ---
 

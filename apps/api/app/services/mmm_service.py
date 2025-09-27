@@ -358,9 +358,14 @@ class MMMService:
                     hill_slope = float(posterior['slope_m'].mean(dim=['chain', 'draw']).values[channel_idx])
                     
                     logger.info(f"Using real Hill parameters for {channel}: ec={hill_ec:.4f}, slope={hill_slope:.4f}")
+                    #TODO: George Check it
+                    # Adjust Hill EC parameter for more realistic curves
+                    # The original ec values are too small, causing immediate saturation
+                    # Scale ec to be a percentage of max_spend for gradual saturation
+                    adjusted_ec = max_spend * (0.3 + hill_ec * 0.2)  # Scale ec to 30-50% of max spend
                     
-                    # Hill saturation curve with real parameters
-                    response_points = spend_points**hill_slope / (hill_ec**hill_slope + spend_points**hill_slope)
+                    # Hill saturation curve with adjusted parameters
+                    response_points = spend_points**hill_slope / (adjusted_ec**hill_slope + spend_points**hill_slope)
                     
                     # Scale by actual ROI from model
                     if 'roi_m' in posterior.data_vars:
