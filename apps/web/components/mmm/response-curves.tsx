@@ -1,72 +1,91 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
-import { useMMMData } from '@/hooks/use-mmm-data'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { Loader2, TrendingDown, Target, Zap, BarChart3 } from 'lucide-react'
-import { formatChannelName } from '@/lib/format-channel'
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
+import { useMMMData } from "@/hooks/use-mmm-data";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
+import { Loader2, TrendingDown, Target, Zap, BarChart3 } from "lucide-react";
+import { formatChannelName } from "@/lib/format-channel";
 
 interface CurveData {
-  spend: number
-  response: number
+  spend: number;
+  response: number;
 }
 
 interface ChannelCurve {
-  channel: string
-  data: CurveData[]
-  saturation_point: number
-  efficiency: number
-  adstock_rate: number
+  channel: string;
+  data: CurveData[];
+  saturation_point: number;
+  efficiency: number;
+  adstock_rate: number;
 }
 
 export function ResponseCurves() {
-  const { getResponseCurves, getChannels, loading, error } = useMMMData()
-  const [curves, setCurves] = useState<ChannelCurve[]>([])
-  const [selectedChannel, setSelectedChannel] = useState<string>('')
-  const [channels, setChannels] = useState<string[]>([])
+  const { getResponseCurves, getChannels, loading, error } = useMMMData();
+  const [curves, setCurves] = useState<ChannelCurve[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<string>("");
+  const [channels, setChannels] = useState<string[]>([]);
 
   useEffect(() => {
-    let isMounted = true
-    
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
         // Get all channels first
-        const channelList = await getChannels()
-        
-        if (!isMounted) return
-        
-        setChannels(channelList)
-        setSelectedChannel(channelList[0] || '')
+        const channelList = await getChannels();
+
+        if (!isMounted) return;
+
+        setChannels(channelList);
+        setSelectedChannel(channelList[0] || "");
 
         // Get response curves for all channels
-        const allCurves = await getResponseCurves() as { curves: Record<string, any> }
-        
-        if (!isMounted) return
-        
-        const curveData = Object.entries(allCurves.curves).map(([channel, data]) => ({
-          channel: formatChannelName(channel),
-          data: data.spend.map((spend: number, index: number) => ({
-            spend: Math.round(spend),
-            response: Math.round(data.response[index])
-          })),
-          saturation_point: data.saturation_point,
-          efficiency: data.efficiency,
-          adstock_rate: data.adstock_rate
-        }))
+        const allCurves = (await getResponseCurves()) as {
+          curves: Record<string, any>;
+        };
 
-        setCurves(curveData)
+        if (!isMounted) return;
+
+        const curveData = Object.entries(allCurves.curves).map(
+          ([channel, data]) => ({
+            channel: formatChannelName(channel),
+            data: data.spend.map((spend: number, index: number) => ({
+              spend: Math.round(spend),
+              response: Math.round(data.response[index]),
+            })),
+            saturation_point: data.saturation_point,
+            efficiency: data.efficiency,
+            adstock_rate: data.adstock_rate,
+          }),
+        );
+
+        setCurves(curveData);
       } catch (err) {
-        console.error('Failed to fetch response curves:', err)
+        console.error("Failed to fetch response curves:", err);
       }
-    }
+    };
 
-    fetchData()
-    
+    fetchData();
+
     return () => {
-      isMounted = false
-    }
-  }, []) // Remove dependencies to prevent infinite loop
+      isMounted = false;
+    };
+  }, []); // Remove dependencies to prevent infinite loop
 
   if (loading) {
     return (
@@ -79,7 +98,7 @@ export function ResponseCurves() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -93,11 +112,15 @@ export function ResponseCurves() {
           <p className="text-red-500">{error}</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const selectedCurve = curves.find(c => c.channel === formatChannelName(selectedChannel))
-  const maxResponse = selectedCurve ? Math.max(...selectedCurve.data.map(d => d.response)) : 0
+  const selectedCurve = curves.find(
+    (c) => c.channel === formatChannelName(selectedChannel),
+  );
+  const maxResponse = selectedCurve
+    ? Math.max(...selectedCurve.data.map((d) => d.response))
+    : 0;
 
   return (
     <Card>
@@ -108,14 +131,16 @@ export function ResponseCurves() {
               <TrendingDown className="h-5 w-5" />
               Response Curves
             </CardTitle>
-            <CardDescription>Analyze diminishing returns and saturation points</CardDescription>
+            <CardDescription>
+              Analyze diminishing returns and saturation points
+            </CardDescription>
           </div>
           <select
             value={selectedChannel}
             onChange={(e) => setSelectedChannel(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {channels.map(channel => (
+            {channels.map((channel) => (
               <option key={channel} value={channel}>
                 {formatChannelName(channel)}
               </option>
@@ -165,32 +190,34 @@ export function ResponseCurves() {
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
+                  <XAxis
                     dataKey="spend"
                     tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
                   />
-                  <YAxis 
+                  <YAxis
                     tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
                   />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value, name) => [
-                      `$${typeof value === 'number' ? value.toLocaleString() : value}`,
-                      name === 'response' ? 'Response' : name
+                      `$${typeof value === "number" ? value.toLocaleString() : value}`,
+                      name === "response" ? "Response" : name,
                     ]}
-                    labelFormatter={(label) => `Spend: $${typeof label === 'number' ? label.toLocaleString() : label}`}
+                    labelFormatter={(label) =>
+                      `Spend: $${typeof label === "number" ? label.toLocaleString() : label}`
+                    }
                   />
-                  <ReferenceLine 
-                    x={selectedCurve.saturation_point} 
-                    stroke="#ff7300" 
+                  <ReferenceLine
+                    x={selectedCurve.saturation_point}
+                    stroke="#ff7300"
                     strokeDasharray="5 5"
                     label={{ value: "Saturation", position: "top" }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="response" 
-                    stroke="#0088FE" 
+                  <Line
+                    type="monotone"
+                    dataKey="response"
+                    stroke="#0088FE"
                     strokeWidth={3}
-                    dot={{ fill: '#0088FE', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: "#0088FE", strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
@@ -207,13 +234,19 @@ export function ResponseCurves() {
                 <div>
                   <span className="font-medium">Optimal Spend Range:</span>
                   <span className="ml-2 text-gray-700">
-                    $0 - ${Math.round(selectedCurve.saturation_point * 0.8).toLocaleString()}
+                    $0 - $
+                    {Math.round(
+                      selectedCurve.saturation_point * 0.8,
+                    ).toLocaleString()}
                   </span>
                 </div>
                 <div>
                   <span className="font-medium">Diminishing Returns:</span>
                   <span className="ml-2 text-gray-700">
-                    Beyond ${Math.round(selectedCurve.saturation_point).toLocaleString()}
+                    Beyond $
+                    {Math.round(
+                      selectedCurve.saturation_point,
+                    ).toLocaleString()}
                   </span>
                 </div>
                 <div>
@@ -234,5 +267,5 @@ export function ResponseCurves() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

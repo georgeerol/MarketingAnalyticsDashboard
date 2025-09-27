@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@workspace/ui/components/button"
-import { useAuth } from "@/lib/auth"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@workspace/ui/components/button";
+import { useAuth } from "@/lib/auth";
 
 export default function Page() {
-  const { user, token, checkAuth } = useAuth()
-  const router = useRouter()
+  const { user, token, checkAuth } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (token) {
-      router.push("/dashboard")
+      router.push("/dashboard");
     } else {
-      router.push("/login")
+      router.push("/login");
     }
-  }, [token, router])
+  }, [token, router]);
 
   return (
     <div className="flex items-center justify-center min-h-svh">
@@ -24,5 +24,5 @@ export default function Page() {
         <p className="text-muted-foreground">Redirecting...</p>
       </div>
     </div>
-  )
+  );
 }

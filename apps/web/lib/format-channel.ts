@@ -5,6 +5,6 @@
  */
 export function formatChannelName(channelName: string): string {
   return channelName
-    .replace(/_/g, ' ') // Replace underscores with spaces
-    .replace(/([a-zA-Z])(\d)/g, '$1 $2') // Add space between letters and numbers
+    .replace(/_/g, " ") // Replace underscores with spaces
+    .replace(/([a-zA-Z])(\d)/g, "$1 $2"); // Add space between letters and numbers
 }

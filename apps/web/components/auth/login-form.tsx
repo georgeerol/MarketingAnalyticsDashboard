@@ -1,32 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { useAuth } from "@/lib/auth"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
+import { useAuth } from "@/lib/auth";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const { login, isLoading } = useAuth()
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login, isLoading } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     try {
-      await login({ email, password })
-      router.push("/dashboard")
+      await login({ email, password });
+      router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed")
+      setError(err instanceof Error ? err.message : "Login failed");
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -69,17 +76,13 @@ export function LoginForm() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 pt-6">
-          <Button 
-            type="submit" 
-            className="w-full mt-4" 
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full mt-4" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
           <p className="text-sm text-center text-muted-foreground">
             Don't have an account?{" "}
-            <Link 
-              href="/register" 
+            <Link
+              href="/register"
               className="font-medium text-primary hover:underline"
             >
               Sign up
@@ -88,5 +91,5 @@ export function LoginForm() {
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

@@ -1,35 +1,45 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { useAuth } from "@/lib/auth"
-import { SimpleContributionChart, SimpleResponseCurves, SimpleMMInsights } from "@/components/mmm/simple-charts"
-import { CheckCircle, BarChart3 } from "lucide-react"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
+import { useAuth } from "@/lib/auth";
+import {
+  SimpleContributionChart,
+  SimpleResponseCurves,
+  SimpleMMInsights,
+} from "@/components/mmm/simple-charts";
+import { CheckCircle, BarChart3 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { user, token, logout, checkAuth, isHydrated } = useAuth()
-  const router = useRouter()
+  const { user, token, logout, checkAuth, isHydrated } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     // Wait for hydration before making auth decisions
-    if (!isHydrated) return
-    
+    if (!isHydrated) return;
+
     if (!token) {
-      router.push("/login")
-      return
+      router.push("/login");
+      return;
     }
     // Only check auth once when component mounts if we have a token
     if (token && !user) {
-      checkAuth()
+      checkAuth();
     }
-  }, [token, router, isHydrated, user, checkAuth])
+  }, [token, router, isHydrated, user, checkAuth]);
 
   const handleLogout = () => {
-    logout()
-    router.push("/login")
-  }
+    logout();
+    router.push("/login");
+  };
 
   // Show loading while hydrating or while we have a token but no user data
   if (!isHydrated || (token && !user)) {
@@ -40,12 +50,12 @@ export default function DashboardPage() {
           <p className="mt-2 text-muted-foreground">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // If hydrated and no token, redirect will happen in useEffect
   if (!token) {
-    return null
+    return null;
   }
 
   return (
@@ -108,7 +118,8 @@ export default function DashboardPage() {
                     Status: {user.is_active ? "Active" : "Inactive"}
                   </p>
                   <p className="text-sm text-green-700 dark:text-green-300">
-                    Member since: {new Date(user.created_at).toLocaleDateString()}
+                    Member since:{" "}
+                    {new Date(user.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -143,5 +154,5 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,13 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { useAuth } from "@/lib/auth"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
+import { useAuth } from "@/lib/auth";
 
 export function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -16,30 +23,30 @@ export function RegisterForm() {
     confirmPassword: "",
     full_name: "",
     company: "",
-  })
-  const [error, setError] = useState("")
-  const { register, isLoading } = useAuth()
-  const router = useRouter()
+  });
+  const [error, setError] = useState("");
+  const { register, isLoading } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
-      return
+      setError("Passwords do not match");
+      return;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long")
-      return
+      setError("Password must be at least 8 characters long");
+      return;
     }
 
     try {
@@ -48,12 +55,12 @@ export function RegisterForm() {
         password: formData.password,
         full_name: formData.full_name,
         company: formData.company || undefined,
-      })
-      router.push("/dashboard")
+      });
+      router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed")
+      setError(err instanceof Error ? err.message : "Registration failed");
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md">
@@ -136,17 +143,13 @@ export function RegisterForm() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Create Account"}
           </Button>
           <p className="text-sm text-center text-muted-foreground">
             Already have an account?{" "}
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="font-medium text-primary hover:underline"
             >
               Sign in
@@ -155,5 +158,5 @@ export function RegisterForm() {
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

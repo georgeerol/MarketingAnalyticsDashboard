@@ -2,53 +2,100 @@
  * Simple chart components for the MMM dashboard
  */
 
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
-import { useMMMData } from '@/hooks/use-mmm-data'
-import { useAuth } from '@/lib/auth'
-import { formatChannelName } from '@/lib/format-channel'
-import { Loader2, TrendingUp, TrendingDown, Target, Zap, Lightbulb, CheckCircle, AlertTriangle, ArrowRight, Rocket, BarChart3, Search, BarChart2, Download } from 'lucide-react'
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
+import { useMMMData } from "@/hooks/use-mmm-data";
+import { useAuth } from "@/lib/auth";
+import { formatChannelName } from "@/lib/format-channel";
+import {
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Zap,
+  Lightbulb,
+  CheckCircle,
+  AlertTriangle,
+  ArrowRight,
+  Rocket,
+  BarChart3,
+  Search,
+  BarChart2,
+  Download,
+} from "lucide-react";
 
 /**
  * Data structure for insights shown to users
  */
 interface Insight {
   /** success, warning, or info - affects styling */
-  type: 'success' | 'warning' | 'info'
+  type: "success" | "warning" | "info";
   /** Insight title */
-  title: string
+  title: string;
   /** Insight description */
-  description: string
+  description: string;
   /** Icon to show */
-  icon?: React.ReactNode
+  icon?: React.ReactNode;
 }
 
 /**
  * Bar chart with optional performance badges
- * 
+ *
  * Shows horizontal bars for each data item. If showPerformance is true,
  * adds badges like "High Performer" based on efficiency vs average.
  */
-function SimpleBarChart({ data, title, showPerformance = false }: { 
-  data: Array<{name: string, value: number, color: string, efficiency?: number}>, 
-  title: string,
-  showPerformance?: boolean 
+function SimpleBarChart({
+  data,
+  title,
+  showPerformance = false,
+}: {
+  data: Array<{
+    name: string;
+    value: number;
+    color: string;
+    efficiency?: number;
+  }>;
+  title: string;
+  showPerformance?: boolean;
 }) {
-  const maxValue = Math.max(...data.map(d => d.value))
-  
+  const maxValue = Math.max(...data.map((d) => d.value));
+
   // Calculate performance tiers for efficiency indicators
-  const efficiencies = data.map(d => d.efficiency || 0).filter(e => e > 0)
-  const avgEfficiency = efficiencies.length > 0 ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length : 1
-  
+  const efficiencies = data.map((d) => d.efficiency || 0).filter((e) => e > 0);
+  const avgEfficiency =
+    efficiencies.length > 0
+      ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length
+      : 1;
+
   const getPerformanceIndicator = (efficiency?: number) => {
-    if (!efficiency || !showPerformance) return null
-    if (efficiency > avgEfficiency * 1.2) return { icon: <Rocket className="h-4 w-4" />, label: 'High Performer', color: 'text-green-600' }
-    if (efficiency < avgEfficiency * 0.8) return { icon: <AlertTriangle className="h-4 w-4" />, label: 'Underperformer', color: 'text-red-600' }
-    return { icon: <BarChart3 className="h-4 w-4" />, label: 'Average', color: 'text-blue-600' }
-  }
-  
+    if (!efficiency || !showPerformance) return null;
+    if (efficiency > avgEfficiency * 1.2)
+      return {
+        icon: <Rocket className="h-4 w-4" />,
+        label: "High Performer",
+        color: "text-green-600",
+      };
+    if (efficiency < avgEfficiency * 0.8)
+      return {
+        icon: <AlertTriangle className="h-4 w-4" />,
+        label: "Underperformer",
+        color: "text-red-600",
+      };
+    return {
+      icon: <BarChart3 className="h-4 w-4" />,
+      label: "Average",
+      color: "text-blue-600",
+    };
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
@@ -60,14 +107,16 @@ function SimpleBarChart({ data, title, showPerformance = false }: {
         )}
       </div>
       {data.map((item, index) => {
-        const performance = getPerformanceIndicator(item.efficiency)
+        const performance = getPerformanceIndicator(item.efficiency);
         return (
           <div key={index} className="space-y-1">
             <div className="flex justify-between items-center text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{item.name}</span>
                 {performance && (
-                  <span className={`text-xs ${performance.color} flex items-center gap-1`}>
+                  <span
+                    className={`text-xs ${performance.color} flex items-center gap-1`}
+                  >
                     {performance.icon} {performance.label}
                   </span>
                 )}
@@ -78,7 +127,9 @@ function SimpleBarChart({ data, title, showPerformance = false }: {
                     ROI: {item.efficiency.toFixed(2)}
                   </span>
                 )}
-                <span className="text-gray-600">{item.value.toLocaleString()}</span>
+                <span className="text-gray-600">
+                  {item.value.toLocaleString()}
+                </span>
               </div>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
@@ -86,34 +137,43 @@ function SimpleBarChart({ data, title, showPerformance = false }: {
                 className="h-3 rounded-full transition-all duration-500 relative"
                 style={{
                   width: `${(item.value / maxValue) * 100}%`,
-                  backgroundColor: item.color
+                  backgroundColor: item.color,
                 }}
               >
                 {/* Performance gradient overlay */}
                 {performance && (
-                  <div 
+                  <div
                     className="absolute inset-0 rounded-full opacity-20"
                     style={{
-                      background: performance.color.includes('green') ? 'linear-gradient(90deg, transparent, #10b981)' :
-                                 performance.color.includes('red') ? 'linear-gradient(90deg, transparent, #ef4444)' :
-                                 'linear-gradient(90deg, transparent, #3b82f6)'
+                      background: performance.color.includes("green")
+                        ? "linear-gradient(90deg, transparent, #10b981)"
+                        : performance.color.includes("red")
+                          ? "linear-gradient(90deg, transparent, #ef4444)"
+                          : "linear-gradient(90deg, transparent, #3b82f6)",
                     }}
                   />
                 )}
               </div>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 // Simple line chart component
-function SimpleLineChart({ data, title }: { data: Array<{x: number, y: number}>, title: string, saturationPoint?: number }) {
-  const maxX = Math.max(...data.map(d => d.x))
-  const maxY = Math.max(...data.map(d => d.y))
-  
+function SimpleLineChart({
+  data,
+  title,
+}: {
+  data: Array<{ x: number; y: number }>;
+  title: string;
+  saturationPoint?: number;
+}) {
+  const maxX = Math.max(...data.map((d) => d.x));
+  const maxY = Math.max(...data.map((d) => d.y));
+
   return (
     <div className="space-y-3">
       <h4 className="font-medium text-sm text-gray-600">{title}</h4>
@@ -121,22 +181,35 @@ function SimpleLineChart({ data, title }: { data: Array<{x: number, y: number}>,
         <svg className="w-full h-full" viewBox="0 0 300 100">
           {/* Grid lines */}
           <defs>
-            <pattern id="grid" width="30" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 30 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" strokeWidth="0.5"/>
+            <pattern
+              id="grid"
+              width="30"
+              height="20"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 30 0 L 0 0 0 20"
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth="0.5"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
-          
+
           {/* Line */}
           <polyline
             fill="none"
             stroke="#0088FE"
             strokeWidth="2"
-            points={data.map((d, i) => 
-              `${(d.x / maxX) * 280 + 10},${90 - (d.y / maxY) * 80}`
-            ).join(' ')}
+            points={data
+              .map(
+                (d, i) =>
+                  `${(d.x / maxX) * 280 + 10},${90 - (d.y / maxY) * 80}`,
+              )
+              .join(" ")}
           />
-          
+
           {/* Points */}
           {data.map((d, i) => (
             <circle
@@ -150,62 +223,78 @@ function SimpleLineChart({ data, title }: { data: Array<{x: number, y: number}>,
         </svg>
       </div>
     </div>
-  )
+  );
 }
 
 /**
  * Shows channel contributions in a bar chart
- * 
+ *
  * Fetches channel data and displays it with performance indicators.
  */
 export function SimpleContributionChart() {
-  const { getChannelSummary, getResponseCurves, loading, error } = useMMMData()
-  const { token } = useAuth()
-  const [data, setData] = useState<Array<{name: string, value: number, color: string, efficiency?: number}>>([])
+  const { getChannelSummary, getResponseCurves, loading, error } = useMMMData();
+  const { token } = useAuth();
+  const [data, setData] = useState<
+    Array<{ name: string; value: number; color: string; efficiency?: number }>
+  >([]);
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884D8",
+    "#82CA9D",
+  ];
 
   useEffect(() => {
-    if (!token) return // Don't fetch data if not authenticated
-    
-    let isMounted = true
-    
+    if (!token) return; // Don't fetch data if not authenticated
+
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
         // Fetch both contribution and efficiency data
         const [summary, responseCurves] = await Promise.all([
           getChannelSummary(),
-          getResponseCurves()
-        ])
-        
-        if (!isMounted) return
-        
-        const chartData = Object.entries(summary).map(([channel, data], index) => {
-          // Get efficiency from response curves
-          const efficiency = responseCurves.curves && typeof responseCurves.curves === 'object' && 
-                            responseCurves.curves[channel as keyof typeof responseCurves.curves]?.efficiency || 0
-          
-          return {
-            name: formatChannelName(channel),
-            value: Math.round(data.total_contribution),
-            color: COLORS[index % COLORS.length] || '#8884D8',
-            efficiency: efficiency
-          }
-        })
-        
-        chartData.sort((a, b) => b.value - a.value)
-        setData(chartData.slice(0, 6)) // Show top 6 channels
-      } catch (err) {
-        console.error('Failed to fetch contribution data:', err)
-      }
-    }
+          getResponseCurves(),
+        ]);
 
-    fetchData()
-    
+        if (!isMounted) return;
+
+        const chartData = Object.entries(summary).map(
+          ([channel, data], index) => {
+            // Get efficiency from response curves
+            const efficiency =
+              (responseCurves.curves &&
+                typeof responseCurves.curves === "object" &&
+                responseCurves.curves[
+                  channel as keyof typeof responseCurves.curves
+                ]?.efficiency) ||
+              0;
+
+            return {
+              name: formatChannelName(channel),
+              value: Math.round(data.total_contribution),
+              color: COLORS[index % COLORS.length] || "#8884D8",
+              efficiency: efficiency,
+            };
+          },
+        );
+
+        chartData.sort((a, b) => b.value - a.value);
+        setData(chartData.slice(0, 6)); // Show top 6 channels
+      } catch (err) {
+        console.error("Failed to fetch contribution data:", err);
+      }
+    };
+
+    fetchData();
+
     return () => {
-      isMounted = false
-    }
-  }, [token])
+      isMounted = false;
+    };
+  }, [token]);
 
   if (loading) {
     return (
@@ -221,7 +310,7 @@ export function SimpleContributionChart() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -235,10 +324,10 @@ export function SimpleContributionChart() {
           <p className="text-red-500">{error}</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const totalContribution = data.reduce((sum, item) => sum + item.value, 0)
+  const totalContribution = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <Card>
@@ -247,7 +336,9 @@ export function SimpleContributionChart() {
           <TrendingUp className="h-5 w-5" />
           Channel Performance
         </CardTitle>
-        <CardDescription>Top performing media channels with ROI insights</CardDescription>
+        <CardDescription>
+          Top performing media channels with ROI insights
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -259,20 +350,31 @@ export function SimpleContributionChart() {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
-              {data[0]?.name || 'N/A'}
+              {data[0]?.name || "N/A"}
             </div>
             <div className="text-sm text-gray-500">Top Channel</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {data.length > 0 ? (data.reduce((sum, item) => sum + (item.efficiency || 0), 0) / data.length).toFixed(2) : '0.00'}
+              {data.length > 0
+                ? (
+                    data.reduce(
+                      (sum, item) => sum + (item.efficiency || 0),
+                      0,
+                    ) / data.length
+                  ).toFixed(2)
+                : "0.00"}
             </div>
             <div className="text-sm text-gray-500">Avg ROI</div>
           </div>
         </div>
 
-        <SimpleBarChart data={data} title="Channel Contributions" showPerformance={true} />
-        
+        <SimpleBarChart
+          data={data}
+          title="Channel Contributions"
+          showPerformance={true}
+        />
+
         {data.length > 0 && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-blue-800">
@@ -280,91 +382,99 @@ export function SimpleContributionChart() {
               <span className="font-medium">Performance Insight:</span>
             </div>
             <p className="text-sm text-blue-700 mt-1">
-              {data.find(d => d.efficiency && d.efficiency > 1.4) ? 
-                `${data.find(d => d.efficiency && d.efficiency > 1.4)?.name} shows exceptional ROI (${data.find(d => d.efficiency && d.efficiency > 1.4)?.efficiency?.toFixed(2)}). Consider increasing investment.` :
-                `Top performer: ${data[0]?.name} with ${data[0]?.efficiency?.toFixed(2) || 'N/A'} ROI. Monitor for optimization opportunities.`
-              }
+              {data.find((d) => d.efficiency && d.efficiency > 1.4)
+                ? `${data.find((d) => d.efficiency && d.efficiency > 1.4)?.name} shows exceptional ROI (${data.find((d) => d.efficiency && d.efficiency > 1.4)?.efficiency?.toFixed(2)}). Consider increasing investment.`
+                : `Top performer: ${data[0]?.name} with ${data[0]?.efficiency?.toFixed(2) || "N/A"} ROI. Monitor for optimization opportunities.`}
             </p>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 /**
  * Interactive response curves chart
- * 
+ *
  * Shows spend vs response curves for each channel. User can pick
  * which channel to view from a dropdown.
  */
 export function SimpleResponseCurves() {
-  const { getResponseCurves, getChannels, loading, error } = useMMMData()
-  const { token } = useAuth()
-  const [selectedChannel, setSelectedChannel] = useState<string>('')
-  const [channels, setChannels] = useState<string[]>([])
-  const [curveData, setCurveData] = useState<Array<{x: number, y: number}>>([])
-  const [saturationPoint, setSaturationPoint] = useState<number>(0)
-  const [efficiency, setEfficiency] = useState<number>(0)
-  const [allCurvesData, setAllCurvesData] = useState<Record<string, any>>({})
+  const { getResponseCurves, getChannels, loading, error } = useMMMData();
+  const { token } = useAuth();
+  const [selectedChannel, setSelectedChannel] = useState<string>("");
+  const [channels, setChannels] = useState<string[]>([]);
+  const [curveData, setCurveData] = useState<Array<{ x: number; y: number }>>(
+    [],
+  );
+  const [saturationPoint, setSaturationPoint] = useState<number>(0);
+  const [efficiency, setEfficiency] = useState<number>(0);
+  const [allCurvesData, setAllCurvesData] = useState<Record<string, any>>({});
 
   // Initial data fetch
   useEffect(() => {
-    if (!token) return // Don't fetch data if not authenticated
-    
-    let isMounted = true
-    
+    if (!token) return; // Don't fetch data if not authenticated
+
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
-        const channelList = await getChannels()
-        
-        if (!isMounted) return
-        
-        setChannels(channelList)
-        setSelectedChannel(channelList[0] || '')
+        const channelList = await getChannels();
 
-        const allCurves = await getResponseCurves() as { curves: Record<string, any> }
-        
-        if (!isMounted) return
-        
-        setAllCurvesData(allCurves.curves)
-        
+        if (!isMounted) return;
+
+        setChannels(channelList);
+        setSelectedChannel(channelList[0] || "");
+
+        const allCurves = (await getResponseCurves()) as {
+          curves: Record<string, any>;
+        };
+
+        if (!isMounted) return;
+
+        setAllCurvesData(allCurves.curves);
+
         // Set initial data for first channel
-        const firstChannel = channelList[0]
+        const firstChannel = channelList[0];
         if (firstChannel && allCurves.curves[firstChannel]) {
-          updateChannelData(firstChannel, allCurves.curves)
+          updateChannelData(firstChannel, allCurves.curves);
         }
       } catch (err) {
-        console.error('Failed to fetch response curves:', err)
+        console.error("Failed to fetch response curves:", err);
       }
-    }
+    };
 
-    fetchData()
-    
+    fetchData();
+
     return () => {
-      isMounted = false
-    }
-  }, [token])
+      isMounted = false;
+    };
+  }, [token]);
 
   // Update data when selected channel changes
   useEffect(() => {
     if (selectedChannel && allCurvesData[selectedChannel]) {
-      updateChannelData(selectedChannel, allCurvesData)
+      updateChannelData(selectedChannel, allCurvesData);
     }
-  }, [selectedChannel, allCurvesData])
+  }, [selectedChannel, allCurvesData]);
 
-  const updateChannelData = (channel: string, curvesData: Record<string, any>) => {
-    const data = curvesData[channel]
+  const updateChannelData = (
+    channel: string,
+    curvesData: Record<string, any>,
+  ) => {
+    const data = curvesData[channel];
     if (data) {
-      const points = data.spend.slice(0, 20).map((spend: number, index: number) => ({
-        x: spend,
-        y: data.response[index]
-      }))
-      setCurveData(points)
-      setSaturationPoint(data.saturation_point)
-      setEfficiency(data.efficiency)
+      const points = data.spend
+        .slice(0, 20)
+        .map((spend: number, index: number) => ({
+          x: spend,
+          y: data.response[index],
+        }));
+      setCurveData(points);
+      setSaturationPoint(data.saturation_point);
+      setEfficiency(data.efficiency);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -380,7 +490,7 @@ export function SimpleResponseCurves() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -394,7 +504,7 @@ export function SimpleResponseCurves() {
           <p className="text-red-500">{error}</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -413,7 +523,7 @@ export function SimpleResponseCurves() {
             onChange={(e) => setSelectedChannel(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm"
           >
-            {channels.map(channel => (
+            {channels.map((channel) => (
               <option key={channel} value={channel}>
                 {formatChannelName(channel)}
               </option>
@@ -443,177 +553,204 @@ export function SimpleResponseCurves() {
           </div>
         </div>
 
-        <SimpleLineChart data={curveData} title={`${formatChannelName(selectedChannel)} Response Curve`} />
-        
+        <SimpleLineChart
+          data={curveData}
+          title={`${formatChannelName(selectedChannel)} Response Curve`}
+        />
+
         <div className="mt-4 p-3 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Insight:</strong> Optimal spend range is $0 - ${Math.round(saturationPoint * 0.8).toLocaleString()}. 
-            Beyond ${Math.round(saturationPoint).toLocaleString()}, diminishing returns occur.
+            <strong>Insight:</strong> Optimal spend range is $0 - $
+            {Math.round(saturationPoint * 0.8).toLocaleString()}. Beyond $
+            {Math.round(saturationPoint).toLocaleString()}, diminishing returns
+            occur.
           </p>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 /**
  * Generates insights from MMM data
- * 
+ *
  * Looks at channel performance and creates recommendations like
  * "increase spend on Google Search" or "Facebook is underperforming".
  */
 export function SimpleMMInsights() {
-  const { getChannelSummary, getMMMInfo, getResponseCurves, loading, error } = useMMMData()
-  const { token } = useAuth()
-  const [insights, setInsights] = useState<Insight[]>([])
-  const [modelInfo, setModelInfo] = useState<any>(null)
-  const [isExporting, setIsExporting] = useState(false)
+  const { getChannelSummary, getMMMInfo, getResponseCurves, loading, error } =
+    useMMMData();
+  const { token } = useAuth();
+  const [insights, setInsights] = useState<Insight[]>([]);
+  const [modelInfo, setModelInfo] = useState<any>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    if (!token) return // Don't fetch data if not authenticated
-    
-    let isMounted = true
-    
+    if (!token) return; // Don't fetch data if not authenticated
+
+    let isMounted = true;
+
     const generateInsights = async () => {
       try {
         const [summary, info, curves] = await Promise.all([
           getChannelSummary(),
           getMMMInfo(),
-          getResponseCurves()
-        ])
-        
-        if (!isMounted) return
-        
-        setModelInfo(info)
+          getResponseCurves(),
+        ]);
 
-        const channels = Object.entries(summary)
-        const sortedByEfficiency = channels.sort(([,a], [,b]) => (b as any).efficiency - (a as any).efficiency)
-        const topPerformer = sortedByEfficiency[0]
-        const underPerformer = sortedByEfficiency[sortedByEfficiency.length - 1]
+        if (!isMounted) return;
 
-        const generatedInsights: Insight[] = []
-        
+        setModelInfo(info);
+
+        const channels = Object.entries(summary);
+        const sortedByEfficiency = channels.sort(
+          ([, a], [, b]) => (b as any).efficiency - (a as any).efficiency,
+        );
+        const topPerformer = sortedByEfficiency[0];
+        const underPerformer =
+          sortedByEfficiency[sortedByEfficiency.length - 1];
+
+        const generatedInsights: Insight[] = [];
+
         // Calculate efficiency statistics
-        const efficiencies = Object.values(curves.curves || {}).map((c: any) => c?.efficiency || 0).filter(e => e > 0)
-        const avgEfficiency = efficiencies.length > 0 ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length : 1
-        const maxEfficiency = efficiencies.length > 0 ? Math.max(...efficiencies) : 1
-        const minEfficiency = efficiencies.length > 0 ? Math.min(...efficiencies) : 1
-        
+        const efficiencies = Object.values(curves.curves || {})
+          .map((c: any) => c?.efficiency || 0)
+          .filter((e) => e > 0);
+        const avgEfficiency =
+          efficiencies.length > 0
+            ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length
+            : 1;
+        const maxEfficiency =
+          efficiencies.length > 0 ? Math.max(...efficiencies) : 1;
+        const minEfficiency =
+          efficiencies.length > 0 ? Math.min(...efficiencies) : 1;
+
         if (topPerformer) {
-          const topEfficiency = (topPerformer[1] as any).efficiency
-          const topChannelCurve = (curves.curves as any)?.[topPerformer[0]]
-          const saturationPoint = topChannelCurve?.saturation_point || 50000
-          
+          const topEfficiency = (topPerformer[1] as any).efficiency;
+          const topChannelCurve = (curves.curves as any)?.[topPerformer[0]];
+          const saturationPoint = topChannelCurve?.saturation_point || 50000;
+
           generatedInsights.push({
-            type: 'success',
+            type: "success",
             title: `${formatChannelName(topPerformer[0])} is your top performer`,
             icon: <Rocket className="h-5 w-5" />,
-            description: `ROI: ${topEfficiency.toFixed(2)} (${((topEfficiency - avgEfficiency) / avgEfficiency * 100).toFixed(0)}% above average). Saturation at $${saturationPoint.toLocaleString()}. Consider increasing spend up to this threshold.`
-          })
+            description: `ROI: ${topEfficiency.toFixed(2)} (${(((topEfficiency - avgEfficiency) / avgEfficiency) * 100).toFixed(0)}% above average). Saturation at $${saturationPoint.toLocaleString()}. Consider increasing spend up to this threshold.`,
+          });
         }
-        
+
         if (underPerformer && underPerformer !== topPerformer) {
-          const underEfficiency = (underPerformer[1] as any).efficiency
-          const potentialGain = ((avgEfficiency - underEfficiency) / underEfficiency * 100).toFixed(0)
-          
+          const underEfficiency = (underPerformer[1] as any).efficiency;
+          const potentialGain = (
+            ((avgEfficiency - underEfficiency) / underEfficiency) *
+            100
+          ).toFixed(0);
+
           generatedInsights.push({
-            type: 'warning',
+            type: "warning",
             title: `${formatChannelName(underPerformer[0])} underperforming`,
             icon: <AlertTriangle className="h-5 w-5" />,
-            description: `ROI: ${underEfficiency.toFixed(2)} (${potentialGain}% below average). Optimize targeting, creative, or reduce spend and reallocate to higher-performing channels.`
-          })
+            description: `ROI: ${underEfficiency.toFixed(2)} (${potentialGain}% below average). Optimize targeting, creative, or reduce spend and reallocate to higher-performing channels.`,
+          });
         }
-        
+
         // Budget reallocation recommendation
         if (topPerformer && underPerformer && topPerformer !== underPerformer) {
-          const efficiencyGap = (topPerformer[1] as any).efficiency - (underPerformer[1] as any).efficiency
+          const efficiencyGap =
+            (topPerformer[1] as any).efficiency -
+            (underPerformer[1] as any).efficiency;
           generatedInsights.push({
-            type: 'info',
+            type: "info",
             title: `Budget Optimization Opportunity`,
             icon: <Lightbulb className="h-5 w-5" />,
-            description: `Shifting budget from ${formatChannelName(underPerformer[0])} to ${formatChannelName(topPerformer[0])} could improve ROI by ${efficiencyGap.toFixed(2)}x per dollar spent.`
-          })
+            description: `Shifting budget from ${formatChannelName(underPerformer[0])} to ${formatChannelName(topPerformer[0])} could improve ROI by ${efficiencyGap.toFixed(2)}x per dollar spent.`,
+          });
         }
-        
+
         // Saturation warnings
-        const nearSaturation = Object.entries(curves.curves || {}).filter(([_, data]: [string, any]) => {
-          // Assume current spend is 70% of saturation point for this example
-          return data?.saturation_point && data.saturation_point < 50000 // Low saturation threshold
-        })
-        
+        const nearSaturation = Object.entries(curves.curves || {}).filter(
+          ([_, data]: [string, any]) => {
+            // Assume current spend is 70% of saturation point for this example
+            return data?.saturation_point && data.saturation_point < 50000; // Low saturation threshold
+          },
+        );
+
         if (nearSaturation.length > 0) {
           generatedInsights.push({
-            type: 'warning',
+            type: "warning",
             title: `Saturation Alert`,
             icon: <BarChart2 className="h-5 w-5" />,
-            description: `${nearSaturation.map(([name]) => formatChannelName(name)).join(', ')} ${nearSaturation.length === 1 ? 'has' : 'have'} low saturation points. Monitor spend levels to avoid diminishing returns.`
-          })
+            description: `${nearSaturation.map(([name]) => formatChannelName(name)).join(", ")} ${nearSaturation.length === 1 ? "has" : "have"} low saturation points. Monitor spend levels to avoid diminishing returns.`,
+          });
         }
-        
+
         generatedInsights.push({
-          type: 'info',
-          title: 'Portfolio Performance',
+          type: "info",
+          title: "Portfolio Performance",
           icon: <TrendingUp className="h-5 w-5" />,
-          description: `Average ROI: ${avgEfficiency.toFixed(2)} | Best: ${maxEfficiency.toFixed(2)} | Worst: ${minEfficiency.toFixed(2)} | ${info.total_weeks} weeks analyzed across ${info.channels.length} channels.`
-        })
+          description: `Average ROI: ${avgEfficiency.toFixed(2)} | Best: ${maxEfficiency.toFixed(2)} | Worst: ${minEfficiency.toFixed(2)} | ${info.total_weeks} weeks analyzed across ${info.channels.length} channels.`,
+        });
 
-        setInsights(generatedInsights)
+        setInsights(generatedInsights);
       } catch (err) {
-        console.error('Failed to generate insights:', err)
+        console.error("Failed to generate insights:", err);
       }
-    }
+    };
 
-    generateInsights()
-    
+    generateInsights();
+
     return () => {
-      isMounted = false
-    }
-  }, [token])
+      isMounted = false;
+    };
+  }, [token]);
 
-  const handleExport = async (format: 'json' | 'csv' | 'txt' = 'txt') => {
-    setIsExporting(true)
-    
+  const handleExport = async (format: "json" | "csv" | "txt" = "txt") => {
+    setIsExporting(true);
+
     try {
       if (!token) {
-        alert('Please log in to export recommendations')
-        return
+        alert("Please log in to export recommendations");
+        return;
       }
 
-      const response = await fetch(`http://localhost:8000/api/v1/export/insights?format=${format}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `http://localhost:8000/api/v1/export/insights?format=${format}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      })
+      );
 
       if (!response.ok) {
-        throw new Error(`Export failed: ${response.status}`)
+        throw new Error(`Export failed: ${response.status}`);
       }
 
       // Create blob and download
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `mmm_insights_${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.${format}`
-      document.body.appendChild(link)
-      link.click()
-      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mmm_insights_${new Date().toISOString().slice(0, 19).replace(/[:-]/g, "")}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+
       // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      
-      console.log('Export successful!')
-      
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log("Export successful!");
     } catch (error) {
-      console.error('Export failed:', error)
-      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error("Export failed:", error);
+      alert(
+        `Export failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -629,7 +766,7 @@ export function SimpleMMInsights() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -643,7 +780,7 @@ export function SimpleMMInsights() {
           <p className="text-red-500">{error}</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -653,17 +790,21 @@ export function SimpleMMInsights() {
           <Lightbulb className="h-5 w-5" />
           MMM Insights
         </CardTitle>
-        <CardDescription>AI-powered recommendations for media optimization</CardDescription>
+        <CardDescription>
+          AI-powered recommendations for media optimization
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {modelInfo && (
           <div className="mb-6 p-3 bg-gray-50 rounded-lg">
             <div className="text-sm text-gray-600">
-              <strong>Model:</strong> {modelInfo.model_type} ({modelInfo.data_source})
+              <strong>Model:</strong> {modelInfo.model_type} (
+              {modelInfo.data_source})
               <br />
               <strong>Period:</strong> {modelInfo.training_period}
               <br />
-              <strong>Data:</strong> {modelInfo.total_weeks} weeks, {modelInfo.channels.length} channels
+              <strong>Data:</strong> {modelInfo.total_weeks} weeks,{" "}
+              {modelInfo.channels.length} channels
             </div>
           </div>
         )}
@@ -674,20 +815,34 @@ export function SimpleMMInsights() {
             Key Insights
           </h4>
           {insights.map((insight, index) => (
-            <div key={index} className={`p-4 rounded-lg border-l-4 ${
-              insight.type === 'success' ? 'border-green-500 bg-green-50' :
-              insight.type === 'warning' ? 'border-yellow-500 bg-yellow-50' :
-              'border-blue-500 bg-blue-50'
-            }`}>
+            <div
+              key={index}
+              className={`p-4 rounded-lg border-l-4 ${
+                insight.type === "success"
+                  ? "border-green-500 bg-green-50"
+                  : insight.type === "warning"
+                    ? "border-yellow-500 bg-yellow-50"
+                    : "border-blue-500 bg-blue-50"
+              }`}
+            >
               <div className="flex items-start gap-3">
-                <div className={`${
-                  insight.type === 'success' ? 'text-green-600' :
-                  insight.type === 'warning' ? 'text-yellow-600' :
-                  'text-blue-600'
-                }`}>
-                  {insight.icon || (insight.type === 'success' ? <CheckCircle className="h-5 w-5" /> :
-                   insight.type === 'warning' ? <AlertTriangle className="h-5 w-5" /> :
-                   <Lightbulb className="h-5 w-5" />)}
+                <div
+                  className={`${
+                    insight.type === "success"
+                      ? "text-green-600"
+                      : insight.type === "warning"
+                        ? "text-yellow-600"
+                        : "text-blue-600"
+                  }`}
+                >
+                  {insight.icon ||
+                    (insight.type === "success" ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : insight.type === "warning" ? (
+                      <AlertTriangle className="h-5 w-5" />
+                    ) : (
+                      <Lightbulb className="h-5 w-5" />
+                    ))}
                 </div>
                 <div className="flex-1">
                   <h5 className="font-medium mb-1">{insight.title}</h5>
@@ -704,10 +859,11 @@ export function SimpleMMInsights() {
             Next Steps
           </h4>
           <p className="text-sm text-gray-700 mb-3">
-            Focus on optimizing your top-performing channels while improving efficiency in underperforming areas.
+            Focus on optimizing your top-performing channels while improving
+            efficiency in underperforming areas.
           </p>
-          <button 
-            onClick={() => handleExport('txt')}
+          <button
+            onClick={() => handleExport("txt")}
             disabled={isExporting}
             className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
@@ -726,5 +882,5 @@ export function SimpleMMInsights() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

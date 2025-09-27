@@ -24,18 +24,21 @@ pnpm seed
 ```
 
 Visit `http://localhost:3000` and log in with:
+
 - **Email**: `test@example.com`
 - **Password**: `test123`
 
 ## Features
 
 ### Authentication & User Management
+
 - Secure JWT-based authentication with bcrypt password hashing
 - User registration with automatic login
 - Session persistence across page refreshes
 - Professional login/registration UI
 
 ### MMM Analytics Dashboard
+
 - **Real Model Data**: Loads actual Google Meridian model (32.3MB `saved_mmm.pkl`)
 - **Contribution Charts**: Visual breakdown of channel performance with bar/pie charts
 - **Response Curves**: Hill saturation curves showing diminishing returns for each channel
@@ -43,6 +46,7 @@ Visit `http://localhost:3000` and log in with:
 - **Export Functionality**: Download insights in JSON, CSV, or TXT formats
 
 ### Performance & Quality
+
 - **95% Performance Improvement**: Intelligent model caching (3+ seconds → 40-50ms)
 - **Comprehensive Testing**: 38+ unit and integration tests
 - **Clean Architecture**: Service interfaces, centralized constants, structured logging
@@ -68,6 +72,7 @@ Visit `http://localhost:3000` and log in with:
 ## System Architecture
 
 ### Data Flow
+
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │   Browser   │───▶│  Next.js    │───▶│   FastAPI   │
@@ -88,6 +93,7 @@ Visit `http://localhost:3000` and log in with:
 ```
 
 ### MMM Processing Pipeline
+
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │ saved_mmm   │───▶│ Model Cache │───▶│ Response    │
@@ -108,6 +114,7 @@ Visit `http://localhost:3000` and log in with:
 ```
 
 ### Authentication Flow
+
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │ Registration│───▶│ Auto-Login  │───▶│  Dashboard  │
@@ -122,6 +129,7 @@ Visit `http://localhost:3000` and log in with:
 ```
 
 ### Protocol-Based Architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Service Protocol Layer                       │
@@ -155,24 +163,28 @@ Visit `http://localhost:3000` and log in with:
 ## Key Components
 
 ### 1. Protocol-Based Architecture
+
 - **Service Interfaces**: `UserServiceProtocol`, `AuthServiceProtocol`, `MMMServiceProtocol`
 - **Dependency Injection**: Protocol-based DI in `api/deps.py`
 - **Mock Implementations**: Complete mock services for testing
 - **SOLID Compliance**: All 5 principles fully implemented
 
 ### 2. MMM Model Integration
+
 - **Real Model**: 32.3MB Google Meridian model (`saved_mmm.pkl`)
 - **Data Processing**: Contribution data, response curves, channel analysis
 - **Channel Support**: 5-channel analysis from real model data
 - **Smart Fallback**: Automatic fallback to mock data when needed
 
 ### 3. Authentication System
+
 - **JWT Tokens**: Secure token-based auth with bcrypt hashing
 - **Protected Routes**: All MMM endpoints require authentication
 - **User Management**: Complete CRUD operations
 - **Session Management**: 30-minute token expiration with persistence
 
 ### 4. Interactive Dashboard
+
 - **Contribution Charts**: Visual breakdown of channel performance
 - **Response Curves**: Diminishing returns analysis with saturation points
 - **Smart Insights**: AI-generated recommendations and performance analysis
@@ -181,11 +193,13 @@ Visit `http://localhost:3000` and log in with:
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/v1/auth/register` - User registration with auto-login
 - `POST /api/v1/auth/login` - User login (OAuth2 form)
 - `GET /api/v1/auth/me` - Get current user info
 
 ### MMM Analytics
+
 - `GET /api/v1/mmm/status` - Model status and info
 - `GET /api/v1/mmm/channels` - Channel summary data
 - `GET /api/v1/mmm/contribution` - Contribution analysis
@@ -195,6 +209,7 @@ Visit `http://localhost:3000` and log in with:
 ## Development
 
 ### Prerequisites
+
 - Node.js 20+
 - Python 3.11+
 - Docker & Docker Compose
@@ -203,7 +218,9 @@ Visit `http://localhost:3000` and log in with:
 ### Required Setup Files
 
 #### 1. MMM Model File
+
 Place your Google Meridian MMM model file at:
+
 ```
 apps/api/data/models/saved_mmm.pkl
 ```
@@ -213,6 +230,7 @@ apps/api/data/models/saved_mmm.pkl
 #### 2. Environment Configuration
 
 **Backend Configuration** - Create `.env.local` in the project root:
+
 ```bash
 # .env.local
 
@@ -234,6 +252,7 @@ ALLOWED_ORIGINS=http://localhost:3000
 ```
 
 **Frontend Configuration** - Create `.env.local` in `apps/web/`:
+
 ```bash
 # apps/web/.env.local
 
@@ -242,6 +261,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 **Important Notes:**
+
 - **SECRET_KEY**: Generate a secure random string for production (e.g., using `openssl rand -hex 32`)
 - **DATABASE_URL**: Matches the PostgreSQL credentials in `docker-compose.yml`
 - **NEXT_PUBLIC_API_URL**: Must match the FastAPI server address and port
@@ -249,6 +269,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ### Commands
 
 #### Essential Commands
+
 ```bash
 # Install dependencies
 pnpm install
@@ -264,45 +285,42 @@ pnpm build
 ```
 
 #### Database Commands
+
 ```bash
 # Seed database with test users
 pnpm seed
 
 # Reset database (drop all tables and recreate)
-cd apps/api && uv run python reset_db.py
+pnpm reset-db
 
-# Create tables only
-cd apps/api && uv run python -c "from app.core.database import init_db; init_db()"
+# Initialize database tables
+pnpm init-db
 
 # Check database connection
-cd apps/api && uv run python -c "from app.core.database import get_db; print('Database connected!')"
+pnpm check-db
 ```
 
-#### Test Commands
+#### Testing Commands
+
 ```bash
 # Run all tests
-cd apps/api && uv run pytest
-
-# Run tests with coverage
-cd apps/api && uv run pytest --cov=app --cov-report=html
-
-# Run specific test file
-cd apps/api && uv run pytest tests/unit/test_mmm_service.py
-
-# Run integration tests only
-cd apps/api && uv run pytest tests/integration/
+pnpm test
 
 # Run unit tests only
-cd apps/api && uv run pytest tests/unit/
+pnpm test:unit
+
+# Run integration tests only
+pnpm test:integration
+
+# Run tests with coverage
+pnpm test:coverage
 
 # Run tests in verbose mode
-cd apps/api && uv run pytest -v
-
-# Run tests and stop on first failure
-cd apps/api && uv run pytest -x
+pnpm test:verbose
 ```
 
 #### Code Quality Commands
+
 ```bash
 # Format code
 pnpm format
@@ -310,14 +328,12 @@ pnpm format
 # Lint code
 pnpm lint
 
-# Type checking (API)
-cd apps/api && uv run mypy app/
-
-# Type checking (Web)
-cd apps/web && pnpm type-check
+# Type checking
+pnpm typecheck
 ```
 
 #### Model Inspection Commands
+
 ```bash
 # Display model info in terminal
 pnpm inspect-model
@@ -333,75 +349,33 @@ pnpm inspect-model:json
 ```
 
 #### Debug Commands
+
 ```bash
-# Check system status
-curl -s http://localhost:8000/health | jq  # API health with JSON formatting
-curl -s http://localhost:3000 | grep -o '<title>.*</title>'  # Web app status
+# System Status Checks
+pnpm debug:api-health      # Check API health with JSON formatting
+pnpm debug:web-status      # Check web app status
+pnpm debug:ports           # Check which processes are using MMM ports
 
-# Database debugging
-cd apps/api && uv run python -c "
-from app.core.database import engine
-from sqlalchemy import text
-with engine.connect() as conn:
-    result = conn.execute(text('SELECT version()'))
-    print('PostgreSQL:', result.fetchone()[0])
-"
+# Database Debugging
+pnpm debug:db-version      # Show PostgreSQL version
+pnpm debug:db-tables       # List database tables and column counts
 
-# Check database tables
-cd apps/api && uv run python -c "
-from app.core.database import engine
-from sqlalchemy import inspect
-inspector = inspect(engine)
-tables = inspector.get_table_names()
-print('Tables:', tables)
-for table in tables:
-    print(f'{table}: {len(inspector.get_columns(table))} columns')
-"
+# Application Debugging
+pnpm debug:model-status    # Check MMM model loading status
+pnpm debug:env-vars        # Show environment variables
+pnpm debug:memory          # Show memory and CPU usage
+pnpm debug:logs            # Show recent database logs
 
-# MMM model debugging
-cd apps/api && uv run python -c "
-from app.services.mmm_service import MMMService
-service = MMMService()
-try:
-    model = service._load_model()
-    print('Model loaded successfully')
-    print('Model type:', type(model))
-except Exception as e:
-    print('Model loading failed:', e)
-"
-
-# Check environment variables
-cd apps/api && uv run python -c "
-import os
-from app.core.config import settings
-print('Database URL:', settings.DATABASE_URL[:50] + '...')
-print('Debug mode:', settings.DEBUG)
-print('Environment:', os.getenv('ENVIRONMENT', 'development'))
-"
-
-# View recent logs
-cd apps/api && tail -f app.log  # If logging to file
-docker logs mmm-postgres-1 --tail 20  # Database logs
-
-# Network debugging
-netstat -tulpn | grep :8000  # Check API port
-netstat -tulpn | grep :3000  # Check Web port
-netstat -tulpn | grep :5432  # Check DB port
-
-# Memory and performance
-cd apps/api && uv run python -c "
-import psutil
-import os
-process = psutil.Process(os.getpid())
-print(f'Memory usage: {process.memory_info().rss / 1024 / 1024:.1f} MB')
-print(f'CPU usage: {process.cpu_percent()}%')
-"
+# Comprehensive Check
+pnpm debug:all             # Run multiple debug checks at once
 ```
 
 #### Development Utilities
+
 ```bash
-# Check API health
-curl http://localhost:8000/health
+# Quick health checks
+pnpm debug:api-health      # Check API health (uses curl + jq)
+pnpm debug:ports           # Check running processes on MMM ports
 
 # View API documentation
 open http://localhost:8000/docs
@@ -409,31 +383,28 @@ open http://localhost:8000/docs
 # Access database UI (Adminer)
 open http://localhost:8080
 
-# Check running processes
-lsof -i :8000  # API server
-lsof -i :3000  # Web server
-lsof -i :5432  # PostgreSQL
-
-# Kill stuck processes
-lsof -ti:8000 | xargs kill -9  # Kill API
-lsof -ti:3000 | xargs kill -9  # Kill Web
+# Manual process management (if needed)
+lsof -ti:8000 | xargs kill -9  # Kill API processes
+lsof -ti:3000 | xargs kill -9  # Kill Web processes
 
 # Docker debugging
 docker ps  # Show running containers
-docker logs mmm-postgres-1  # Database logs
-docker exec -it mmm-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
+pnpm debug:logs            # Database logs (uses docker logs)
+docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 ```
 
 ### Test Users
-| Email | Password | Role |
-|-------|----------|------|
-| `test@example.com` | `test123` | Standard user |
+
+| Email               | Password   | Role          |
+| ------------------- | ---------- | ------------- |
+| `test@example.com`  | `test123`  | Standard user |
 | `admin@example.com` | `admin123` | Administrator |
-| `demo@example.com` | `demo123` | Demo account |
+| `demo@example.com`  | `demo123`  | Demo account  |
 
 ## Technical Stack
 
 **Backend**
+
 - FastAPI with Uvicorn
 - PostgreSQL with SQLAlchemy ORM
 - JWT authentication with bcrypt
@@ -441,6 +412,7 @@ docker exec -it mmm-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 - Comprehensive test suite (pytest)
 
 **Frontend**
+
 - Next.js 14 with App Router
 - TypeScript and Tailwind CSS
 - Zustand for state management
@@ -448,6 +420,7 @@ docker exec -it mmm-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 - shadcn/ui component library
 
 **Infrastructure**
+
 - Docker Compose for local development
 - Turbo monorepo with pnpm workspaces
 - Automated testing and linting
@@ -455,19 +428,25 @@ docker exec -it mmm-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 ## Key Features Explained
 
 ### Model Caching
+
 The system implements intelligent LRU caching for the MMM model:
+
 - **Before**: 3+ seconds per request (32MB model loaded from disk)
 - **After**: 40-50ms per request (model served from memory)
 - **Result**: 95%+ performance improvement
 
 ### Response Curves
+
 Each marketing channel has unique Hill saturation curves showing:
+
 - Spend vs. returns relationship
 - Saturation points where additional spend becomes inefficient
 - Marginal ROI at different spend levels
 
 ### Smart Insights
+
 The system analyzes channel performance and generates recommendations:
+
 - Identifies top and underperforming channels
 - Suggests budget reallocation opportunities
 - Warns about channels approaching saturation
@@ -477,46 +456,48 @@ The system analyzes channel performance and generates recommendations:
 
 ### Key Architectural Decisions
 
-| Decision | Approach | Pros | Cons | Rationale |
-|----------|----------|------|------|-----------|
-| **Architecture** | Monorepo with Turbo + pnpm workspaces | Shared code, unified builds, type safety | More complex than separate repos | Better developer experience and code sharing |
-| **Authentication** | JWT tokens with bcrypt password hashing | Stateless, secure, scalable | Token management complexity | Industry standard for API authentication |
-| **MMM Integration** | Smart fallback system (real model → mock data) | Works without Google Meridian package | May not reflect real model behavior in dev | Ensures development continuity |
-| **Database** | PostgreSQL with SQLAlchemy ORM | ACID compliance, complex queries, type safety | More setup than SQLite | Production-ready with proper relationships |
-| **Frontend State** | Zustand with persistence | Simple, TypeScript-first, persistent auth | Less ecosystem than Redux | Lightweight and sufficient for project scope |
+| Decision            | Approach                                       | Pros                                          | Cons                                       | Rationale                                    |
+| ------------------- | ---------------------------------------------- | --------------------------------------------- | ------------------------------------------ | -------------------------------------------- |
+| **Architecture**    | Monorepo with Turbo + pnpm workspaces          | Shared code, unified builds, type safety      | More complex than separate repos           | Better developer experience and code sharing |
+| **Authentication**  | JWT tokens with bcrypt password hashing        | Stateless, secure, scalable                   | Token management complexity                | Industry standard for API authentication     |
+| **MMM Integration** | Smart fallback system (real model → mock data) | Works without Google Meridian package         | May not reflect real model behavior in dev | Ensures development continuity               |
+| **Database**        | PostgreSQL with SQLAlchemy ORM                 | ACID compliance, complex queries, type safety | More setup than SQLite                     | Production-ready with proper relationships   |
+| **Frontend State**  | Zustand with persistence                       | Simple, TypeScript-first, persistent auth     | Less ecosystem than Redux                  | Lightweight and sufficient for project scope |
 
 ### Production Scaling Strategy
 
 #### Current State vs Production Target
-| Aspect | Current | Production Target |
-|--------|---------|-------------------|
-| **Authentication** | JWT with 30min expiration | JWT with refresh tokens + rate limiting |
-| **Database** | Single PostgreSQL instance | PostgreSQL cluster with read replicas |
-| **Caching** | LRU model caching (95%+ performance improvement) | Redis for session and computed data caching |
-| **Monitoring** | Basic logging | APM with Grafana/Prometheus |
-| **Deployment** | Docker Compose | Kubernetes with auto-scaling |
+
+| Aspect             | Current                                          | Production Target                           |
+| ------------------ | ------------------------------------------------ | ------------------------------------------- |
+| **Authentication** | JWT with 30min expiration                        | JWT with refresh tokens + rate limiting     |
+| **Database**       | Single PostgreSQL instance                       | PostgreSQL cluster with read replicas       |
+| **Caching**        | LRU model caching (95%+ performance improvement) | Redis for session and computed data caching |
+| **Monitoring**     | Basic logging                                    | APM with Grafana/Prometheus                 |
+| **Deployment**     | Docker Compose                                   | Kubernetes with auto-scaling                |
 
 ### MMM Model Integration Strategy
 
-| What We're Optimizing | Current Implementation | Production Enhancement |
-|----------------------|------------------------|------------------------|
-| **Model Loading** | LRU cached in memory (40-50ms after first load) | Pre-load and cache model data in Redis |
-| **Data Processing** | Real-time computation of response curves | Background processing with cached results |
-| **Channel Analysis** | Extract 5 channels from real model | Support dynamic channel configuration |
-| **Performance** | 40-50ms response times (95%+ improvement) | <30ms with Redis and background processing |
+| What We're Optimizing | Current Implementation                          | Production Enhancement                     |
+| --------------------- | ----------------------------------------------- | ------------------------------------------ |
+| **Model Loading**     | LRU cached in memory (40-50ms after first load) | Pre-load and cache model data in Redis     |
+| **Data Processing**   | Real-time computation of response curves        | Background processing with cached results  |
+| **Channel Analysis**  | Extract 5 channels from real model              | Support dynamic channel configuration      |
+| **Performance**       | 40-50ms response times (95%+ improvement)       | <30ms with Redis and background processing |
 
 ### Alternative Approaches Considered
 
-| Alternative | What We Considered | Pros | Cons | Why We Didn't Choose It |
-|-------------|-------------------|------|------|-------------------------|
-| **Microservices** | Separate auth and MMM services | Better scalability, service isolation | More complex deployment, network overhead | Monolith is simpler for current scope |
-| **GraphQL API** | GraphQL instead of REST | Flexible queries, better for complex data | Learning curve, more complex caching | REST meets current requirements |
-| **Real-time Updates** | WebSocket for live MMM updates | Real-time dashboard updates | Added complexity, not required | Polling is sufficient for MMM data |
-| **NoSQL Database** | MongoDB for MMM model storage | Better for unstructured model data | Different from relational user data | PostgreSQL JSON support is sufficient |
+| Alternative           | What We Considered             | Pros                                      | Cons                                      | Why We Didn't Choose It               |
+| --------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------------- | ------------------------------------- |
+| **Microservices**     | Separate auth and MMM services | Better scalability, service isolation     | More complex deployment, network overhead | Monolith is simpler for current scope |
+| **GraphQL API**       | GraphQL instead of REST        | Flexible queries, better for complex data | Learning curve, more complex caching      | REST meets current requirements       |
+| **Real-time Updates** | WebSocket for live MMM updates | Real-time dashboard updates               | Added complexity, not required            | Polling is sufficient for MMM data    |
+| **NoSQL Database**    | MongoDB for MMM model storage  | Better for unstructured model data        | Different from relational user data       | PostgreSQL JSON support is sufficient |
 
 ## Production Considerations
 
 This project is designed for easy production deployment:
+
 - Environment-based configuration
 - Docker containerization
 - Proper error handling and logging
@@ -525,6 +506,7 @@ This project is designed for easy production deployment:
 - Comprehensive test coverage
 
 For production scaling, consider:
+
 - Redis for session and computed data caching
 - Rate limiting for API endpoints
 - Load balancing and auto-scaling
