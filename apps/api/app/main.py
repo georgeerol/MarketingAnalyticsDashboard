@@ -68,7 +68,7 @@ async def root():
 async def startup_event():
     """Initialize application on startup."""
     try:
-        await init_db()
+        init_db()
         logger.info("Database initialized successfully")
         logger.info(f"{settings.APP_NAME} v{settings.APP_VERSION} started")
         logger.info("API docs available at: /docs")
