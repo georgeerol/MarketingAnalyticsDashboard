@@ -11,25 +11,28 @@ Usage:
 
 import argparse
 import json
+import logging
 import os
 import sys
-import logging
+import traceback
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any, Optional
 
 # Add the app directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import numpy as np
+import xarray as xr
+
+from app.services.mmm_service import MMMService
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
-import xarray as xr
-from app.services.mmm_service import MMMService
 
 
-def format_array_info(arr, name="Array"):
+def format_array_info(arr: Any, name: str = "Array") -> str:
     """Format array information in a readable way."""
     if isinstance(arr, np.ndarray):
         return f"{name}: shape={arr.shape}, dtype={arr.dtype}, min={arr.min():.4f}, max={arr.max():.4f}, mean={arr.mean():.4f}"
@@ -39,7 +42,7 @@ def format_array_info(arr, name="Array"):
         return f"{name}: type={type(arr)}, value={arr}"
 
 
-def inspect_model_structure(model_data):
+def inspect_model_structure(model_data: Any) -> Dict[str, Any]:
     """Inspect and return the structure of the model data."""
     info = {
         "model_type": str(type(model_data)),
@@ -69,7 +72,7 @@ def inspect_model_structure(model_data):
     return info
 
 
-def get_channel_insights(mmm_service):
+def get_channel_insights(mmm_service: MMMService) -> Dict[str, Any]:
     """Get insights for each channel."""
     try:
         channels = mmm_service.get_channel_names()
@@ -96,7 +99,7 @@ def get_channel_insights(mmm_service):
         return {"error": str(e)}
 
 
-def get_contribution_summary(mmm_service):
+def get_contribution_summary(mmm_service: MMMService) -> Dict[str, Any]:
     """Get contribution data summary."""
     try:
         contributions = mmm_service.get_contribution_data()
@@ -132,7 +135,8 @@ def get_contribution_summary(mmm_service):
         return {"error": str(e)}
 
 
-def format_text_output(model_info, channel_insights, contribution_summary, mmm_service):
+def format_text_output(model_info: Dict[str, Any], channel_insights: Dict[str, Any], 
+                      contribution_summary: Dict[str, Any], mmm_service: MMMService) -> str:
     """Format the output as readable text."""
     output = []
     output.append("=" * 80)
@@ -236,7 +240,8 @@ def format_text_output(model_info, channel_insights, contribution_summary, mmm_s
     return "\n".join(output)
 
 
-def format_json_output(model_info, channel_insights, contribution_summary, mmm_service):
+def format_json_output(model_info: Dict[str, Any], channel_insights: Dict[str, Any], 
+                      contribution_summary: Dict[str, Any], mmm_service: MMMService) -> str:
     """Format the output as JSON."""
     try:
         model_status = mmm_service.get_model_info()
@@ -252,7 +257,8 @@ def format_json_output(model_info, channel_insights, contribution_summary, mmm_s
     }, indent=2, default=str)
 
 
-def main():
+def main() -> None:
+    """Main function to run the MMM model inspection."""
     parser = argparse.ArgumentParser(description="Inspect MMM model data")
     parser.add_argument("--output-file", "-o", help="Output file path (optional)")
     parser.add_argument("--format", "-f", choices=["text", "json"], default="text", help="Output format")
@@ -260,21 +266,31 @@ def main():
     
     args = parser.parse_args()
     
-    # Set up environment
-    os.environ.setdefault('POSTGRES_USER', 'postgres')
-    os.environ.setdefault('POSTGRES_PASSWORD', 'password')
-    os.environ.setdefault('POSTGRES_HOST', 'localhost')
-    os.environ.setdefault('POSTGRES_PORT', '5432')
-    os.environ.setdefault('POSTGRES_DB', 'local')
-    os.environ.setdefault('JWT_SECRET_KEY', 'your-super-secret-jwt-key')
+    # Set up environment defaults (can be overridden by actual env vars)
+    env_defaults = {
+        'POSTGRES_USER': 'postgres',
+        'POSTGRES_PASSWORD': 'password', 
+        'POSTGRES_HOST': 'localhost',
+        'POSTGRES_PORT': '5432',
+        'POSTGRES_DB': 'local',
+        'JWT_SECRET_KEY': 'your-super-secret-jwt-key'
+    }
+    
+    for key, default_value in env_defaults.items():
+        os.environ.setdefault(key, default_value)
     
     try:
         logger.info("Loading MMM model...")
         mmm_service = MMMService()
         
         logger.info("Analyzing model structure...")
-        model_data = mmm_service._load_model()
-        model_info = inspect_model_structure(model_data)
+        # Get model info through public interface
+        model_status = mmm_service.get_model_info()
+        model_info = {
+            "model_type": "MMM Model",
+            "structure": {"model_info": model_status},
+            "summary": {}
+        }
         
         logger.info("Getting channel insights...")
         channel_insights = get_channel_insights(mmm_service)
@@ -304,10 +320,20 @@ def main():
             
             logger.info(f"Output saved to: {output_path.absolute()}")
         
+    except ImportError as e:
+        logger.error(f"Import error - ensure all dependencies are installed: {e}")
+        sys.exit(1)
+    except FileNotFoundError as e:
+        logger.error(f"File not found - check model path and data directory: {e}")
+        sys.exit(1)
+    except PermissionError as e:
+        logger.error(f"Permission error - check file/directory permissions: {e}")
+        sys.exit(1)
     except Exception as e:
-        logger.error(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Unexpected error during model inspection: {e}")
+        if not args.quiet:
+            logger.debug("Full traceback:")
+            traceback.print_exc()
         sys.exit(1)
 
 

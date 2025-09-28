@@ -20,7 +20,7 @@ async def register_user(
     user_service: UserServiceProtocol = Depends(get_user_service),
     auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
-    """Register new user and auto-login"""
+    """Register a new user and return auth response."""
     try:
         user = user_service.create_user(user_data)
         login_data = UserLogin(email=user_data.email, password=user_data.password)
@@ -64,7 +64,7 @@ async def login_oauth(
 async def get_current_user(
     current_user = Depends(get_current_active_user_dep)
 ):
-    """Get current user info"""
+    """Return current authenticated user info."""
     return UserResponse.model_validate(current_user)
 
 

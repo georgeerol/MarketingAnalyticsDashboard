@@ -3,22 +3,20 @@ Pydantic schemas package for API request/response models.
 """
 
 from app.schemas.user import (
-    UserBase, UserCreate, UserResponse, UserUpdate
+    UserBase, UserCreate, UserResponse
 )
 from app.schemas.auth import (
     Token, TokenData, AuthResponse, UserLogin
 )
 from app.schemas.mmm import (
-    ContributionData, ResponseCurvePoint, ResponseCurveData,
-    MMMDashboardData, MMMModelInfo
+    ResponseCurvePoint, MMMModelInfo, MMMChannelSummary
 )
 
 __all__ = [
     # User schemas
-    "UserBase", "UserCreate", "UserResponse", "UserUpdate",
+    "UserBase", "UserCreate", "UserResponse",
     # Auth schemas  
     "Token", "TokenData", "AuthResponse", "UserLogin",
     # MMM schemas
-    "ContributionData", "ResponseCurvePoint", "ResponseCurveData",
-    "MMMDashboardData", "MMMModelInfo",
+    "ResponseCurvePoint", "MMMModelInfo", "MMMChannelSummary",
 ]

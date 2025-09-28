@@ -2,13 +2,10 @@
 MMM (Media Mix Modeling) API routes.
 """
 
-from typing import Optional, Dict, Any
+from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Query, Depends
 
-from app.schemas.mmm import (
-    MMMModelInfo, ContributionData, 
-    ResponseCurveData, MMMChannelSummary
-)
+from app.schemas.mmm import MMMModelInfo
 from app.services.mmm_service import MMMModelError
 from app.services.interfaces import MMMServiceProtocol
 from app.api.deps import get_mmm_service, get_current_active_user_dep
@@ -21,7 +18,7 @@ async def get_mmm_info(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get MMM model info"""
+    """Return MMM model metadata."""
     try:
         return mmm_service.get_model_info()
     except MMMModelError as e:
@@ -36,7 +33,7 @@ async def get_media_channels(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get available media channels"""
+    """Return available media channels."""
     try:
         channels = mmm_service.get_channel_names()
         
@@ -58,7 +55,7 @@ async def get_contribution_data(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get channel contribution data"""
+    """Return contribution data for channels."""
     try:
         return mmm_service.get_contribution_data(channel)
     except MMMModelError as e:
@@ -74,7 +71,7 @@ async def get_response_curves(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get response curves for channels"""
+    """Return response curves for channels."""
     try:
         return mmm_service.get_response_curves(channel)
     except MMMModelError as e:
@@ -89,7 +86,7 @@ async def get_channel_summary(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get channel performance summary"""
+    """Return per-channel summary metrics."""
     try:
         return mmm_service.get_channel_summary()
     except MMMModelError as e:

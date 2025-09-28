@@ -1,10 +1,65 @@
 # MMM Dashboard
 
-A  Media Mix Modeling analytics platform built with FastAPI and Next.js.
+A Media Mix Modeling analytics platform built with FastAPI and Next.js.
+
+---
+
+## Requirements
+
+- Implement user authentication and dashboard
+- Load and integrate Google Meridian model trace (`saved_mmm.pkl`)
+- Build contribution charts for channel performance
+- Add response curves to show diminishing returns
+- Provide clear customer-facing insights and recommendations
+- Ensure full testing (unit, integration, and coverage)
+- Set up CI/CD for production readiness
+
+---
+
+## Project Status
+
+## Phase 1 – User Management
+
+| Task                | Description                                | Status   |
+| ------------------- | ------------------------------------------ | -------- |
+| User Authentication | Secure login with JWT and password hashing | Complete |
+| User Dashboard      | Login and dashboard UI                     | Complete |
+| User Dashboard      | Registration                               | Complete |
+
+## Phase 2 – MMM Dashboard
+
+| Task                   | Description                                | Status   |
+| ---------------------- | ------------------------------------------ | -------- |
+| Load & Integrate Model | Connected Google Meridian model trace file | Complete |
+| Contribution Charts    | Visual breakdown of channel performance    | Complete |
+| Response Curves        | Analysis of spend vs. returns              | Complete |
+| Customer Narrative     | Insights and recommendations view          | Complete |
+
+## Phase 3 – Testing & QA
+
+| Task              | Description                            | Status   |
+| ----------------- | -------------------------------------- | -------- |
+| Unit Tests        | MMM features and authentication        | Complete |
+| Integration Tests | API endpoints and database connections | Complete |
+
+## Phase 4 – Refactoring & Bug Fixes
+
+| Task                             | Description                             | Status   |
+| -------------------------------- | --------------------------------------- | -------- |
+| Code Cleanup                     | Improve readability and maintainability | Complete |
+| Bug Fixes                        | Resolve issues found during testing     | Complete |
+| Performance Tuning               | Optimize queries and response times     | Complete |
+| Documentation Update             | Update README and code docs             | Complete |
+| Technical Decisions & Trade-offs | Document key architectural choices      | Complete |
+
+---
 
 ### Main Dashboard Overview
+
 <img src="imgs/dashboard-overview.png" alt="MMM Dashboard Overview" width="800">
 <img src="imgs/mmm-insights.png" alt="MMM Insights and Recommendations" width="800">
+
+---
 
 ## Quick Start
 
@@ -28,6 +83,8 @@ Visit `http://localhost:3000` and log in with:
 - **Email**: `test@example.com`
 - **Password**: `test123`
 
+---
+
 ## Features
 
 ### Authentication & User Management
@@ -48,9 +105,10 @@ Visit `http://localhost:3000` and log in with:
 ### Performance & Quality
 
 - **95% faster**: Smart model caching (3+ seconds → 40-50ms)
-- **Well tested**: 46 focused tests covering all core functionality (100% pass rate)
-- **Clean code**: Protocol-based services, no dead code, optimized structure
-- **Production ready**: Docker setup, proper error handling, security best practices
+- **Well tested**: Tests covering all core functionality (100% pass rate)
+- **Clean code**: Modular MMM architecture, protocol-based services, Solid principles
+
+---
 
 ## Project Structure
 
@@ -58,8 +116,11 @@ Visit `http://localhost:3000` and log in with:
 ├── apps/
 │   ├── api/          # FastAPI backend
 │   │   ├── app/      # Application code
+│   │   │   ├── services/mmm/  # Modular MMM components
+│   │   │   └── ...   # Other app modules
 │   │   ├── data/     # MMM model files
-│   │   └── tests/    # Test suite
+│   │   ├── scripts/  # Utility scripts (seed, reset, shutdown, inspect)
+│   │   └── tests/    # test suite (mock,unit,integration)
 │   └── web/          # Next.js frontend
 │       ├── app/      # App router pages
 │       ├── components/ # React components
@@ -69,11 +130,13 @@ Visit `http://localhost:3000` and log in with:
 │   └── docker/       # Database setup
 ```
 
+---
+
 ## System Architecture
 
 ### Data Flow
 
-The application follows a standard three-tier architecture with clear data flow:
+The application follows a  three-tier architecture:
 
 <img src="imgs/DataFlow.png" alt="Data Flow Architecture" width="600">
 
@@ -84,8 +147,8 @@ Excalidraw: [Data Flow Architecture](imgs/DataFlow.excalidraw)
 - **Browser**: Users interact with the Next.js app running on port 3000
 - **Frontend**: Next.js handles routing, auth, and makes API calls to the backend
 - **Backend**: FastAPI server on port 8000 processes requests and validates JWT tokens
-- **Database**: PostgreSQL on port 5432 stores user accounts and session data
-- **MMM Model**: 32MB Google Meridian model file loaded once and cached in memory
+- **Database**: PostgreSQL on port 5432 stores user accounts
+- **MMM Model**: Google Meridian model file loaded once and cached in memory
 - **State**: Zustand keeps auth state in browser localStorage between sessions
 - **Security**: JWT tokens in Authorization headers protect API endpoints
 
@@ -98,7 +161,7 @@ The MMM model processing pipeline demonstrates significant performance optimizat
 Excalidraw: [MMM Processing Pipeline](imgs/MMMProcessingPipeline.excalidraw)
 
 - **First load**: Takes ~3 seconds to load the 32MB model file
-- **After that**: Cached requests are fast at 40-50ms (95% improvement)
+- **After that**: Cached requests are fast at 40-50ms
 - **Three APIs**: Channel summary, response curves, and export endpoints
 - **Channels**: Gets 5 marketing channels from `/mmm/channels/summary`
 - **Curves**: Shows diminishing returns via `/mmm/response-curves`
@@ -112,16 +175,18 @@ Authentication system with automatic login after registration for improved user 
 
 Excalidraw: [Authentication Flow](imgs/AuthenticationFlow.excalidraw)
 
-- **Auto-login**: Register at `/auth/register` and get logged in immediately
+- **Auto-login**: Register at `/auth/register` and get logged in
 - **Security**: Tokens expire after 30 minutes, passwords are bcrypt hashed
 - **Stay logged in**: Zustand saves your JWT in localStorage between sessions
 - **Protected pages**: Dashboard and MMM pages need a valid JWT token
 - **API calls**: Frontend sends JWT as `Authorization: Bearer <token>`
 - **Safety**: CORS protection, input validation, and secure headers
 
+---
+
 ### Protocol-Based Architecture
 
-Implementation uses Python protocols for dependency inversion and enhanced testability:
+Implementation uses Python protocols for dependency inversion and improve testability:
 
 <img src="imgs/ProtocolBase%20Architecture.png" alt="Protocol-Based Architecture" width="600">
 
@@ -133,18 +198,25 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 - **Dependency injection**: FastAPI automatically picks the right service via `api/deps.py`
 - **SOLID design**: Dependency inversion makes testing easier and code more flexible
 
+---
+
 ## Key Components
 
 ### 1. Protocol-Based Architecture
 
 - **Service Interfaces**: `UserServiceProtocol`, `AuthServiceProtocol`, `MMMServiceProtocol`
 - **Dependency Injection**: Protocol-based DI in `api/deps.py`
-- **Mock Services**: Complete mock implementations for testing
+- **Mock Services**:  Mock implementations for testing
 - **SOLID design**: Follows all 5 SOLID principles
 
 ### 2. MMM Model Integration
 
-- **Real Model**: 32.3MB Google Meridian model (`saved_mmm.pkl`)
+- **Real Model**: Google Meridian model (`saved_mmm.pkl`)
+- **Modular Architecture**: Separated into components:
+  - `MMMModelLoader`: Handles model loading and caching with fallback support(mock)
+  - `MMMDataProcessor`: Processes contribution data and channel analysis
+  - `ResponseCurveGenerator`: Generates saturation curves and metrics
+  - `MMMService`: Orchestrates all components
 - **Data Processing**: Contribution data, response curves, channel analysis
 - **Channel Support**: 5-channel analysis from real model data
 - **Fallback**: Uses mock data when model file isn't available
@@ -160,8 +232,10 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 
 - **Contribution Charts**: Visual breakdown of channel performance
 - **Response Curves**: Saturation analysis with diminishing returns and efficiency metrics
-- **Smart Insights**: AI-generated recommendations and performance analysis
-- **Export**: Download insights in JSON, CSV, or TXT formats
+- **Insights**: Recommendations and performance analysis
+- **Export**: Download insights in TXT formats
+
+---
 
 ## API Endpoints
 
@@ -179,6 +253,8 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 - `GET /api/v1/mmm/contribution` - Contribution analysis data
 - `GET /api/v1/mmm/response-curves` - Response curve data
 - `GET /api/v1/export/insights` - Export recommendations
+
+---
 
 ## Development
 
@@ -199,7 +275,7 @@ Place your Google Meridian MMM model file at:
 apps/api/data/models/saved_mmm.pkl
 ```
 
-**Note**: The model file (`saved_mmm.pkl`) is required for MMM analytics. Without it, the system will use mock data for development.
+**Note**: The model file (`saved_mmm.pkl`) is required for MMM analytics.
 
 #### 2. Environment Configuration
 
@@ -351,42 +427,38 @@ pnpm debug:all             # Run multiple debug checks at once
 pnpm debug:api-health      # Check API health (uses curl + jq)
 pnpm debug:ports           # Check running processes on MMM ports
 
-# View API documentation
-open http://localhost:8000/docs
-
-# Access database UI (Adminer)
-open http://localhost:8080
-
-# Manual process management (if needed)
-lsof -ti:8000 | xargs kill -9  # Kill API processes
-lsof -ti:3000 | xargs kill -9  # Kill Web processes
-
-# Docker debugging
-docker ps  # Show running containers
+# Service management
+pnpm stop                  # Comprehensive shutdown script (Python-based)
+pnpm seed                  # Database seeding (enhanced Python script)
+pnpm reset-db              # Database reset (enhanced Python script)
 pnpm debug:logs            # Database logs (uses docker logs)
 docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 ```
 
 ### Test Users
 
-| Email               | Password   | Role          |
-| ------------------- | ---------- | ------------- |
-| `test@example.com`  | `test123`  | Standard user |
-| `demo@example.com`  | `demo123`  | Demo account  |
+| Email              | Password  | Role          |
+| ------------------ | --------- | ------------- |
+| `test@example.com` | `test123` | Standard user |
+| `demo@example.com` | `demo123` | Demo account  |
+
+---
 
 ## Production Deployment Options
 
 ### Key Architectural Decisions
 
-| Decision | What I Built | What I Considered | Why I Chose This |
-|----------|--------------|-------------------|------------------|
-| **Architecture** | Monorepo with Turbo + pnpm | Separate repos for API/web | Easier to share types and components |
-| **API Style** | REST endpoints | GraphQL | MMM data is pretty straightforward, REST is simpler |
-| **Auth** | JWT + bcrypt | OAuth with Google/GitHub | Wanted to show I can build auth from scratch |
-| **Database** | PostgreSQL | MongoDB for model data | User data is relational, Postgres handles JSON fine |
-| **Updates** | Polling every 30s | WebSocket connections | MMM data doesn't change that often |
-| **State** | Zustand | Redux Toolkit | Zustand is way less boilerplate for this size project |
-| **Model Caching** | Python LRU cache (3s → 40ms) | Redis from the start | Wanted to see the performance difference first |
+| Decision          | What I Built                 | What I Considered   | Why I Chose This                              |
+| ----------------- | ---------------------------- | ------------------- |-----------------------------------------------|
+| **Architecture**  | Monorepo with Turbo + pnpm   | Separate repos for API/web | Easier to share types and components          |
+| **API Style**     | REST endpoints               | GraphQL             | MMM data is pretty straightforward, REST is simpler |
+| **Auth**          | JWT + bcrypt                 | OAuth with Google   | Keep it simple                                |
+| **Database**      | PostgreSQL                   | MongoDB for model data | User data is relational, Postgres handles JSON fine |
+| **Updates**       | Polling every 30s            | WebSocket connections | MMM data doesn't change that often            |
+| **State**         | Zustand                      | Redux Toolkit       | Zustand keeps it simple                       |
+| **Model Caching** | Python LRU cache (3s → 40ms) | Redis from the start | Wanted to see the performance difference      |
+
+---
 
 ### AWS Production Architecture
 
@@ -395,13 +467,12 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 Excalidraw: [AWS Production Architecture](imgs/AWSProductionArchitecture.excalidraw)
 
 **Why AWS for Production:**
-- **Auto-scaling**: ECS handles traffic spikes without me managing servers
+
+- **Auto-scaling**: ECS handles traffic spikes without managing servers
 - **Fast caching**: ElastiCache Redis keeps MMM data under 30ms response times
 - **Background jobs**: SQS + Lambda for heavy model computations without blocking the API
-- **Database reliability**: RDS Multi-AZ means automatic failover if something breaks
-- **User management**: Cognito handles auth so I don't have to build user registration flows
-- **Global CDN**: CloudFront serves static assets fast worldwide
-- **Monitoring built-in**: CloudWatch and X-Ray show me what's slow or breaking
-- **Security layers**: API Gateway throttling and WAF protect against attacks
+- **Database reliability**: RDS Multi-AZ, automatic fail over if something breaks
+- **User management**: Cognito handles auth so no need to build user registration flows
+- **Global CDN**: CloudFront serves static assets
+- **Monitoring built-in**: CloudWatch and X-Ray show what's slow or breaking
 - **Pay for usage**: Lambda only costs money when processing jobs
-- **Less ops work**: Managed services mean less infrastructure to maintain

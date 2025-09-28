@@ -17,7 +17,7 @@
     "reset-db": "cd apps/api && pnpm reset-db",
     "init-db": "cd apps/api && pnpm init-db",
     "check-db": "cd apps/api && pnpm check-db",
-    "stop": "node scripts/shutdown.js",
+    "stop": "cd apps/api && uv run python scripts/shutdown.py",
     "inspect-model": "cd apps/api && pnpm inspect-model",
     "inspect-model:json": "cd apps/api && pnpm inspect-model:json",
     "inspect-model:file": "cd apps/api && pnpm inspect-model:file",
