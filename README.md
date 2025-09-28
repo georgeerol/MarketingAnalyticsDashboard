@@ -1,10 +1,10 @@
 # MMM Dashboard
 
-A professional Media Mix Modeling analytics platform built with FastAPI and Next.js.
+A  Media Mix Modeling analytics platform built with FastAPI and Next.js.
 
-## What This Is
-
-This project implements a complete MMM (Media Mix Modeling) dashboard that loads real Google Meridian model data and provides actionable marketing insights. Users can register, log in, and analyze channel performance through interactive charts and AI-generated recommendations.
+### Main Dashboard Overview
+<img src="imgs/dashboard-overview.png" alt="MMM Dashboard Overview" width="800">
+<img src="imgs/mmm-insights.png" alt="MMM Insights and Recommendations" width="800">
 
 ## Quick Start
 
@@ -75,34 +75,9 @@ Visit `http://localhost:3000` and log in with:
 
 The application follows a standard three-tier architecture with clear data flow:
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Browser   │───▶│  Next.js    │───▶│   FastAPI   │
-│             │    │  Frontend   │    │   Backend   │
-│             │    │ (Port 3000) │    │ (Port 8000) │
-└─────────────┘    └─────────────┘    └─────────────┘
-                           │                   │
-                           │                   ▼
-                           │            ┌─────────────┐
-                           │            │ PostgreSQL  │
-                           │            │  Database   │
-                           │            │ (Port 5432) │
-                           │            └─────────────┘
-                           │                   │
-                           ▼                   ▼
-                   ┌─────────────┐    ┌─────────────┐
-                   │   Zustand   │    │ Google MMM  │
-                   │    Store    │    │ Model Cache │
-                   │(localStorage)│    │ (LRU Cache) │
-                   └─────────────┘    └─────────────┘
-                                             ▲
-                                             │
-                                     ┌─────────────┐
-                                     │saved_mmm.pkl│
-                                     │   (32MB)    │
-                                     │ (Read-only) │
-                                     └─────────────┘
-```
+<img src="imgs/DataFlow.png" alt="Data Flow Architecture" width="600">
+
+Excalidraw: [Data Flow Architecture](imgs/DataFlow.excalidraw)
 
 **Data Flow Components:**
 
@@ -118,27 +93,10 @@ The application follows a standard three-tier architecture with clear data flow:
 
 The MMM model processing pipeline demonstrates significant performance optimization through caching:
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ saved_mmm   │───▶│ Model Cache │───▶│   FastAPI   │
-│ .pkl (32MB) │    │ (LRU)       │    │ Endpoints   │
-└─────────────┘    └─────────────┘    └─────────────┘
-                                             │
-                   ┌─────────────────────────┼─────────────────────────┐
-                   │                         │                         │
-                   ▼                         ▼                         ▼
-            ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-            │ Channel     │         │ Response    │         │ Export      │
-            │ Summary API │         │ Curves API  │         │ Insights API│
-            └─────────────┘         └─────────────┘         └─────────────┘
-                   │                         │                         │
-                   ▼                         ▼                         ▼
-            ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-            │ Contribution│         │ Response    │         │ Smart       │
-            │ Charts      │         │ Curves      │         │ Insights    │
-            │ (Frontend)  │         │ (Frontend)  │         │ (Reports)   │
-            └─────────────┘         └─────────────┘         └─────────────┘
-```
+<img src="imgs/MMMProcesiingPipeline.png" alt="MMM Processing Pipeline" width="600">
+
+Excalidraw: [MMM Processing Pipeline](imgs/MMMProcessingPipeline.excalidraw)
+
 - **First load**: Takes ~3 seconds to load the 32MB model file
 - **After that**: Cached requests are fast at 40-50ms (95% improvement)
 - **Three APIs**: Channel summary, response curves, and export endpoints
@@ -150,20 +108,9 @@ The MMM model processing pipeline demonstrates significant performance optimizat
 
 Authentication system with automatic login after registration for improved user experience:
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Registration│───▶│   FastAPI   │───▶│  Dashboard  │
-│    Form     │    │/auth/register│    │   Access    │
-│ (Frontend)  │    │(Auto-Login) │    │ (Protected) │
-└─────────────┘    └─────────────┘    └─────────────┘
-       │                   │                   │
-       ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Validation  │    │ JWT Token   │    │localStorage │
-│ & Hashing   │    │ Generation  │    │ Persistence │
-│ (Backend)   │    │ (Backend)   │    │ (Frontend)  │
-└─────────────┘    └─────────────┘    └─────────────┘
-```
+<img src="imgs/AuthenticationFlow.png" alt="Authentication Flow" width="600">
+
+Excalidraw: [Authentication Flow](imgs/AuthenticationFlow.excalidraw)
 
 - **Auto-login**: Register at `/auth/register` and get logged in immediately
 - **Security**: Tokens expire after 30 minutes, passwords are bcrypt hashed
@@ -176,25 +123,9 @@ Authentication system with automatic login after registration for improved user 
 
 Implementation uses Python protocols for dependency inversion and enhanced testability:
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ UserService │    │ AuthService │    │ MMMService  │
-│  Protocol   │    │  Protocol   │    │  Protocol   │
-└─────────────┘    └─────────────┘    └─────────────┘
-       │                   │                   │
-       ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ UserService │    │ AuthService │    │ MMMService  │
-│Implementation│    │Implementation│    │Implementation│
-└─────────────┘    └─────────────┘    └─────────────┘
-       │                   │                   │
-       ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ MockUser    │    │ MockAuth    │    │ MockMMM     │
-│ Service     │    │ Service     │    │ Service     │
-│ (Testing)   │    │ (Testing)   │    │ (Testing)   │
-└─────────────┘    └─────────────┘    └─────────────┘
-```
+<img src="imgs/ProtocolBase%20Architecture.png" alt="Protocol-Based Architecture" width="600">
+
+Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidraw)
 
 - **Protocols**: Abstract interfaces in `services/interfaces.py` define what services do
 - **Real services**: Concrete implementations handle business logic and database operations
@@ -460,55 +391,9 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 
 ### AWS Production Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    AWS Production Environment                                │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
-│  │ CloudFront  │    │ Application │    │ API Gateway │    │ EventBridge │                  │
-│  │    CDN      │    │ Load Balancer│    │   (REST)    │    │ Scheduler   │                  │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
-│         │                   │                   │                   │                       │
-│         ▼                   ▼                   ▼                   ▼                       │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
-│  │    S3       │    │    ECS      │    │    ECS      │    │   Lambda    │                  │
-│  │ Static Web  │    │ FastAPI     │    │ FastAPI     │    │ Functions   │                  │
-│  │   Assets    │    │ Service     │    │ Service     │    │ (Workers)   │                  │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
-│         │                   │                   │                   │                       │
-│         └───────────────────┼───────────────────┼───────────────────┘                       │
-│                             ▼                   ▼                   ▲                       │
-│                      ┌─────────────┐    ┌─────────────┐           │                       │
-│                      │ ElastiCache │    │     RDS     │           │                       │
-│                      │   Redis     │    │ PostgreSQL  │           │                       │
-│                      │ (Sessions)  │    │ Multi-AZ    │           │                       │
-│                      └─────────────┘    └─────────────┘           │                       │
-│                             │                   │                 │                       │
-│                             ▼                   ▼                 │                       │
-│                      ┌─────────────┐    ┌─────────────┐          │                       │
-│                      │ ElastiCache │    │     S3      │          │                       │
-│                      │   Redis     │    │   Bucket    │          │                       │
-│                      │ (MMM Cache) │    │ (Models &   │          │                       │
-│                      └─────────────┘    │  Exports)   │          │                       │
-│                             │           └─────────────┘          │                       │
-│                             ▼                   │                │                       │
-│                      ┌─────────────┐           ▼                │                       │
-│                      │     SQS     │    ┌─────────────┐          │                       │
-│                      │   Queue     │    │ AWS Cognito │          │                       │
-│                      │ (MMM Jobs)  │────│ Identity &  │──────────┘                       │
-│                      └─────────────┘    │ Access Mgmt │                                  │
-│                                         └─────────────┘                                  │
-│                                                                                             │
-│ Monitoring & Observability:                                                                │
-│ ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
-│ │ CloudWatch  │    │ X-Ray       │    │ CloudTrail  │    │ AWS Config  │                  │
-│ │ (Metrics &  │    │ (Tracing)   │    │ (Audit)     │    │ (Compliance)│                  │
-│ │  Logs)      │    │             │    │             │    │             │                  │
-│ └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
-│                                                                                             │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+<img src="imgs/AWSProductionArchitecture.png" alt="AWS Production Architecture" width="800">
+
+Excalidraw: [AWS Production Architecture](imgs/AWSProductionArchitecture.excalidraw)
 
 **Why AWS for Production:**
 - **Auto-scaling**: ECS handles traffic spikes without me managing servers
