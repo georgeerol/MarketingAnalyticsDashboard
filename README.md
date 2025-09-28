@@ -153,67 +153,55 @@ Authentication system with automatic login after registration for improved user 
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Registration│───▶│ Auto-Login  │───▶│  Dashboard  │
-│    Form     │    │  (JWT)      │    │   Access    │
+│ Registration│───▶│   FastAPI   │───▶│  Dashboard  │
+│    Form     │    │/auth/register│    │   Access    │
+│ (Frontend)  │    │(Auto-Login) │    │ (Protected) │
 └─────────────┘    └─────────────┘    └─────────────┘
        │                   │                   │
        ▼                   ▼                   ▼
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Validation  │    │ Token       │    │ Session     │
-│ & Hashing   │    │ Storage     │    │ Persistence │
+│ Validation  │    │ JWT Token   │    │localStorage │
+│ & Hashing   │    │ Generation  │    │ Persistence │
+│ (Backend)   │    │ (Backend)   │    │ (Frontend)  │
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-**Authentication Details:**
-
-- **Automatic Login**: New users are immediately authenticated after successful registration
-- **JWT Security**: Tokens expire after 30 minutes with bcrypt password hashing
-- **Session Persistence**: Zustand maintains authentication state in localStorage across page refreshes
+- **Automatic Login**: `/auth/register` endpoint creates user and immediately returns JWT token
+- **JWT Security**: Tokens expire after 30 minutes with bcrypt password hashing on backend
+- **Session Persistence**: Zustand stores JWT in localStorage for cross-session authentication
 - **Protected Routes**: Dashboard and MMM endpoints require valid JWT tokens in Authorization headers
-- **Token Flow**: `Browser localStorage → HTTP Headers → FastAPI validation → MMM data access`
-- **Security Measures**: CORS protection, input validation, and secure headers
-
-**Important Note**: JWT tokens are used for API authentication only - they do not interact with the MMM model file (`saved_mmm.pkl`). The model file is read-only and accessed by the backend service after successful authentication.
+- **API Authentication**: Frontend sends JWT via `Authorization: Bearer <token>` to FastAPI endpoints
+- **Security Measures**: CORS protection, input validation, and secure headers across all endpoints
 
 ### Protocol-Based Architecture
 
 Implementation uses Python protocols for dependency inversion and enhanced testability:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Service Protocol Layer                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
-│ │ UserService     │    │ AuthService     │    │ MMMService   │  │
-│ │ Protocol        │    │ Protocol        │    │ Protocol     │  │
-│ └─────────────────┘    └─────────────────┘    └──────────────┘  │
-│          │                       │                      │       │
-│          ▼                       ▼                      ▼       │
-│ ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
-│ │ UserService     │    │ AuthService     │    │ MMMService   │  │
-│ │ Implementation  │    │ Implementation  │    │ Implementation│  │
-│ └─────────────────┘    └─────────────────┘    └──────────────┘  │
-│          │                       │                      │       │
-│          ▼                       ▼                      ▼       │
-│ ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐  │
-│ │ Mock Service    │    │ Mock Service    │    │ Mock Service │  │
-│ │ (Testing)       │    │ (Testing)       │    │ (Testing)    │  │
-│ └─────────────────┘    └─────────────────┘    └──────────────┘  │
-│                                                                 │
-│ Benefits:                                                       │
-│ • Dependency Inversion Principle (SOLID)                       │
-│ • Easy testing with mock implementations                       │
-│ • Clean separation of concerns                                 │
-│ • Protocol-based dependency injection                          │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ UserService │    │ AuthService │    │ MMMService  │
+│  Protocol   │    │  Protocol   │    │  Protocol   │
+└─────────────┘    └─────────────┘    └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ UserService │    │ AuthService │    │ MMMService  │
+│Implementation│    │Implementation│    │Implementation│
+└─────────────┘    └─────────────┘    └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ MockUser    │    │ MockAuth    │    │ MockMMM     │
+│ Service     │    │ Service     │    │ Service     │
+│ (Testing)   │    │ (Testing)   │    │ (Testing)   │
+└─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-- **Protocol Definitions**: Abstract interfaces define service contracts and expected behavior
+- **Protocol Definitions**: Abstract interfaces in `services/interfaces.py` define service contracts
 - **Production Implementations**: Concrete services handle actual business logic and data operations
-- **Test Implementations**: Mock services provide isolated testing without external dependencies
-- **Dependency Injection**: FastAPI automatically resolves and injects appropriate service implementations
-- **Maintainability**: Loose coupling enables easier testing, modification, and extension
+- **Mock Implementations**: Test services in `tests/mocks/` provide isolated testing without dependencies
+- **Dependency Injection**: FastAPI resolves protocols via `api/deps.py` for automatic service injection
+- **SOLID Compliance**: Dependency inversion principle enables loose coupling and enhanced testability
 
 ## Key Components
 
