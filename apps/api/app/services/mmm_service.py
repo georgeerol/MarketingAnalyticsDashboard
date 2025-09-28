@@ -12,7 +12,7 @@ import numpy as np
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.schemas.mmm import (
-    MMMStatus, MMMModelInfo, ContributionData, 
+    MMMModelInfo, ContributionData, 
     ResponseCurveData, MMMChannelSummary
 )
 
@@ -54,38 +54,6 @@ class MMMService:
     
     def __init__(self):
         self.model_path = settings.MMM_MODEL_FULL_PATH
-    
-    def get_model_status(self) -> MMMStatus:
-        """Check if model file exists and can be loaded."""
-        try:
-            file_exists = self.model_path.exists()
-            
-            if not file_exists:
-                return MMMStatus(
-                    status="error",
-                    message="MMM model file not found",
-                    file_exists=False,
-                    model_info=None
-                )
-            
-            # Try to get basic model info
-            model_info = self._get_basic_model_info()
-            
-            return MMMStatus(
-                status="success",
-                message="MMM model available",
-                file_exists=file_exists,
-                model_info=model_info
-            )
-            
-        except Exception as e:
-            logger.error(f"Error checking MMM status: {e}")
-            return MMMStatus(
-                status="error",
-                message=f"Error checking MMM status: {str(e)}",
-                file_exists=False,
-                model_info=None
-            )
     
     def get_model_info(self) -> MMMModelInfo:
         """Get model metadata like channels, training period, etc."""

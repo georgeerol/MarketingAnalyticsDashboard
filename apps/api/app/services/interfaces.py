@@ -6,7 +6,7 @@ Defines interfaces that services implement for easier testing.
 
 from typing import Protocol, Optional, List, Dict, Any, runtime_checkable
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate
 from app.schemas.auth import UserLogin, AuthResponse
 from app.schemas.mmm import MMMModelInfo, MMMChannelSummary
 
@@ -23,33 +23,8 @@ class UserServiceProtocol(Protocol):
         """Get user by email address."""
         ...
     
-    def get_users(
-        self, 
-        skip: int = 0, 
-        limit: int = 100,
-        active_only: bool = True
-    ) -> List[User]:
-        """Get list of users with pagination."""
-        ...
-    
-    def get_users_count(self, active_only: bool = True) -> int:
-        """Get total count of users."""
-        ...
-    
     def create_user(self, user_data: UserCreate) -> User:
         """Create a new user."""
-        ...
-    
-    def update_user(self, user_id: int, user_data: UserUpdate) -> Optional[User]:
-        """Update an existing user."""
-        ...
-    
-    def deactivate_user(self, user_id: int) -> bool:
-        """Deactivate a user account."""
-        ...
-    
-    def activate_user(self, user_id: int) -> bool:
-        """Activate a user account."""
         ...
 
 

@@ -6,7 +6,7 @@ This demonstrates how easy it is to create test doubles when using protocols.
 
 from typing import List, Optional, Dict
 from app.services.interfaces import UserServiceProtocol
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate
 from app.models.user import User
 
 
@@ -73,26 +73,6 @@ class MockUserService(UserServiceProtocol):
             return self.users.get(user_id)
         return None
     
-    def get_users(
-        self, 
-        skip: int = 0, 
-        limit: int = 100,
-        active_only: bool = True
-    ) -> List[MockUser]:
-        """Get list of users with pagination."""
-        users = list(self.users.values())
-        
-        if active_only:
-            users = [u for u in users if u.is_active]
-        
-        return users[skip:skip + limit]
-    
-    def get_users_count(self, active_only: bool = True) -> int:
-        """Get total count of users."""
-        if active_only:
-            return len([u for u in self.users.values() if u.is_active])
-        return len(self.users)
-    
     def create_user(self, user_data: UserCreate) -> MockUser:
         """Create a new user."""
         # Check if email already exists
@@ -113,63 +93,6 @@ class MockUserService(UserServiceProtocol):
         self.next_id += 1
         
         return user
-    
-    def update_user(self, user_id: int, user_data: UserUpdate) -> Optional[MockUser]:
-        """Update an existing user."""
-        user = self.users.get(user_id)
-        if not user:
-            return None
-        
-        # Update fields if provided
-        if user_data.email and user_data.email != user.email:
-            # Check if new email already exists
-            if user_data.email in self.email_index:
-                raise ValueError(f"User with email {user_data.email} already exists")
-            
-            # Update email index
-            del self.email_index[user.email]
-            self.email_index[user_data.email] = user_id
-            user.email = user_data.email
-        
-        if user_data.full_name:
-            user.full_name = user_data.full_name
-        
-        if user_data.is_active is not None:
-            user.is_active = user_data.is_active
-        
-        return user
-    
-    def delete_user(self, user_id: int) -> bool:
-        """Delete a user."""
-        user = self.users.get(user_id)
-        if not user:
-            return False
-        
-        # Remove from email index
-        del self.email_index[user.email]
-        
-        # Remove user
-        del self.users[user_id]
-        
-        return True
-    
-    def deactivate_user(self, user_id: int) -> bool:
-        """Deactivate a user."""
-        user = self.users.get(user_id)
-        if not user:
-            return False
-        
-        user.is_active = False
-        return True
-    
-    def activate_user(self, user_id: int) -> bool:
-        """Activate a user."""
-        user = self.users.get(user_id)
-        if not user:
-            return False
-        
-        user.is_active = True
-        return True
     
     # Utility methods for testing
     def clear_users(self):
