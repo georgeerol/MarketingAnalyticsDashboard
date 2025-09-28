@@ -71,7 +71,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Welcome, {user.full_name}
+                Welcome, {user?.full_name || "User"}
               </span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 Sign Out
@@ -99,15 +99,15 @@ export default function DashboardPage() {
                     User Profile
                   </h3>
                   <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                    Email: {user.email}
+                    Email: {user?.email || "N/A"}
                   </p>
-                  {user.company && (
+                  {user?.company && (
                     <p className="text-sm text-blue-700 dark:text-blue-300">
                       Company: {user.company}
                     </p>
                   )}
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Role: {user.role}
+                    Role: {user?.role || "User"}
                   </p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -115,11 +115,13 @@ export default function DashboardPage() {
                     Account Status
                   </h3>
                   <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                    Status: {user.is_active ? "Active" : "Inactive"}
+                    Status: {user?.is_active ? "Active" : "Inactive"}
                   </p>
                   <p className="text-sm text-green-700 dark:text-green-300">
                     Member since:{" "}
-                    {new Date(user.created_at).toLocaleDateString()}
+                    {user?.created_at
+                      ? new Date(user.created_at).toLocaleDateString()
+                      : "N/A"}
                   </p>
                 </div>
                 <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
