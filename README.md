@@ -106,12 +106,12 @@ The application follows a standard three-tier architecture with clear data flow:
 
 **Data Flow Components:**
 
-- **Browser Layer**: User interface and client-side interactions
-- **Frontend Layer**: Next.js handles routing, authentication, and API communication via HTTP requests
-- **Backend Layer**: FastAPI processes requests, validates JWT tokens, and manages business logic
-- **Database Layer**: PostgreSQL stores user data, authentication info, and session information
-- **Model Layer**: Google Meridian MMM model (32MB) loaded from disk and cached in memory for performance
-- **State Management**: Zustand maintains authentication state in browser localStorage across sessions
+- **Browser Layer**: User interface and client-side interactions on port 3000
+- **Frontend Layer**: Next.js handles routing, authentication, and API communication
+- **Backend Layer**: FastAPI on port 8000 processes requests, validates JWT tokens, and manages business logic
+- **Database Layer**: PostgreSQL on port 5432 stores user data and session information
+- **Model Layer**: 32MB Google Meridian model loaded once and cached in memory for performance
+- **State Management**: Zustand maintains authentication state in browser localStorage
 - **Authentication Flow**: JWT tokens sent in Authorization headers for protected API endpoints
 
 ### MMM Processing Pipeline
@@ -139,6 +139,7 @@ The MMM model processing pipeline demonstrates significant performance optimizat
             │ (Frontend)  │         │ (Frontend)  │         │ (Reports)   │
             └─────────────┘         └─────────────┘         └─────────────┘
 ```
+**How it works:**
 
 - **Initial Load**: 32MB pickle file requires ~3 seconds for first-time loading via Google Meridian
 - **Cached Performance**: Subsequent API requests served in ~40-50ms (95% improvement)
@@ -198,7 +199,7 @@ Implementation uses Python protocols for dependency inversion and enhanced testa
 ```
 
 - **Protocol Definitions**: Abstract interfaces in `services/interfaces.py` define service contracts
-- **Production Implementations**: Concrete services handle actual business logic and data operations
+- **Production Implementations**: Concrete services handle business logic and data operations
 - **Mock Implementations**: Test services in `tests/mocks/` provide isolated testing without dependencies
 - **Dependency Injection**: FastAPI resolves protocols via `api/deps.py` for automatic service injection
 - **SOLID Compliance**: Dependency inversion principle enables loose coupling and enhanced testability
