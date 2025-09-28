@@ -1,8 +1,7 @@
 """
 Comprehensive tests for Response Curves validation.
 
-This test ensures that all response curves are mathematically correct,
-have proper MMM behavior, and provide meaningful business insights.
+This test ensures that all response curves are mathematically correct.
 """
 
 import pytest
