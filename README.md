@@ -79,27 +79,40 @@ The application follows a standard three-tier architecture with clear data flow:
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │   Browser   │───▶│  Next.js    │───▶│   FastAPI   │
 │             │    │  Frontend   │    │   Backend   │
+│             │    │ (Port 3000) │    │ (Port 8000) │
 └─────────────┘    └─────────────┘    └─────────────┘
-                           │                   │
-                           │                   ▼
-                           │            ┌─────────────┐
-                           │            │ PostgreSQL  │
-                           │            │  Database   │
-                           │            └─────────────┘
-                           │                   │
-                           ▼                   ▼
-                   ┌─────────────┐    ┌─────────────┐
-                   │   Zustand   │    │ Google MMM  │
-                   │    Store    │    │ Model (32MB)│
-                   └─────────────┘    └─────────────┘
+       │                   │                   │
+       │                   │                   ▼
+       │                   │            ┌─────────────┐
+       │                   │            │ PostgreSQL  │
+       │                   │            │  Database   │
+       │                   │            │ (Port 5432) │
+       │                   │            └─────────────┘
+       │                   │                   │
+       │                   ▼                   ▼
+       │           ┌─────────────┐    ┌─────────────┐
+       │           │   Zustand   │    │ Google MMM  │
+       │           │    Store    │    │ Model Cache │
+       │           │(localStorage)│    │ (LRU Cache) │
+       │           └─────────────┘    └─────────────┘
+       │                                       ▲
+       │                                       │
+       │                               ┌─────────────┐
+       └──── JWT Tokens ───────────────│saved_mmm.pkl│
+            (Authorization)            │   (32MB)    │
+                                       │ (Read-only) │
+                                       └─────────────┘
 ```
 
+**Data Flow Components:**
+
 - **Browser Layer**: User interface and client-side interactions
-- **Frontend Layer**: Next.js handles routing, authentication, and API communication
-- **Backend Layer**: FastAPI processes requests and manages business logic
-- **Data Layer**: PostgreSQL stores user data and session information
-- **Model Layer**: Google Meridian MMM model (32MB) cached in memory for performance
-- **State Management**: Zustand maintains authentication state across sessions
+- **Frontend Layer**: Next.js handles routing, authentication, and API communication via HTTP requests
+- **Backend Layer**: FastAPI processes requests, validates JWT tokens, and manages business logic
+- **Database Layer**: PostgreSQL stores user data, authentication info, and session information
+- **Model Layer**: Google Meridian MMM model (32MB) loaded from disk and cached in memory for performance
+- **State Management**: Zustand maintains authentication state in browser localStorage across sessions
+- **Authentication Flow**: JWT tokens sent in Authorization headers for protected API endpoints
 
 ### MMM Processing Pipeline
 
@@ -148,11 +161,16 @@ Authentication system with automatic login after registration for improved user 
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
+**Authentication Details:**
+
 - **Automatic Login**: New users are immediately authenticated after successful registration
 - **JWT Security**: Tokens expire after 30 minutes with bcrypt password hashing
-- **Session Persistence**: Zustand maintains authentication state across page refreshes
-- **Protected Routes**: Dashboard and MMM endpoints require valid authentication
+- **Session Persistence**: Zustand maintains authentication state in localStorage across page refreshes
+- **Protected Routes**: Dashboard and MMM endpoints require valid JWT tokens in Authorization headers
+- **Token Flow**: `Browser localStorage → HTTP Headers → FastAPI validation → MMM data access`
 - **Security Measures**: CORS protection, input validation, and secure headers
+
+**Important Note**: JWT tokens are used for API authentication only - they do not interact with the MMM model file (`saved_mmm.pkl`). The model file is read-only and accessed by the backend service after successful authentication.
 
 ### Protocol-Based Architecture
 
