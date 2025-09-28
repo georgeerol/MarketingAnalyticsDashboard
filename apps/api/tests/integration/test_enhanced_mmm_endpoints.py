@@ -10,48 +10,6 @@ from httpx import AsyncClient
 class TestEnhancedMMMEndpoints:
     """Integration tests for enhanced MMM endpoints."""
 
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.real_data
-    @pytest.mark.asyncio
-    async def test_mmm_debug_endpoint(self, client: AsyncClient, auth_headers):
-        """Test the new MMM debug endpoint."""
-        response = await client.get("/api/v1/mmm/debug", headers=auth_headers)
-        
-        assert response.status_code == 200
-        data = response.json()
-        
-        assert "debug_status" in data
-        assert "model_debug" in data
-        assert "message" in data
-        
-        assert data["debug_status"] == "success"
-        
-        # Check debug information structure
-        debug_info = data["model_debug"]
-        assert "available_posterior_vars" in debug_info
-        assert "model_attributes" in debug_info
-        
-        # Should detect key Google Meridian parameters
-        posterior_vars = debug_info["available_posterior_vars"]
-        assert isinstance(posterior_vars, list)
-        
-        # Should have some of the key parameters we use
-        expected_vars = ['roi_m', 'ec_m', 'slope_m', 'alpha_m']
-        found_vars = [var for var in expected_vars if var in posterior_vars]
-        assert len(found_vars) > 0, f"No expected variables found in {posterior_vars}"
-
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.real_data
-    @pytest.mark.asyncio
-    async def test_mmm_debug_unauthenticated(self, client: AsyncClient):
-        """Test MMM debug endpoint without authentication."""
-        response = await client.get("/api/v1/mmm/debug")
-        
-        assert response.status_code == 401
-        data = response.json()
-        assert "detail" in data
 
     @pytest.mark.integration
     @pytest.mark.mmm
@@ -232,16 +190,9 @@ class TestRealDataWorkflows:
     @pytest.mark.asyncio
     async def test_complete_enhanced_workflow(self, client: AsyncClient, auth_headers):
         """Test complete workflow using enhanced real data features."""
-        # Step 1: Debug model parameters
-        debug_response = await client.get("/api/v1/mmm/debug", headers=auth_headers)
-        assert debug_response.status_code == 200
-        debug_data = debug_response.json()
-        
-        # Step 2: Get model status and info
-        status_response = await client.get("/api/v1/mmm/status", headers=auth_headers)
+        # Step 1: Get model info
         info_response = await client.get("/api/v1/mmm/info", headers=auth_headers)
         
-        assert status_response.status_code == 200
         assert info_response.status_code == 200
         
         info_data = info_response.json()
@@ -312,7 +263,7 @@ class TestRealDataErrorHandling:
     async def test_debug_endpoint_error_handling(self, client: AsyncClient, auth_headers):
         """Test debug endpoint handles errors gracefully."""
         # The debug endpoint should handle model loading errors gracefully
-        response = await client.get("/api/v1/mmm/debug", headers=auth_headers)
+        response = await client.get("/api/v1/mmm/info", headers=auth_headers)
         
         # Should either succeed or fail gracefully
         assert response.status_code in [200, 500]

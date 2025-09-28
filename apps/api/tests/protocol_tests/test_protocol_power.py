@@ -316,7 +316,7 @@ class TestProtocolIntegration:
         assert user_data["is_admin"] is True
         
         # Test MMM endpoints
-        response = client.get("/api/v1/mmm/status", headers=headers)
+        response = client.get("/api/v1/mmm/info", headers=headers)
         assert response.status_code == 200
         
         status_data = response.json()

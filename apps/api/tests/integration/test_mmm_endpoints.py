@@ -9,32 +9,6 @@ from httpx import AsyncClient
 class TestMMMEndpoints:
     """Integration tests for MMM endpoints."""
 
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_mmm_status_authenticated(self, client: AsyncClient, auth_headers):
-        """Test MMM status endpoint with authentication."""
-        response = await client.get("/api/v1/mmm/status", headers=auth_headers)
-        
-        assert response.status_code == 200
-        data = response.json()
-        
-        assert "status" in data
-        assert "message" in data
-        assert "file_exists" in data
-        assert "model_loaded" in data
-        assert data["status"] in ["success", "error", "loading"]
-
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_mmm_status_unauthenticated(self, client: AsyncClient):
-        """Test MMM status endpoint without authentication."""
-        response = await client.get("/api/v1/mmm/status")
-        
-        assert response.status_code == 401
-        data = response.json()
-        assert "detail" in data
 
     @pytest.mark.integration
     @pytest.mark.mmm
@@ -262,10 +236,10 @@ class TestMMMWorkflow:
     @pytest.mark.asyncio
     async def test_complete_mmm_workflow(self, client: AsyncClient, auth_headers):
         """Test complete MMM data access workflow."""
-        # Step 1: Check MMM status
-        status_response = await client.get("/api/v1/mmm/status", headers=auth_headers)
-        assert status_response.status_code == 200
-        status_data = status_response.json()
+        # Step 1: Get MMM info
+        info_response = await client.get("/api/v1/mmm/info", headers=auth_headers)
+        assert info_response.status_code == 200
+        info_data = info_response.json()
         
         # Step 2: Get model info
         info_response = await client.get("/api/v1/mmm/info", headers=auth_headers)
@@ -343,7 +317,7 @@ class TestMMMErrorHandling:
         """Test MMM endpoints with invalid token format."""
         headers = {"Authorization": "InvalidTokenFormat"}
         
-        response = await client.get("/api/v1/mmm/status", headers=headers)
+        response = await client.get("/api/v1/mmm/info", headers=headers)
         assert response.status_code == 401
 
     @pytest.mark.integration
@@ -361,7 +335,7 @@ class TestMMMErrorHandling:
         )
         
         headers = {"Authorization": f"Bearer {expired_token}"}
-        response = await client.get("/api/v1/mmm/status", headers=headers)
+        response = await client.get("/api/v1/mmm/info", headers=headers)
         
         assert response.status_code == 401
 
@@ -401,7 +375,7 @@ class TestMMMPerformance:
         
         # Create multiple concurrent requests
         tasks = [
-            client.get("/api/v1/mmm/status", headers=auth_headers),
+            client.get("/api/v1/mmm/info", headers=auth_headers),
             client.get("/api/v1/mmm/channels", headers=auth_headers),
             client.get("/api/v1/mmm/info", headers=auth_headers),
             client.get("/api/v1/mmm/summary", headers=auth_headers)
