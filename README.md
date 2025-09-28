@@ -32,25 +32,25 @@ Visit `http://localhost:3000` and log in with:
 
 ### Authentication & User Management
 
-- Secure JWT-based authentication with bcrypt password hashing
-- User registration with automatic login
-- Session persistence across page refreshes
--  Login/registration UI
+- Secure JWT auth with bcrypt password hashing
+- Register and get logged in automatically
+- Sessions stay active across page refreshes
+- Clean login/registration UI
 
 ### MMM Analytics Dashboard
 
 - **Real Model Data**: Loads actual Google Meridian model (32MB `saved_mmm.pkl`)
-- **Contribution Charts**: Visual breakdown of channel performance with bar/pie charts
-- **Response Curves**: Hill saturation curves showing diminishing returns for each channel
+- **Contribution Charts**: See channel performance with bar/pie charts
+- **Response Curves**: Hill saturation curves show diminishing returns for each channel
 - **Smart Insights**: AI-generated recommendations for budget optimization
-- **Export Functionality**: Download insights in JSON, CSV, or TXT formats
+- **Export**: Download insights in JSON, CSV, or TXT formats
 
 ### Performance & Quality
 
-- **95% Performance Improvement**: Intelligent model caching (3+ seconds → 40-50ms)
-- **Comprehensive Testing**: 38+ unit and integration tests
-- **Clean Architecture**: Service interfaces, centralized constants, structured logging
-- **Production Ready**: Docker setup, proper error handling, security best practices
+- **95% faster**: Smart model caching (3+ seconds → 40-50ms)
+- **Well tested**: 38+ unit and integration tests
+- **Clean code**: Service interfaces, centralized constants, structured logging
+- **Production ready**: Docker setup, proper error handling, security best practices
 
 ## Project Structure
 
@@ -208,29 +208,29 @@ Implementation uses Python protocols for dependency inversion and enhanced testa
 
 - **Service Interfaces**: `UserServiceProtocol`, `AuthServiceProtocol`, `MMMServiceProtocol`
 - **Dependency Injection**: Protocol-based DI in `api/deps.py`
-- **Mock Implementations**: Complete mock services for testing
-- **SOLID Compliance**: All 5 principles fully implemented
+- **Mock Services**: Complete mock implementations for testing
+- **SOLID design**: Follows all 5 SOLID principles
 
 ### 2. MMM Model Integration
 
 - **Real Model**: 32.3MB Google Meridian model (`saved_mmm.pkl`)
 - **Data Processing**: Contribution data, response curves, channel analysis
 - **Channel Support**: 5-channel analysis from real model data
-- **Smart Fallback**: Automatic fallback to mock data when needed
+- **Fallback**: Uses mock data when model file isn't available
 
 ### 3. Authentication System
 
 - **JWT Tokens**: Secure token-based auth with bcrypt hashing
 - **Protected Routes**: All MMM endpoints require authentication
 - **User Management**: Complete CRUD operations
-- **Session Management**: 30-minute token expiration with persistence
+- **Sessions**: Tokens expire after 30 minutes but stay saved
 
 ### 4. Interactive Dashboard
 
 - **Contribution Charts**: Visual breakdown of channel performance
 - **Response Curves**: Diminishing returns analysis with saturation points
 - **Smart Insights**: AI-generated recommendations and performance analysis
-- **Export Functionality**: Download insights in JSON, CSV, or TXT formats
+- **Export**: Download insights in JSON, CSV, or TXT formats
 
 ## API Endpoints
 
