@@ -20,7 +20,7 @@ async def register_user(
     user_service: UserServiceProtocol = Depends(get_user_service),
     auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
-    """Register new user and auto-login"""
+    """Register user"""
     try:
         user = user_service.create_user(user_data)
         login_data = UserLogin(email=user_data.email, password=user_data.password)

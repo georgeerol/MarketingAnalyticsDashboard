@@ -3,18 +3,15 @@ Export API endpoints for MMM insights and recommendations.
 """
 
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 import json
 import csv
 import io
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user
 from app.models.user import User
 from app.services.mmm_service import MMMService
-from app.schemas.mmm import MMMExportRequest, MMMExportResponse
 
 router = APIRouter()
 
@@ -281,13 +278,12 @@ def format_as_text(data: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-@router.get("/insights", response_model=MMMExportResponse)
+@router.get("/insights")
 async def export_insights(
-    format: str = Query("json", regex="^(json|csv|txt)$"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    format: str = Query("json", pattern="^(json|csv|txt)$"),
+    current_user: User = Depends(get_current_user)
 ):
-    """Export MMM insights (json/csv/txt)"""
+    """Export MMM insights"""
     try:
         mmm_service = MMMService()
         insights_data = generate_insights_data(mmm_service)

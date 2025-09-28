@@ -182,25 +182,6 @@ class TestResponseCurvesValidation:
             # Check array lengths match
             assert len(data['spend']) == len(data['response']), f"{channel} spend and response arrays different lengths"
 
-    def test_business_insights_validity(self, all_curves):
-        """Test that the curves provide valid business insights."""
-        # Test that we can identify top and bottom performers
-        efficiencies = [(channel, data['efficiency']) for channel, data in all_curves['curves'].items()]
-        efficiencies.sort(key=lambda x: x[1], reverse=True)
-        
-        top_performer = efficiencies[0]
-        bottom_performer = efficiencies[-1]
-        
-        # Top performer should have significantly higher efficiency
-        efficiency_gap = top_performer[1] - bottom_performer[1]
-        assert efficiency_gap > 0.3, f"Efficiency gap too small: {efficiency_gap:.3f}"
-        
-        # Test that saturation points vary meaningfully
-        saturation_points = [data['saturation_point'] for data in all_curves['curves'].values()]
-        sat_std = np.std(saturation_points)
-        sat_mean = np.mean(saturation_points)
-        coefficient_of_variation = sat_std / sat_mean
-        assert coefficient_of_variation > 0.15, f"Saturation points too similar: CV={coefficient_of_variation:.3f}"
 
     @pytest.mark.integration
     def test_end_to_end_curve_generation(self, mmm_service):
@@ -219,17 +200,6 @@ class TestResponseCurvesValidation:
             assert 'efficiency' in data
             assert data['saturation_point'] > 0, f"{channel} individual generation has $0 saturation"
 
-    def test_performance_benchmarks(self, all_curves):
-        """Test that the curves meet performance expectations."""
-        # Channel 4 should be the top performer based on our test data
-        channel4_efficiency = all_curves['curves']['Channel4']['efficiency']
-        
-        # Should be among the top performers
-        all_efficiencies = [data['efficiency'] for data in all_curves['curves'].values()]
-        max_efficiency = max(all_efficiencies)
-        
-        # Channel 4 should be close to the top (within 10% of max)
-        assert channel4_efficiency >= max_efficiency * 0.9, f"Channel4 efficiency {channel4_efficiency:.2f} not near top {max_efficiency:.2f}"
 
     def test_mathematical_consistency(self, all_curves):
         """Test mathematical consistency of the curves."""

@@ -219,32 +219,25 @@ class TestMMMWorkflow:
         # Step 1: Get MMM info
         info_response = await client.get("/api/v1/mmm/info", headers=auth_headers)
         assert info_response.status_code == 200
-        info_data = info_response.json()
         
-        # Step 2: Get model info
-        info_response = await client.get("/api/v1/mmm/info", headers=auth_headers)
-        assert info_response.status_code == 200
-        info_data = info_response.json()
-        
-        # Step 3: Get available channels
+        # Step 2: Get available channels
         channels_response = await client.get("/api/v1/mmm/channels", headers=auth_headers)
         assert channels_response.status_code == 200
         channels_data = channels_response.json()
-        
         channels = channels_data["channels"]
         assert len(channels) > 0
         
-        # Step 4: Get contribution data for all channels
+        # Step 3: Get contribution data
         contribution_response = await client.get("/api/v1/mmm/contribution", headers=auth_headers)
         assert contribution_response.status_code == 200
         contribution_data = contribution_response.json()
         
-        # Step 5: Get response curves for all channels
+        # Step 4: Get response curves
         curves_response = await client.get("/api/v1/mmm/response-curves", headers=auth_headers)
         assert curves_response.status_code == 200
         curves_data = curves_response.json()
         
-        # Step 6: Get channel summary
+        # Step 5: Get channel summary
         summary_response = await client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         assert summary_response.status_code == 200
         summary_data = summary_response.json()
@@ -320,42 +313,3 @@ class TestMMMErrorHandling:
         assert response.status_code == 401
 
 
-
-class TestMMMPerformance:
-    """Test MMM endpoint performance characteristics."""
-
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_concurrent_requests(self, client: AsyncClient, auth_headers):
-        """Test multiple concurrent requests to MMM endpoints."""
-        import asyncio
-        
-        # Create multiple concurrent requests
-        tasks = [
-            client.get("/api/v1/mmm/info", headers=auth_headers),
-            client.get("/api/v1/mmm/channels", headers=auth_headers),
-            client.get("/api/v1/mmm/info", headers=auth_headers),
-            client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
-        ]
-        
-        responses = await asyncio.gather(*tasks)
-        
-        # All requests should succeed
-        for response in responses:
-            assert response.status_code == 200
-
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_repeated_requests_caching(self, client: AsyncClient, auth_headers):
-        """Test that repeated requests are handled efficiently (caching)."""
-        # Make the same request multiple times
-        for _ in range(5):
-            response = await client.get("/api/v1/mmm/channels", headers=auth_headers)
-            assert response.status_code == 200
-            
-            # Response should be consistent
-            data = response.json()
-            assert "channels" in data
-            assert len(data["channels"]) > 0

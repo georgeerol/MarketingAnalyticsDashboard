@@ -11,10 +11,7 @@ import numpy as np
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
-from app.schemas.mmm import (
-    MMMModelInfo, ContributionData, 
-    ResponseCurveData, MMMChannelSummary
-)
+from app.schemas.mmm import MMMModelInfo, MMMChannelSummary
 
 settings = get_settings()
 logger = get_logger(__name__)
