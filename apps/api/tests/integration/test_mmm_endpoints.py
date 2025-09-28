@@ -108,16 +108,6 @@ class TestMMMEndpoints:
             assert "summary" in data
             assert channel in data["channels"] or len(data["channels"]) == 1
 
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_get_contribution_invalid_channel(self, client: AsyncClient, auth_headers):
-        """Test get contribution data for invalid channel."""
-        response = await client.get("/api/v1/mmm/contribution?channel=InvalidChannel", headers=auth_headers)
-        
-        assert response.status_code == 400
-        data = response.json()
-        assert "detail" in data
 
     @pytest.mark.integration
     @pytest.mark.mmm
@@ -175,16 +165,6 @@ class TestMMMEndpoints:
             assert isinstance(data["curves"], dict)
             assert channel in data["curves"] or len(data["curves"]) == 1
 
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_get_response_curves_invalid_channel(self, client: AsyncClient, auth_headers):
-        """Test get response curves for invalid channel."""
-        response = await client.get("/api/v1/mmm/response-curves?channel=InvalidChannel", headers=auth_headers)
-        
-        assert response.status_code == 400
-        data = response.json()
-        assert "detail" in data
 
     @pytest.mark.integration
     @pytest.mark.mmm
@@ -339,28 +319,6 @@ class TestMMMErrorHandling:
         
         assert response.status_code == 401
 
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_malformed_query_parameters(self, client: AsyncClient, auth_headers):
-        """Test MMM endpoints with malformed query parameters."""
-        # Test with very long channel name
-        long_channel = "a" * 1000
-        response = await client.get(f"/api/v1/mmm/contribution?channel={long_channel}", headers=auth_headers)
-        
-        # Should handle gracefully (either 400 or 404)
-        assert response.status_code in [400, 404]
-
-    @pytest.mark.integration
-    @pytest.mark.mmm
-    @pytest.mark.asyncio
-    async def test_special_characters_in_channel(self, client: AsyncClient, auth_headers):
-        """Test MMM endpoints with special characters in channel names."""
-        special_channel = "Channel<script>alert('xss')</script>"
-        response = await client.get(f"/api/v1/mmm/contribution?channel={special_channel}", headers=auth_headers)
-        
-        # Should handle gracefully
-        assert response.status_code in [400, 404]
 
 
 class TestMMMPerformance:

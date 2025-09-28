@@ -3,12 +3,13 @@ Test configuration and fixtures for the MMM Dashboard API.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from pathlib import Path
 from typing import AsyncGenerator, Generator
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker, Session
 from fastapi.testclient import TestClient
 
 import sys
@@ -24,11 +25,12 @@ from app.models.user import User
 from app.core.security import hash_password
 from app.services.mmm_service import MMMService
 
-# Test database URL
-TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+# Test database URL - use sync SQLite for testing to match production sync services
+TEST_DATABASE_URL = "sqlite:///./test.db"
 
-# Create test engine
-test_engine = create_async_engine(
+# Create test engine (sync to match production)
+from sqlalchemy import create_engine
+test_engine = create_engine(
     TEST_DATABASE_URL,
     echo=False,
     future=True
@@ -36,7 +38,6 @@ test_engine = create_async_engine(
 
 TestSessionLocal = sessionmaker(
     test_engine,
-    class_=AsyncSession,
     expire_on_commit=False
 )
 
@@ -48,29 +49,28 @@ def event_loop() -> Generator:
     loop.close()
 
 @pytest.fixture
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
+def db_session() -> Generator[Session, None, None]:
     """Create a test database session."""
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    Base.metadata.create_all(bind=test_engine)
     
-    async with TestSessionLocal() as session:
+    with TestSessionLocal() as session:
         yield session
     
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    Base.metadata.drop_all(bind=test_engine)
 
-@pytest.fixture
-def override_get_db(db_session: AsyncSession):
-    """Override the get_db dependency for testing."""
-    def _override_get_db():
-        return db_session
-    return _override_get_db
 
-@pytest.fixture
-async def client(override_get_db) -> AsyncGenerator[AsyncClient, None]:
+@pytest_asyncio.fixture
+async def client(db_session: Session) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client."""
+    def override_get_db():
+        return db_session
+    
     app.dependency_overrides[get_db] = override_get_db
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    
+    async with AsyncClient(
+        transport=ASGITransport(app=app), 
+        base_url="http://test"
+    ) as ac:
         yield ac
     app.dependency_overrides.clear()
 
@@ -80,7 +80,7 @@ def test_client() -> TestClient:
     return TestClient(app)
 
 @pytest.fixture
-async def test_user(db_session: AsyncSession) -> User:
+def test_user(db_session: Session) -> User:
     """Create a test user."""
     user = User(
         email="test@example.com",
@@ -90,8 +90,8 @@ async def test_user(db_session: AsyncSession) -> User:
         hashed_password=hash_password("testpassword123")
     )
     db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
+    db_session.commit()
+    db_session.refresh(user)
     return user
 
 @pytest.fixture
@@ -150,13 +150,13 @@ def sample_response_curves():
 
 # Service fixtures for testing business logic
 @pytest.fixture
-def user_service(db_session: AsyncSession):
+def user_service(db_session: Session):
     """Create a user service instance for testing."""
     from app.services.user_service import UserService
     return UserService(db_session)
 
 @pytest.fixture
-def auth_service(db_session: AsyncSession):
+def auth_service(db_session: Session):
     """Create an auth service instance for testing."""
     from app.services.auth_service import AuthService
     return AuthService(db_session)

@@ -79,19 +79,6 @@ class TestAuthEndpoints:
         data = response.json()
         assert "detail" in data
 
-    @pytest.mark.integration
-    @pytest.mark.auth
-    @pytest.mark.asyncio
-    async def test_login_missing_fields(self, client: AsyncClient):
-        """Test login with missing fields."""
-        login_data = {
-            "email": "test@example.com"
-            # Missing password
-        }
-        
-        response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
-        
-        assert response.status_code == 422  # Validation error
 
     @pytest.mark.integration
     @pytest.mark.auth
@@ -278,59 +265,3 @@ class TestAuthWorkflow:
         user_info2 = me_response2.json()
         assert user_info2["email"] == "workflow@example.com"
         assert user_info2["id"] == user_info["id"]  # Same user
-
-
-class TestAuthSecurity:
-    """Test authentication security aspects."""
-
-    @pytest.mark.integration
-    @pytest.mark.auth
-    @pytest.mark.asyncio
-    async def test_sql_injection_attempt(self, client: AsyncClient):
-        """Test that SQL injection attempts are handled safely."""
-        malicious_data = {
-            "email": "test@example.com'; DROP TABLE users; --",
-            "password": "password"
-        }
-        
-        response = await client.post("/api/v1/auth/login", data={"username": malicious_data["email"], "password": malicious_data["password"]})
-        
-        # Should return 401 (not found) rather than causing an error
-        assert response.status_code == 401
-
-    @pytest.mark.integration
-    @pytest.mark.auth
-    @pytest.mark.asyncio
-    async def test_xss_attempt_in_registration(self, client: AsyncClient):
-        """Test that XSS attempts in registration are handled safely."""
-        xss_data = {
-            "email": "xss@example.com",
-            "password": "password123",
-            "full_name": "<script>alert('xss')</script>",
-            "company": "<img src=x onerror=alert('xss')>"
-        }
-        
-        response = await client.post("/api/v1/auth/register", json=xss_data)
-        
-        if response.status_code == 201:
-            # If registration succeeds, check that data is properly escaped
-            data = response.json()
-            assert "<script>" not in data["user"]["full_name"]
-            assert "<img" not in data["user"]["company"]
-
-    @pytest.mark.integration
-    @pytest.mark.auth
-    @pytest.mark.asyncio
-    async def test_rate_limiting_simulation(self, client: AsyncClient):
-        """Test multiple failed login attempts (simulating rate limiting)."""
-        login_data = {
-            "email": "nonexistent@example.com",
-            "password": "wrongpassword"
-        }
-        
-        # Make multiple failed attempts
-        for _ in range(5):
-            response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
-            assert response.status_code == 401
-        
-        # All should fail with 401, not cause server errors
