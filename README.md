@@ -245,8 +245,9 @@ Implementation uses Python protocols for dependency inversion and enhanced testa
 ### MMM Analytics
 
 - `GET /api/v1/mmm/status` - Model status and info
-- `GET /api/v1/mmm/channels` - Channel summary data
-- `GET /api/v1/mmm/contribution` - Contribution analysis
+- `GET /api/v1/mmm/channels` - List of media channels
+- `GET /api/v1/mmm/channels/summary` - Channel performance summary
+- `GET /api/v1/mmm/contribution` - Contribution analysis data
 - `GET /api/v1/mmm/response-curves` - Response curve data
 - `GET /api/v1/export/insights` - Export recommendations
 
