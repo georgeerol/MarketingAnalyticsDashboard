@@ -15,20 +15,16 @@ class ResponseCurvePoint(BaseModel):
     response: float = Field(..., ge=0, description="Response/conversions")
 
 
-
-
 class MMMModelInfo(BaseModel):
     """Schema for MMM model information."""
     
     model_type: str = Field(..., description="Type of MMM model")
     version: str = Field(..., description="Model version")
     training_period: str = Field(..., description="Training period")
-    channels: list[str] = Field(..., description="List of channels")
+    channels: List[str] = Field(..., description="List of channels")
     data_frequency: str = Field(..., description="Data frequency")
     total_weeks: int = Field(..., description="Total number of weeks")
     data_source: str = Field(..., description="Data source")
-
-
 
 
 class MMMChannelSummary(BaseModel):
@@ -41,5 +37,3 @@ class MMMChannelSummary(BaseModel):
     efficiency: float = Field(..., ge=0, description="Efficiency score")
     avg_weekly_spend: float = Field(..., ge=0, description="Average weekly spend")
     avg_weekly_contribution: float = Field(..., ge=0, description="Average weekly contribution")
-
-
