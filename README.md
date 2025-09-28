@@ -120,29 +120,32 @@ The MMM model processing pipeline demonstrates significant performance optimizat
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ saved_mmm   │───▶│ Model Cache │───▶│ Response    │
-│ .pkl (32MB) │    │ (LRU)       │    │ Curves      │
+│ saved_mmm   │───▶│ Model Cache │───▶│   FastAPI   │
+│ .pkl (32MB) │    │ (LRU)       │    │ Endpoints   │
 └─────────────┘    └─────────────┘    └─────────────┘
-       │                   │                   │
-       │                   ▼                   ▼
-       │            ┌─────────────┐    ┌─────────────┐
-       │            │ Channel     │    │ Hill        │
-       │            │ Analysis    │    │ Saturation  │
-       │            └─────────────┘    └─────────────┘
-       │                   │                   │
-       ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│ Contribution│    │ Smart       │    │ Export      │
-│ Charts      │    │ Insights    │    │ Reports     │
-└─────────────┘    └─────────────┘    └─────────────┘
+                                             │
+                   ┌─────────────────────────┼─────────────────────────┐
+                   │                         │                         │
+                   ▼                         ▼                         ▼
+            ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
+            │ Channel     │         │ Response    │         │ Export      │
+            │ Summary API │         │ Curves API  │         │ Insights API│
+            └─────────────┘         └─────────────┘         └─────────────┘
+                   │                         │                         │
+                   ▼                         ▼                         ▼
+            ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
+            │ Contribution│         │ Hill        │         │ Smart       │
+            │ Charts      │         │ Saturation  │         │ Insights    │
+            │ (Frontend)  │         │ (Frontend)  │         │ (Reports)   │
+            └─────────────┘         └─────────────┘         └─────────────┘
 ```
 
-- **Initial Load**: 32MB pickle file requires ~3 seconds for first-time loading
-- **Cached Performance**: Subsequent requests served in ~40-50ms (95% improvement)
-- **Channel Extraction**: Extracts 5 marketing channels with real model parameters
-- **Response Curves**: Generates Hill saturation curves showing diminishing returns
-- **Insights Generation**: Analyzes channel performance and provides optimization recommendations
-- **Export Capabilities**: Supports JSON, CSV, and text format exports
+- **Initial Load**: 32MB pickle file requires ~3 seconds for first-time loading via Google Meridian
+- **Cached Performance**: Subsequent API requests served in ~40-50ms (95% improvement)
+- **API Endpoints**: Three specialized endpoints serve channel summary, response curves, and export data
+- **Channel Analysis**: Extracts 5 marketing channels with real model parameters via `/mmm/channels/summary`
+- **Response Curves**: Generates Hill saturation curves showing diminishing returns via `/mmm/response-curves`
+- **Export Reports**: Provides insights in JSON, CSV, and text formats via `/export/insights`
 
 ### Authentication Flow
 
