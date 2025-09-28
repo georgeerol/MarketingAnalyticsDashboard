@@ -2,15 +2,17 @@
 
 A Media Mix Modeling analytics platform built with FastAPI and Next.js.
 
+---
+
 ## Requirements
 
-- Implement user authentication and dashboard  
-- Load and integrate Google Meridian model trace (`saved_mmm.pkl`)  
-- Build contribution charts for channel performance  
-- Add response curves to show diminishing returns  
-- Provide clear customer-facing insights and recommendations  
-- Ensure full testing (unit, integration, and coverage)  
-- Set up CI/CD for production readiness  
+- Implement user authentication and dashboard
+- Load and integrate Google Meridian model trace (`saved_mmm.pkl`)
+- Build contribution charts for channel performance
+- Add response curves to show diminishing returns
+- Provide clear customer-facing insights and recommendations
+- Ensure full testing (unit, integration, and coverage)
+- Set up CI/CD for production readiness
 
 ---
 
@@ -18,40 +20,37 @@ A Media Mix Modeling analytics platform built with FastAPI and Next.js.
 
 ## Phase 1 – User Management
 
-| Task                | Description                                   | Status   |
-|---------------------|-----------------------------------------------|----------|
-| User Authentication | Secure login with JWT and password hashing    | Complete |
-| User Dashboard      | Login and dashboard UI                        | Complete |
-| User Dashboard      | Registration                                  | Complete |
-
+| Task                | Description                                | Status   |
+| ------------------- | ------------------------------------------ | -------- |
+| User Authentication | Secure login with JWT and password hashing | Complete |
+| User Dashboard      | Login and dashboard UI                     | Complete |
+| User Dashboard      | Registration                               | Complete |
 
 ## Phase 2 – MMM Dashboard
 
-| Task                   | Description                                    | Status   |
-|------------------------|------------------------------------------------|----------|
-| Load & Integrate Model | Connected Google Meridian model trace file     | Complete |
-| Contribution Charts    | Visual breakdown of channel performance        | Complete |
-| Response Curves        | Analysis of spend vs. returns                  | Complete |
-| Customer Narrative     | Insights and recommendations view              | Complete |
-
+| Task                   | Description                                | Status   |
+| ---------------------- | ------------------------------------------ | -------- |
+| Load & Integrate Model | Connected Google Meridian model trace file | Complete |
+| Contribution Charts    | Visual breakdown of channel performance    | Complete |
+| Response Curves        | Analysis of spend vs. returns              | Complete |
+| Customer Narrative     | Insights and recommendations view          | Complete |
 
 ## Phase 3 – Testing & QA
 
-| Task             | Description                                | Status   |
-|------------------|--------------------------------------------|----------|
-| Unit Tests       | MMM features and authentication            | Complete |
-| Integration Tests| API endpoints and database connections      | Complete |
-
+| Task              | Description                            | Status   |
+| ----------------- | -------------------------------------- | -------- |
+| Unit Tests        | MMM features and authentication        | Complete |
+| Integration Tests | API endpoints and database connections | Complete |
 
 ## Phase 4 – Refactoring & Bug Fixes
 
-| Task                          | Description                                   | Status   |
-|-------------------------------|-----------------------------------------------|----------|
-| Code Cleanup                  | Improve readability and maintainability       | Complete |
-| Bug Fixes                     | Resolve issues found during testing           | Complete |
-| Performance Tuning            | Optimize queries and response times           | Complete |
-| Documentation Update          | Update README and code docs                   | Complete |
-| Technical Decisions & Trade-offs | Document key architectural choices         | Complete |
+| Task                             | Description                             | Status   |
+| -------------------------------- | --------------------------------------- | -------- |
+| Code Cleanup                     | Improve readability and maintainability | Complete |
+| Bug Fixes                        | Resolve issues found during testing     | Complete |
+| Performance Tuning               | Optimize queries and response times     | Complete |
+| Documentation Update             | Update README and code docs             | Complete |
+| Technical Decisions & Trade-offs | Document key architectural choices      | Complete |
 
 ---
 
@@ -59,6 +58,8 @@ A Media Mix Modeling analytics platform built with FastAPI and Next.js.
 
 <img src="imgs/dashboard-overview.png" alt="MMM Dashboard Overview" width="800">
 <img src="imgs/mmm-insights.png" alt="MMM Insights and Recommendations" width="800">
+
+---
 
 ## Quick Start
 
@@ -81,6 +82,8 @@ Visit `http://localhost:3000` and log in with:
 
 - **Email**: `test@example.com`
 - **Password**: `test123`
+
+---
 
 ## Features
 
@@ -106,6 +109,8 @@ Visit `http://localhost:3000` and log in with:
 - **Clean code**: Protocol-based services, no dead code, optimized structure
 - **Production ready**: Docker setup, proper error handling, security best practices
 
+---
+
 ## Project Structure
 
 ```
@@ -122,6 +127,7 @@ Visit `http://localhost:3000` and log in with:
 │   ├── ui/           # Shared component library
 │   └── docker/       # Database setup
 ```
+
 ---
 
 ## System Architecture
@@ -189,6 +195,7 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 - **Test mocks**: Fake services in `tests/mocks/` let you test without real databases
 - **Dependency injection**: FastAPI automatically picks the right service via `api/deps.py`
 - **SOLID design**: Dependency inversion makes testing easier and code more flexible
+
 ---
 
 ## Key Components
@@ -220,6 +227,8 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 - **Response Curves**: Saturation analysis with diminishing returns and efficiency metrics
 - **Smart Insights**: AI-generated recommendations and performance analysis
 - **Export**: Download insights in JSON, CSV, or TXT formats
+
+---
 
 ## API Endpoints
 
@@ -434,6 +443,8 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 | `test@example.com` | `test123` | Standard user |
 | `demo@example.com` | `demo123` | Demo account  |
 
+---
+
 ## Production Deployment Options
 
 ### Key Architectural Decisions
@@ -447,6 +458,8 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 | **Updates**       | Polling every 30s            | WebSocket connections      | MMM data doesn't change that often                    |
 | **State**         | Zustand                      | Redux Toolkit              | Zustand is way less boilerplate for this size project |
 | **Model Caching** | Python LRU cache (3s → 40ms) | Redis from the start       | Wanted to see the performance difference first        |
+
+---
 
 ### AWS Production Architecture
 
