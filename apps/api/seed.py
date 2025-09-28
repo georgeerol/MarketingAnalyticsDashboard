@@ -10,7 +10,6 @@ Or via pnpm:
     pnpm seed
 """
 
-import asyncio
 import sys
 from pathlib import Path
 # Add the parent directory to Python path for imports
@@ -18,7 +17,7 @@ sys.path.append(str(Path(__file__).parent))
 
 # Import database and models
 from sqlalchemy import select
-from app.core.database import AsyncSessionLocal, init_db
+from app.core.database import SessionLocal, init_db
 from app.models import User
 from app.core.security import hash_password
 from app.core.logging import get_logger
@@ -27,7 +26,7 @@ from app.core.logging import get_logger
 logger = get_logger(__name__)
 
 
-async def seed_users() -> None:
+def seed_users() -> None:
     """Seed sample users for development and testing."""
     
     sample_users = [
@@ -76,13 +75,13 @@ async def seed_users() -> None:
     logger.info("Seeding users...")
     
     # Create database session
-    async with AsyncSessionLocal() as db:
+    with SessionLocal() as db:
         try:
             for user_data in sample_users:
                 logger.info(f"Creating user: {user_data['email']}")
                 
                 # Check if user already exists
-                result = await db.execute(
+                result = db.execute(
                     select(User).filter(User.email == user_data['email'])
                 )
                 existing_user = result.scalar_one_or_none()
@@ -101,16 +100,16 @@ async def seed_users() -> None:
                 )
                 db.add(user)
             
-            await db.commit()
+            db.commit()
         except Exception as e:
-            await db.rollback()
+            db.rollback()
             logger.error(f"Error creating users: {e}")
             raise
     
     logger.info(f"Created {len(sample_users)} users")
 
 
-async def main() -> None:
+def main() -> None:
     """Main seeding function."""
     
     logger.info("Starting database seeding...")
@@ -118,11 +117,11 @@ async def main() -> None:
     
     try:
         # Initialize database tables
-        await init_db()
+        init_db()
         logger.info("Database tables initialized")
         
         # Seed users
-        await seed_users()
+        seed_users()
         
         logger.info("=" * 50)
         logger.info("Database seeding completed successfully!")
@@ -139,4 +138,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
