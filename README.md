@@ -81,27 +81,27 @@ The application follows a standard three-tier architecture with clear data flow:
 │             │    │  Frontend   │    │   Backend   │
 │             │    │ (Port 3000) │    │ (Port 8000) │
 └─────────────┘    └─────────────┘    └─────────────┘
-       │                   │                   │
-       │                   │                   ▼
-       │                   │            ┌─────────────┐
-       │                   │            │ PostgreSQL  │
-       │                   │            │  Database   │
-       │                   │            │ (Port 5432) │
-       │                   │            └─────────────┘
-       │                   │                   │
-       │                   ▼                   ▼
-       │           ┌─────────────┐    ┌─────────────┐
-       │           │   Zustand   │    │ Google MMM  │
-       │           │    Store    │    │ Model Cache │
-       │           │(localStorage)│    │ (LRU Cache) │
-       │           └─────────────┘    └─────────────┘
-       │                                       ▲
-       │                                       │
-       │                               ┌─────────────┐
-       └──── JWT Tokens ───────────────│saved_mmm.pkl│
-            (Authorization)            │   (32MB)    │
-                                       │ (Read-only) │
-                                       └─────────────┘
+                           │                   │
+                           │                   ▼
+                           │            ┌─────────────┐
+                           │            │ PostgreSQL  │
+                           │            │  Database   │
+                           │            │ (Port 5432) │
+                           │            └─────────────┘
+                           │                   │
+                           ▼                   ▼
+                   ┌─────────────┐    ┌─────────────┐
+                   │   Zustand   │    │ Google MMM  │
+                   │    Store    │    │ Model Cache │
+                   │(localStorage)│    │ (LRU Cache) │
+                   └─────────────┘    └─────────────┘
+                                             ▲
+                                             │
+                                     ┌─────────────┐
+                                     │saved_mmm.pkl│
+                                     │   (32MB)    │
+                                     │ (Read-only) │
+                                     └─────────────┘
 ```
 
 **Data Flow Components:**
