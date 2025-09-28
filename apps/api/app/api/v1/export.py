@@ -316,17 +316,3 @@ async def export_insights(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
-
-@router.get("/insights/preview")
-async def preview_insights(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Preview export data"""
-    try:
-        mmm_service = MMMService()
-        insights_data = generate_insights_data(mmm_service)
-        return insights_data
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Preview failed: {str(e)}")

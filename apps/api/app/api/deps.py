@@ -50,26 +50,3 @@ def get_current_active_user_dep(
     return current_user
 
 
-def get_current_admin_user(
-    current_user: User = Depends(get_current_active_user)
-) -> User:
-    """Dependency to get current admin user."""
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    return current_user
-
-
-def get_pagination_params(
-    skip: int = 0,
-    limit: int = 100
-) -> dict:
-    """Get pagination parameters with validation."""
-    if skip < 0:
-        skip = 0
-    if limit <= 0 or limit > 1000:
-        limit = 100
-    
-    return {"skip": skip, "limit": limit}
