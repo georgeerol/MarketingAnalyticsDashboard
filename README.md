@@ -96,17 +96,17 @@ Visit `http://localhost:3000` and log in with:
 
 ### MMM Analytics Dashboard
 
-- **Real Model Data**: Loads actual Google Meridian model (32MB `saved_mmm.pkl`)
-- **Contribution Charts**: See channel performance with bar/pie charts
+- **Real Model Data**: Loads actual Google Meridian model (`saved_mmm.pkl`)
+- **Contribution Charts**: See channel performance
 - **Response Curves**: Saturation analysis showing diminishing returns for each channel
-- **Smart Insights**: AI-generated recommendations for budget optimization
-- **Export**: Download insights in JSON, CSV, or TXT formats
+- **Smart Insights**: Recommendations for budget optimization
+- **Export**: Download insights in TXT format
 
 ### Performance & Quality
 
-- **95% faster**: Smart model caching (3+ seconds → 40-50ms)
-- **Well tested**: Tests covering all core functionality (100% pass rate)
-- **Clean code**: Modular MMM architecture, protocol-based services, Solid principles
+- **Cache**: Smart model caching (3+ seconds → 40-50ms)
+- **Test**: Tests covering all core functionality
+- **Architecture**: Modular MMM architecture, protocol-based services, Solid principles
 
 ---
 
@@ -120,7 +120,7 @@ Visit `http://localhost:3000` and log in with:
 │   │   │   └── ...   # Other app modules
 │   │   ├── data/     # MMM model files
 │   │   ├── scripts/  # Utility scripts (seed, reset, shutdown, inspect)
-│   │   └── tests/    # test suite (mock,unit,integration)
+│   │   └── tests/    # test suite (mock, unit, integration)
 │   └── web/          # Next.js frontend
 │       ├── app/      # App router pages
 │       ├── components/ # React components
@@ -186,7 +186,7 @@ Excalidraw: [Authentication Flow](imgs/AuthenticationFlow.excalidraw)
 
 ### Protocol-Based Architecture
 
-Implementation uses Python protocols for dependency inversion and improve testability:
+Implementation uses Python protocols for dependency inversion and improves testability:
 
 <img src="imgs/ProtocolBase%20Architecture.png" alt="Protocol-Based Architecture" width="600">
 
@@ -219,7 +219,7 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
   - `MMMService`: Orchestrates all components
 - **Data Processing**: Contribution data, response curves, channel analysis
 - **Channel Support**: 5-channel analysis from real model data
-- **Fallback**: Uses mock data when model file isn't available
+- **Fallback**: Uses mock data when the model file isn't available
 
 ### 3. Authentication System
 
@@ -233,7 +233,7 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 - **Contribution Charts**: Visual breakdown of channel performance
 - **Response Curves**: Saturation analysis with diminishing returns and efficiency metrics
 - **Insights**: Recommendations and performance analysis
-- **Export**: Download insights in TXT formats
+- **Export**: Download insights in TXT format
 
 ---
 
@@ -471,8 +471,8 @@ Excalidraw: [AWS Production Architecture](imgs/AWSProductionArchitecture.excalid
 - **Auto-scaling**: ECS handles traffic spikes without managing servers
 - **Fast caching**: ElastiCache Redis keeps MMM data under 30ms response times
 - **Background jobs**: SQS + Lambda for heavy model computations without blocking the API
-- **Database reliability**: RDS Multi-AZ, automatic fail over if something breaks
-- **User management**: Cognito handles auth so no need to build user registration flows
+- **Database reliability**: RDS Multi-AZ, automatic failover if something breaks
+- **User management**: Cognito handles auth, so no need to build user registration flows
 - **Global CDN**: CloudFront serves static assets
 - **Monitoring built-in**: CloudWatch and X-Ray show what's slow or breaking
 - **Pay for usage**: Lambda only costs money when processing jobs
