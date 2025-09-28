@@ -10,9 +10,7 @@ from typing import Dict, Any, Optional, List
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.schemas.mmm import MMMModelInfo, MMMChannelSummary
-from app.services.mmm_model_loader import load_mmm_model, ChannelNameExtractor, MMMModelError
-from app.services.mmm_data_processor import MMMDataProcessor
-from app.services.mmm_curve_generator import ResponseCurveGenerator
+from app.services.mmm import load_mmm_model, ChannelNameExtractor, MMMModelError, MMMDataProcessor, ResponseCurveGenerator
 
 settings = get_settings()
 logger = get_logger(__name__)
