@@ -2,7 +2,7 @@
 Security utilities for authentication and authorization.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from jose import JWTError, jwt
@@ -60,7 +60,8 @@ def hash_password(password: str) -> str:
         
         return pwd_context.hash(password)
     except Exception:
-        # Fallback to simple hash for compatibility
+        # WARNING: Fallback to simple hash for compatibility
+        # TODO: Remove this fallback in production - SHA256 without salt is insecure
         import hashlib
         return hashlib.sha256(password.encode()).hexdigest()
 
@@ -110,9 +111,9 @@ def create_access_token(
     to_encode = data.copy()
     
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     
