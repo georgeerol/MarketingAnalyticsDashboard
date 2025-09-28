@@ -3,6 +3,7 @@ Loads and processes Google Meridian MMM models.
 """
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Dict, Any, Optional, List
 import numpy as np
 
@@ -25,8 +26,6 @@ def _load_model_cached(model_path: str) -> Any:
 
     Falls back to a lightweight in-process model when Meridian isn't installed.
     """
-    from pathlib import Path
-
     model_path_obj = Path(model_path)
     if not model_path_obj.exists():
         raise MMMModelError(f"MMM model file not found at {model_path}")
