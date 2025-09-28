@@ -547,6 +547,138 @@ For production scaling, consider:
 - Monitoring and alerting
 - CI/CD pipeline
 
+## Production-Grade System Architecture
+
+Scalable architecture design showing evolution from current monolith to production-ready distributed system:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    AWS Production Environment                                │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
+│  │ CloudFront  │    │ Application │    │ API Gateway │    │ EventBridge │                  │
+│  │    CDN      │    │ Load Balancer│    │   (REST)    │    │ Scheduler   │                  │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
+│         │                   │                   │                   │                       │
+│         ▼                   ▼                   ▼                   ▼                       │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
+│  │    S3       │    │    ECS      │    │    ECS      │    │   Lambda    │                  │
+│  │ Static Web  │    │ FastAPI     │    │ FastAPI     │    │ Functions   │                  │
+│  │   Assets    │    │ Service     │    │ Service     │    │ (Workers)   │                  │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
+│         │                   │                   │                   │                       │
+│         └───────────────────┼───────────────────┼───────────────────┘                       │
+│                             ▼                   ▼                   ▲                       │
+│                      ┌─────────────┐    ┌─────────────┐           │                       │
+│                      │ ElastiCache │    │     RDS     │           │                       │
+│                      │   Redis     │    │ PostgreSQL  │           │                       │
+│                      │ (Sessions)  │    │ Multi-AZ    │           │                       │
+│                      └─────────────┘    └─────────────┘           │                       │
+│                             │                   │                 │                       │
+│                             ▼                   ▼                 │                       │
+│                      ┌─────────────┐    ┌─────────────┐          │                       │
+│                      │ ElastiCache │    │     S3      │          │                       │
+│                      │   Redis     │    │   Bucket    │          │                       │
+│                      │ (MMM Cache) │    │ (Models &   │          │                       │
+│                      └─────────────┘    │  Exports)   │          │                       │
+│                             │           └─────────────┘          │                       │
+│                             ▼                   │                │                       │
+│                      ┌─────────────┐           ▼                │                       │
+│                      │     SQS     │    ┌─────────────┐          │                       │
+│                      │   Queue     │    │ AWS Cognito │          │                       │
+│                      │ (MMM Jobs)  │────│ Identity &  │──────────┘                       │
+│                      └─────────────┘    │ Access Mgmt │                                  │
+│                                         └─────────────┘                                  │
+│                                                                                             │
+│ Monitoring & Observability:                                                                │
+│ ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
+│ │ CloudWatch  │    │ X-Ray       │    │ CloudTrail  │    │ AWS Config  │                  │
+│ │ (Metrics &  │    │ (Tracing)   │    │ (Audit)     │    │ (Compliance)│                  │
+│ │  Logs)      │    │             │    │             │    │             │                  │
+│ └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
+│                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**AWS Production Architecture Benefits:**
+- **High Availability**: Application Load Balancer with ECS auto-scaling across multiple AZs
+- **Performance**: ElastiCache Redis for sub-30ms response times and MMM data caching
+- **Scalability**: ECS Fargate with automatic scaling and Lambda for serverless workers
+- **Reliability**: RDS PostgreSQL Multi-AZ with automated backups and failover
+- **Identity Management**: AWS Cognito for user authentication, MFA, and social login integration
+- **Asynchronous Processing**: SQS queues with Lambda functions for heavy MMM computations
+- **Global Distribution**: CloudFront CDN for worldwide low-latency static asset delivery
+- **Monitoring**: CloudWatch metrics/logs, X-Ray tracing, CloudTrail audit, Config compliance
+- **Security**: API Gateway with throttling, WAF protection, and VPC isolation
+- **Cost Optimization**: Lambda pay-per-execution, S3 intelligent tiering, spot instances
+- **Managed Services**: Fully managed AWS services reduce operational overhead
+
+### On-Premise Alternative Architecture
+
+Enterprise on-premise deployment using VMware Tanzu and open-source components:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              VMware Tanzu On-Premise Environment                            │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
+│  │   NGINX     │    │ HAProxy     │    │ Keycloak    │    │ RabbitMQ    │                  │
+│  │ Reverse     │    │ Load        │    │ Identity &  │    │ Message     │                  │
+│  │ Proxy       │    │ Balancer    │    │ Access Mgmt │    │ Queue       │                  │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
+│         │                   │                   │                   │                       │
+│         ▼                   ▼                   ▼                   ▼                       │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
+│  │ Static Web  │    │ Tanzu Pod   │    │ Tanzu Pod   │    │ Workflow    │                  │
+│  │ Assets      │    │ FastAPI     │    │ FastAPI     │    │ Workers     │                  │
+│  │ (Files)     │    │ Service     │    │ Service     │    │ (3x Pods)   │                  │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
+│         │                   │                   │                   │                       │
+│         └───────────────────┼───────────────────┼───────────────────┘                       │
+│                             ▼                   ▼                   ▲                       │
+│                      ┌─────────────┐    ┌─────────────┐           │                       │
+│                      │    Redis    │    │ PostgreSQL  │           │                       │
+│                      │   Cache     │    │ Relational  │           │                       │
+│                      │ (Sessions)  │    │ Database    │           │                       │
+│                      └─────────────┘    └─────────────┘           │                       │
+│                             │                   │                 │                       │
+│                             ▼                   ▼                 │                       │
+│                      ┌─────────────┐    ┌─────────────┐          │                       │
+│                      │    Redis    │    │    MinIO    │          │                       │
+│                      │   Cache     │    │   Object    │          │                       │
+│                      │ (MMM Data)  │    │  Storage    │          │                       │
+│                      └─────────────┘    │ (Models &   │          │                       │
+│                             │           │  Exports)   │          │                       │
+│                             ▼           └─────────────┘          │                       │
+│                      ┌─────────────┐                            │                       │
+│                      │ RabbitMQ    │────────────────────────────┘                       │
+│                      │ Queue       │                                                    │
+│                      │ (MMM Jobs)  │                                                    │
+│                      └─────────────┘                                                    │
+│                                                                                             │
+│ Monitoring & Observability:                                                                │
+│ ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
+│ │ Prometheus  │    │   Grafana   │    │    Loki     │    │  Promtail   │                  │
+│ │ (Metrics)   │    │ (Dashboard) │    │ (Logs)      │    │ (Log Agent) │                  │
+│ └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
+│                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**On-Premise Architecture Benefits:**
+- **Data Sovereignty**: Complete control over data location and compliance requirements
+- **Security**: Air-gapped deployment with enterprise-grade identity management (Keycloak)
+- **Performance**: Local network latency with dedicated hardware resources
+- **Customization**: Full control over infrastructure configuration and scaling policies
+- **Cost Predictability**: Fixed infrastructure costs without cloud usage surprises
+- **Integration**: Seamless integration with existing enterprise systems and Active Directory
+- **Monitoring**: Self-hosted observability stack with Prometheus, Grafana, and Loki
+- **Message Reliability**: RabbitMQ with persistent queues and dead letter exchanges
+- **Object Storage**: MinIO S3-compatible storage for model files and exports
+- **Container Orchestration**: VMware Tanzu for enterprise Kubernetes management
+
 ## License
 
 This project is for demonstration purposes. The Google Meridian model data is used under appropriate licensing terms.
