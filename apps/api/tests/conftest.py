@@ -5,15 +5,12 @@ Test configuration and fixtures for the MMM Dashboard API.
 import pytest
 import pytest_asyncio
 import asyncio
-from pathlib import Path
-from typing import AsyncGenerator, Generator
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker, Session
-from fastapi.testclient import TestClient
-
 import sys
 from pathlib import Path
+from typing import Generator, AsyncGenerator
+from httpx import AsyncClient, ASGITransport
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import sessionmaker, Session
 
 # Add the parent directory to sys.path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent))

@@ -11,7 +11,7 @@ async def reset_database():
     
     async with async_engine.begin() as conn:
         # Import all models to ensure they are registered
-        from app.models import User, ResponseCurve, MMMModelData
+        from app.models import User
         
         # Drop all tables
         await conn.run_sync(Base.metadata.drop_all)

@@ -8,7 +8,7 @@ from typing import Protocol, Optional, List, Dict, Any, runtime_checkable
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.schemas.auth import UserLogin, AuthResponse
-from app.schemas.mmm import MMMStatus, MMMModelInfo, MMMChannelSummary
+from app.schemas.mmm import MMMModelInfo, MMMChannelSummary
 
 
 @runtime_checkable
@@ -74,10 +74,6 @@ class AuthServiceProtocol(Protocol):
 @runtime_checkable
 class MMMServiceProtocol(Protocol):
     """Protocol for MMM model operations."""
-    
-    def get_model_status(self) -> MMMStatus:
-        """Get the status of the MMM model."""
-        ...
     
     def get_model_info(self) -> MMMModelInfo:
         """Get detailed information about the MMM model."""

@@ -10,7 +10,7 @@ from app.schemas.auth import (
 )
 from app.schemas.mmm import (
     ContributionData, ResponseCurvePoint, ResponseCurveData,
-    MMMDashboardData, MMMModelInfo, MMMStatus
+    MMMDashboardData, MMMModelInfo
 )
 
 __all__ = [
@@ -20,5 +20,5 @@ __all__ = [
     "Token", "TokenData", "AuthResponse", "UserLogin",
     # MMM schemas
     "ContributionData", "ResponseCurvePoint", "ResponseCurveData",
-    "MMMDashboardData", "MMMModelInfo", "MMMStatus",
+    "MMMDashboardData", "MMMModelInfo",
 ]

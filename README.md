@@ -48,8 +48,8 @@ Visit `http://localhost:3000` and log in with:
 ### Performance & Quality
 
 - **95% faster**: Smart model caching (3+ seconds → 40-50ms)
-- **Well tested**: 128+ test functions across comprehensive test suites
-- **Clean code**: Service interfaces, centralized constants, structured logging
+- **Well tested**: 46 focused tests covering all core functionality (100% pass rate)
+- **Clean code**: Protocol-based services, no dead code, optimized structure
 - **Production ready**: Docker setup, proper error handling, security best practices
 
 ## Project Structure
@@ -173,7 +173,7 @@ Excalidraw: [Protocol-Based Architecture](imgs/ProtocolBaseArchitecture.excalidr
 
 ### MMM Analytics
 
-- `GET /api/v1/mmm/status` - Model status and info
+- `GET /api/v1/mmm/info` - Model information and status
 - `GET /api/v1/mmm/channels` - List of media channels
 - `GET /api/v1/mmm/channels/summary` - Channel performance summary
 - `GET /api/v1/mmm/contribution` - Contribution analysis data
@@ -372,7 +372,6 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 | Email               | Password   | Role          |
 | ------------------- | ---------- | ------------- |
 | `test@example.com`  | `test123`  | Standard user |
-| `admin@example.com` | `admin123` | Administrator |
 | `demo@example.com`  | `demo123`  | Demo account  |
 
 ## Production Deployment Options
