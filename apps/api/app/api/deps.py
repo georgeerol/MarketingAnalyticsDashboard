@@ -1,8 +1,11 @@
 """
 Common API dependencies.
+
+Dependency injection here enables easy testing and loose coupling - services depend on 
+interfaces (protocols) rather than concrete implementations, so you can inject mock 
+services during testing while using real services in production.
 """
 
-from typing import Generator
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
