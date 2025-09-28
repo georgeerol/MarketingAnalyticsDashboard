@@ -9,7 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, List
 from app.core.logging import get_logger
-from app.services.mmm_fallback_model import create_fallback_model
+from .mmm_fallback_model import create_fallback_model
 
 logger = get_logger(__name__)
 
