@@ -20,24 +20,11 @@ async def register_user(
     user_service: UserServiceProtocol = Depends(get_user_service),
     auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
-    """
-    Register a new user and automatically log them in.
-    
-    - **email**: User's email address (must be unique)
-    - **password**: User's password (minimum 8 characters)
-    - **full_name**: User's full name
-    - **company**: Optional company name
-    
-    Returns access token and user information for immediate login.
-    """
+    """Register new user and auto-login"""
     try:
-        # Create the user
         user = user_service.create_user(user_data)
-        
-        # Automatically log in the newly created user
         login_data = UserLogin(email=user_data.email, password=user_data.password)
         auth_response = auth_service.login(login_data)
-        
         return auth_response
     except ValueError as e:
         raise HTTPException(
@@ -45,10 +32,9 @@ async def register_user(
             detail=str(e)
         )
     except AuthenticationError as e:
-        # This shouldn't happen since we just created the user, but handle it gracefully
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="User created but login failed. Please try logging in manually."
+            detail="User created but auto-login failed"
         )
 
 
@@ -57,13 +43,7 @@ async def login_oauth(
     form_data: OAuth2PasswordRequestForm = Depends(),
     auth_service: AuthServiceProtocol = Depends(get_auth_service)
 ):
-    """
-    OAuth2 compatible login endpoint (for form-based authentication).
-    
-    Uses OAuth2PasswordRequestForm which expects:
-    - **username**: User's email address
-    - **password**: User's password
-    """
+    """Login with username/password"""
     try:
         login_data = UserLogin(email=form_data.username, password=form_data.password)
         auth_response = auth_service.login(login_data)
@@ -84,11 +64,7 @@ async def login_oauth(
 async def get_current_user(
     current_user = Depends(get_current_active_user_dep)
 ):
-    """
-    Get current authenticated user information.
-    
-    Requires valid JWT token in Authorization header.
-    """
+    """Get current user info"""
     return UserResponse.model_validate(current_user)
 
 

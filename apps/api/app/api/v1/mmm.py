@@ -21,11 +21,7 @@ async def get_mmm_status(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Get the status of the MMM model.
-    
-    Returns information about model availability, file existence, and basic metadata.
-    """
+    """Check MMM model status"""
     return mmm_service.get_model_status()
 
 
@@ -34,15 +30,7 @@ async def get_mmm_info(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Get detailed information about the MMM model.
-    
-    Returns comprehensive model metadata including:
-    - Model type and version
-    - Training period
-    - Available channels
-    - Data frequency and coverage
-    """
+    """Get MMM model info"""
     try:
         return mmm_service.get_model_info()
     except MMMModelError as e:
@@ -57,11 +45,7 @@ async def get_media_channels(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Get the list of media channels from the MMM model.
-    
-    Returns all available marketing channels in the model.
-    """
+    """Get available media channels"""
     try:
         channels = mmm_service.get_channel_names()
         
@@ -83,14 +67,7 @@ async def get_contribution_data(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Get media contribution data from the MMM model.
-    
-    - **channel**: Optional specific channel to filter by
-    
-    Returns contribution data showing how much each channel contributed
-    to overall conversions over time.
-    """
+    """Get channel contribution data"""
     try:
         return mmm_service.get_contribution_data(channel)
     except MMMModelError as e:
@@ -106,14 +83,7 @@ async def get_response_curves(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Get response curve data from the MMM model.
-    
-    - **channel**: Optional specific channel to filter by
-    
-    Returns response curves showing the relationship between spend
-    and conversions, including saturation points and efficiency metrics.
-    """
+    """Get response curves for channels"""
     try:
         return mmm_service.get_response_curves(channel)
     except MMMModelError as e:
@@ -128,15 +98,7 @@ async def get_channel_summary(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Get summary statistics for all channels.
-    
-    Returns comprehensive performance metrics for each channel including:
-    - Total spend and contribution
-    - Efficiency scores
-    - Contribution share
-    - Average weekly performance
-    """
+    """Get channel performance summary"""
     try:
         return mmm_service.get_channel_summary()
     except MMMModelError as e:
@@ -151,12 +113,7 @@ async def explore_mmm_model(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Explore the MMM model structure and capabilities.
-    
-    Returns detailed information about model structure, available data,
-    and analysis capabilities for development and debugging purposes.
-    """
+    """Explore MMM model capabilities"""
     try:
         status = mmm_service.get_model_status()
         info = mmm_service.get_model_info()
@@ -189,16 +146,7 @@ async def test_mmm_model(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Test MMM model loading and basic functionality.
-    
-    Performs a comprehensive test of the MMM model including:
-    - Model loading
-    - Data extraction
-    - Basic calculations
-    
-    Useful for debugging and health checks.
-    """
+    """Test MMM model functionality"""
     try:
         test_results = {
             "model_status": "unknown",
@@ -254,12 +202,7 @@ async def debug_mmm_model(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """
-    Debug MMM model parameters and available data.
-    
-    This endpoint shows what parameters are actually available in the 
-    Google Meridian model for improving response curve generation.
-    """
+    """Debug MMM model parameters"""
     try:
         # Get debug information about model parameters
         model = mmm_service._load_model()

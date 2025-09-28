@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 def generate_insights_data(mmm_service: MMMService) -> Dict[str, Any]:
-    """Generate comprehensive insights data for export."""
+    """Generate insights data for export"""
     try:
         # Get all the data we need
         channel_summary = mmm_service.get_channel_summary()
@@ -152,7 +152,7 @@ def generate_insights_data(mmm_service: MMMService) -> Dict[str, Any]:
 
 
 def format_as_csv(data: Dict[str, Any]) -> str:
-    """Format insights data as CSV."""
+    """Format data as CSV"""
     output = io.StringIO()
     
     # Write metadata
@@ -211,12 +211,12 @@ def format_as_csv(data: Dict[str, Any]) -> str:
 
 
 def format_as_json(data: Dict[str, Any]) -> str:
-    """Format insights data as JSON."""
+    """Format data as JSON"""
     return json.dumps(data, indent=2, default=str)
 
 
 def format_as_text(data: Dict[str, Any]) -> str:
-    """Format insights data as readable text report."""
+    """Format data as text report"""
     lines = []
     lines.append("=" * 80)
     lines.append("MMM INSIGHTS & RECOMMENDATIONS REPORT")
@@ -287,14 +287,7 @@ async def export_insights(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Export MMM insights and recommendations in various formats.
-    
-    Formats:
-    - json: Structured JSON data
-    - csv: Comma-separated values
-    - txt: Human-readable text report
-    """
+    """Export MMM insights (json/csv/txt)"""
     try:
         mmm_service = MMMService()
         insights_data = generate_insights_data(mmm_service)
@@ -329,9 +322,7 @@ async def preview_insights(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Preview the insights data that would be exported (JSON format only).
-    """
+    """Preview export data"""
     try:
         mmm_service = MMMService()
         insights_data = generate_insights_data(mmm_service)

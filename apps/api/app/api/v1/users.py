@@ -24,15 +24,7 @@ async def get_users(
     current_user = Depends(get_current_admin_user),
     user_service: UserServiceProtocol = Depends(get_user_service)
 ):
-    """
-    Get list of users (admin only).
-    
-    - **skip**: Number of users to skip (pagination)
-    - **limit**: Maximum number of users to return
-    - **active_only**: Filter active users only
-    
-    Requires admin privileges.
-    """
+    """Get all users (admin only)"""
     users = user_service.get_users(
         skip=pagination["skip"],
         limit=pagination["limit"],
@@ -55,13 +47,7 @@ async def get_user(
     current_user = Depends(get_current_admin_user),
     user_service: UserServiceProtocol = Depends(get_user_service)
 ):
-    """
-    Get user by ID (admin only).
-    
-    - **user_id**: ID of the user to retrieve
-    
-    Requires admin privileges.
-    """
+    """Get user by ID (admin only)"""
     user = user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(
@@ -79,14 +65,7 @@ async def update_user(
     current_user = Depends(get_current_admin_user),
     user_service: UserServiceProtocol = Depends(get_user_service)
 ):
-    """
-    Update user information (admin only).
-    
-    - **user_id**: ID of the user to update
-    - **user_data**: Updated user information
-    
-    Requires admin privileges.
-    """
+    """Update user (admin only)"""
     try:
         user = user_service.update_user(user_id, user_data)
         if not user:
@@ -109,17 +88,11 @@ async def update_current_user(
     current_user = Depends(get_current_active_user_dep),
     user_service: UserServiceProtocol = Depends(get_user_service)
 ):
-    """
-    Update current user's information.
-    
-    - **user_data**: Updated user information
-    
-    Users can only update their own profile information.
-    """
+    """Update current user profile"""
     try:
-        # Remove admin-only fields for regular users
+        # Users can't change their own active status
         update_data = user_data.model_copy()
-        update_data.is_active = None  # Users can't change their own active status
+        update_data.is_active = None
         
         user = user_service.update_user(current_user.id, update_data)
         if not user:
@@ -142,13 +115,7 @@ async def deactivate_user(
     current_user = Depends(get_current_admin_user),
     user_service: UserServiceProtocol = Depends(get_user_service)
 ):
-    """
-    Deactivate a user (admin only).
-    
-    - **user_id**: ID of the user to deactivate
-    
-    Requires admin privileges.
-    """
+    """Deactivate user (admin only)"""
     if user_id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -171,13 +138,7 @@ async def activate_user(
     current_user = Depends(get_current_admin_user),
     user_service: UserServiceProtocol = Depends(get_user_service)
 ):
-    """
-    Activate a user (admin only).
-    
-    - **user_id**: ID of the user to activate
-    
-    Requires admin privileges.
-    """
+    """Activate user (admin only)"""
     success = user_service.activate_user(user_id)
     if not success:
         raise HTTPException(
