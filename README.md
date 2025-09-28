@@ -439,17 +439,17 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 
 ### Key Architectural Decisions
 
-| Decision | Current Implementation | Alternative Considered | Rationale |
-|----------|----------------------|----------------------|-----------|
-| **Architecture** | Monorepo with Turbo + pnpm workspaces | Microservices | Deployment simplicity and shared code benefits |
-| **API Design** | REST endpoints | GraphQL | Caching simplicity and team familiarity |
-| **Authentication** | JWT tokens with bcrypt (30min expiration) | OAuth2/SAML | Stateless, secure, industry standard |
-| **Database** | PostgreSQL with SQLAlchemy ORM | NoSQL (MongoDB) | ACID compliance and relational data structure |
-| **Real-time Updates** | Polling | WebSocket | Sufficient for MMM data update frequency |
-| **State Management** | Zustand with persistence | Redux Toolkit | Lightweight, TypeScript-first approach |
-| **Caching** | LRU model caching (95% improvement: 3s → 40-50ms) | Redis from start | Memory efficiency for development |
+| Decision | What I Built | What I Considered | Why I Chose This |
+|----------|--------------|-------------------|------------------|
+| **Architecture** | Monorepo with Turbo + pnpm | Separate repos for API/web | Easier to share types and components |
+| **API Style** | REST endpoints | GraphQL | MMM data is pretty straightforward, REST is simpler |
+| **Auth** | JWT + bcrypt | OAuth with Google/GitHub | Wanted to show I can build auth from scratch |
+| **Database** | PostgreSQL | MongoDB for model data | User data is relational, Postgres handles JSON fine |
+| **Updates** | Polling every 30s | WebSocket connections | MMM data doesn't change that often |
+| **State** | Zustand | Redux Toolkit | Zustand is way less boilerplate for this size project |
+| **Model Caching** | Python LRU cache (3s → 40ms) | Redis from the start | Wanted to see the performance difference first |
 
-### Cloud vs. On-Premise Deployment
+### AWS Production Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -501,84 +501,14 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 └─────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**AWS Production Architecture Benefits:**
-- **High Availability**: Application Load Balancer with ECS auto-scaling across multiple AZs
-- **Performance**: ElastiCache Redis for sub-30ms response times and MMM data caching
-- **Scalability**: ECS Fargate with automatic scaling and Lambda for serverless workers
-- **Reliability**: RDS PostgreSQL Multi-AZ with automated backups and failover
-- **Identity Management**: AWS Cognito for user authentication, MFA, and social login integration
-- **Asynchronous Processing**: SQS queues with Lambda functions for heavy MMM computations
-- **Global Distribution**: CloudFront CDN for worldwide low-latency static asset delivery
-- **Monitoring**: CloudWatch metrics/logs, X-Ray tracing, CloudTrail audit, Config compliance
-- **Security**: API Gateway with throttling, WAF protection, and VPC isolation
-- **Cost Optimization**: Lambda pay-per-execution, S3 intelligent tiering, spot instances
-- **Managed Services**: Fully managed AWS services reduce operational overhead
-
-### On-Premise Alternative Architecture
-
-Enterprise on-premise deployment using VMware Tanzu and open-source components:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│                              VMware Tanzu On-Premise Environment                            │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
-│  │   NGINX     │    │ HAProxy     │    │ Keycloak    │    │ RabbitMQ    │                  │
-│  │ Reverse     │    │ Load        │    │ Identity &  │    │ Message     │                  │
-│  │ Proxy       │    │ Balancer    │    │ Access Mgmt │    │ Queue       │                  │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
-│         │                   │                   │                   │                       │
-│         ▼                   ▼                   ▼                   ▼                       │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
-│  │ Static Web  │    │ Tanzu Pod   │    │ Tanzu Pod   │    │ Workflow    │                  │
-│  │ Assets      │    │ FastAPI     │    │ FastAPI     │    │ Workers     │                  │
-│  │ (Files)     │    │ Service     │    │ Service     │    │ (3x Pods)   │                  │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
-│         │                   │                   │                   │                       │
-│         └───────────────────┼───────────────────┼───────────────────┘                       │
-│                             ▼                   ▼                   ▲                       │
-│                      ┌─────────────┐    ┌─────────────┐           │                       │
-│                      │    Redis    │    │ PostgreSQL  │           │                       │
-│                      │   Cache     │    │ Relational  │           │                       │
-│                      │ (Sessions)  │    │ Database    │           │                       │
-│                      └─────────────┘    └─────────────┘           │                       │
-│                             │                   │                 │                       │
-│                             ▼                   ▼                 │                       │
-│                      ┌─────────────┐    ┌─────────────┐          │                       │
-│                      │    Redis    │    │    MinIO    │          │                       │
-│                      │   Cache     │    │   Object    │          │                       │
-│                      │ (MMM Data)  │    │  Storage    │          │                       │
-│                      └─────────────┘    │ (Models &   │          │                       │
-│                             │           │  Exports)   │          │                       │
-│                             ▼           └─────────────┘          │                       │
-│                      ┌─────────────┐                            │                       │
-│                      │ RabbitMQ    │────────────────────────────┘                       │
-│                      │ Queue       │                                                    │
-│                      │ (MMM Jobs)  │                                                    │
-│                      └─────────────┘                                                    │
-│                                                                                             │
-│ Monitoring & Observability:                                                                │
-│ ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                  │
-│ │ Prometheus  │    │   Grafana   │    │    Loki     │    │  Promtail   │                  │
-│ │ (Metrics)   │    │ (Dashboard) │    │ (Logs)      │    │ (Log Agent) │                  │
-│ └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘                  │
-│                                                                                             │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
-**On-Premise Architecture Benefits:**
-- **Data Sovereignty**: Complete control over data location and compliance requirements
-- **Security**: Air-gapped deployment with enterprise-grade identity management (Keycloak)
-- **Performance**: Local network latency with dedicated hardware resources
-- **Customization**: Full control over infrastructure configuration and scaling policies
-- **Cost Predictability**: Fixed infrastructure costs without cloud usage surprises
-- **Integration**: Seamless integration with existing enterprise systems and Active Directory
-- **Monitoring**: Self-hosted observability stack with Prometheus, Grafana, and Loki
-- **Message Reliability**: RabbitMQ with persistent queues and dead letter exchanges
-- **Object Storage**: MinIO S3-compatible storage for model files and exports
-- **Container Orchestration**: VMware Tanzu for enterprise Kubernetes management
-
-## License
-
-This project is for demonstration purposes. The Google Meridian model data is used under appropriate licensing terms.
+**Why AWS for Production:**
+- **Auto-scaling**: ECS handles traffic spikes without me managing servers
+- **Fast caching**: ElastiCache Redis keeps MMM data under 30ms response times
+- **Background jobs**: SQS + Lambda for heavy model computations without blocking the API
+- **Database reliability**: RDS Multi-AZ means automatic failover if something breaks
+- **User management**: Cognito handles auth so I don't have to build user registration flows
+- **Global CDN**: CloudFront serves static assets fast worldwide
+- **Monitoring built-in**: CloudWatch and X-Ray show me what's slow or breaking
+- **Security layers**: API Gateway throttling and WAF protect against attacks
+- **Pay for usage**: Lambda only costs money when processing jobs
+- **Less ops work**: Managed services mean less infrastructure to maintain
