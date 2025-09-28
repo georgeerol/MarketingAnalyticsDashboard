@@ -2,7 +2,7 @@
 MMM (Media Mix Modeling) API routes.
 """
 
-from typing import Optional, Dict, Any
+from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Query, Depends
 
 from app.schemas.mmm import MMMModelInfo
@@ -18,7 +18,7 @@ async def get_mmm_info(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get MMM model information"""
+    """Return MMM model metadata."""
     try:
         return mmm_service.get_model_info()
     except MMMModelError as e:
@@ -33,7 +33,7 @@ async def get_media_channels(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get media channels"""
+    """Return available media channels."""
     try:
         channels = mmm_service.get_channel_names()
         
@@ -55,7 +55,7 @@ async def get_contribution_data(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get contribution data"""
+    """Return contribution data for channels."""
     try:
         return mmm_service.get_contribution_data(channel)
     except MMMModelError as e:
@@ -71,7 +71,7 @@ async def get_response_curves(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get response curves"""
+    """Return response curves for channels."""
     try:
         return mmm_service.get_response_curves(channel)
     except MMMModelError as e:
@@ -86,7 +86,7 @@ async def get_channel_summary(
     current_user = Depends(get_current_active_user_dep),
     mmm_service: MMMServiceProtocol = Depends(get_mmm_service)
 ):
-    """Get channel summary"""
+    """Return per-channel summary metrics."""
     try:
         return mmm_service.get_channel_summary()
     except MMMModelError as e:
