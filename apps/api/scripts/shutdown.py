@@ -16,10 +16,9 @@ import argparse
 import asyncio
 import os
 import signal
-import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 # Add the parent directory to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -29,6 +28,10 @@ from app.core.logging import setup_logging, get_logger
 # Setup logging
 setup_logging()
 logger = get_logger(__name__)
+
+# Constants
+PORTS_TO_CHECK = [3000, 8000, 5432]  # Frontend, Backend, Database
+MAX_OUTPUT_LINES = 3  # Maximum lines to show from command output
 
 
 async def execute_command(command: str, description: str, quiet: bool = False) -> bool:
@@ -47,7 +50,13 @@ async def execute_command(command: str, description: str, quiet: bool = False) -
         stderr_text = stderr.decode().strip() if stderr else ""
         
         # Check for expected "no process" or "no containers" messages
-        expected_errors = ["No such process", "No containers", "No docker-compose services"]
+        expected_errors = [
+            "No such process", 
+            "No containers", 
+            "No docker-compose services",
+            "No matching processes",
+            "command not found"  # Handle cases where docker/lsof might not be installed
+        ]
         is_expected_error = any(err in stderr_text for err in expected_errors)
         
         if process.returncode != 0 and not is_expected_error:
@@ -59,7 +68,7 @@ async def execute_command(command: str, description: str, quiet: bool = False) -
                 logger.info(f"SUCCESS: {description}")
                 
             # Show stdout if it's short and meaningful
-            if stdout_text and len(stdout_text.split('\n')) <= 3:
+            if stdout_text and len(stdout_text.split('\n')) <= MAX_OUTPUT_LINES:
                 if not quiet:
                     for line in stdout_text.split('\n'):
                         if line.strip():
@@ -84,11 +93,11 @@ async def shutdown_services(quiet: bool = False, force: bool = False) -> None:
     
     # Commands to stop various services
     commands = [
-        # Stop Node.js processes (Next.js frontend)
-        ('pkill -f "next dev" 2>/dev/null || true', 'Next.js frontend stopped'),
+        # Stop Node.js processes (Next.js frontend) - more specific pattern
+        ('pkill -f "next.*dev" 2>/dev/null || true', 'Next.js frontend stopped'),
         
-        # Stop Python processes (FastAPI backend)
-        ('pkill -f "uvicorn.*app" 2>/dev/null || true', 'FastAPI backend stopped'),
+        # Stop Python processes (FastAPI backend) - more specific pattern
+        ('pkill -f "uvicorn.*main:app" 2>/dev/null || true', 'FastAPI backend stopped'),
         
         # Stop Turbo processes
         ('pkill -f "turbo.*dev" 2>/dev/null || true', 'Turbo dev processes stopped'),
@@ -99,10 +108,19 @@ async def shutdown_services(quiet: bool = False, force: bool = False) -> None:
         await execute_command(command, description, quiet)
     
     # Stop Docker services
-    docker_dir = Path(__file__).parent.parent.parent.parent / "packages" / "docker"
-    if docker_dir.exists():
-        docker_command = f'cd "{docker_dir}" && docker-compose down 2>/dev/null || echo "No docker-compose services running"'
-        await execute_command(docker_command, 'Docker services stopped', quiet)
+    try:
+        # Navigate to docker directory relative to project root
+        project_root = Path(__file__).parent.parent.parent.parent
+        docker_dir = project_root / "packages" / "docker"
+        
+        if docker_dir.exists() and (docker_dir / "docker-compose.yml").exists():
+            docker_command = f'cd "{docker_dir}" && docker-compose down 2>/dev/null || echo "No docker-compose services running"'
+            await execute_command(docker_command, 'Docker services stopped', quiet)
+        elif not quiet:
+            logger.info("SUCCESS: Docker services stopped (no docker-compose.yml found)")
+    except Exception as e:
+        if not quiet:
+            logger.warning(f"Docker services stopped: Could not access docker directory - {e}")
     
     # Stop any remaining Docker containers
     await execute_command(
@@ -130,10 +148,10 @@ async def shutdown_services(quiet: bool = False, force: bool = False) -> None:
         logger.info("")
         logger.info("Checking port status...")
     
+    # Generate port check commands dynamically
     port_commands = [
-        ('lsof -i :3000 2>/dev/null || echo "Port 3000: Free"', 'Port 3000 status'),
-        ('lsof -i :8000 2>/dev/null || echo "Port 8000: Free"', 'Port 8000 status'),
-        ('lsof -i :5432 2>/dev/null || echo "Port 5432: Free"', 'Port 5432 status'),
+        (f'lsof -i :{port} 2>/dev/null || echo "Port {port}: Free"', f'Port {port} status')
+        for port in PORTS_TO_CHECK
     ]
     
     for command, description in port_commands:
@@ -154,7 +172,7 @@ async def shutdown_services(quiet: bool = False, force: bool = False) -> None:
         logger.info("System is now clean and ready!")
 
 
-def signal_handler(signum: int, frame) -> None:
+def signal_handler(signum: int, frame: Any) -> None:
     """Handle Ctrl+C gracefully."""
     logger.info("\n\nShutdown interrupted. Some processes may still be running.")
     sys.exit(0)
