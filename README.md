@@ -41,14 +41,14 @@ Visit `http://localhost:3000` and log in with:
 
 - **Real Model Data**: Loads actual Google Meridian model (32MB `saved_mmm.pkl`)
 - **Contribution Charts**: See channel performance with bar/pie charts
-- **Response Curves**: Hill saturation curves show diminishing returns for each channel
+- **Response Curves**: Saturation analysis showing diminishing returns for each channel
 - **Smart Insights**: AI-generated recommendations for budget optimization
 - **Export**: Download insights in JSON, CSV, or TXT formats
 
 ### Performance & Quality
 
 - **95% faster**: Smart model caching (3+ seconds → 40-50ms)
-- **Well tested**: 38+ unit and integration tests
+- **Well tested**: 128+ test functions across comprehensive test suites
 - **Clean code**: Service interfaces, centralized constants, structured logging
 - **Production ready**: Docker setup, proper error handling, security best practices
 
@@ -134,8 +134,8 @@ The MMM model processing pipeline demonstrates significant performance optimizat
                    │                         │                         │
                    ▼                         ▼                         ▼
             ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-            │ Contribution│         │ Hill        │         │ Smart       │
-            │ Charts      │         │ Saturation  │         │ Insights    │
+            │ Contribution│         │ Response    │         │ Smart       │
+            │ Charts      │         │ Curves      │         │ Insights    │
             │ (Frontend)  │         │ (Frontend)  │         │ (Reports)   │
             └─────────────┘         └─────────────┘         └─────────────┘
 ```
@@ -228,7 +228,7 @@ Implementation uses Python protocols for dependency inversion and enhanced testa
 ### 4. Interactive Dashboard
 
 - **Contribution Charts**: Visual breakdown of channel performance
-- **Response Curves**: Diminishing returns analysis with saturation points
+- **Response Curves**: Saturation analysis with diminishing returns and efficiency metrics
 - **Smart Insights**: AI-generated recommendations and performance analysis
 - **Export**: Download insights in JSON, CSV, or TXT formats
 
