@@ -106,13 +106,13 @@ The application follows a standard three-tier architecture with clear data flow:
 
 **Data Flow Components:**
 
-- **Browser Layer**: User interface and client-side interactions on port 3000
-- **Frontend Layer**: Next.js handles routing, authentication, and API communication
-- **Backend Layer**: FastAPI on port 8000 processes requests, validates JWT tokens, and manages business logic
-- **Database Layer**: PostgreSQL on port 5432 stores user data and session information
-- **Model Layer**: 32MB Google Meridian model loaded once and cached in memory for performance
-- **State Management**: Zustand maintains authentication state in browser localStorage
-- **Authentication Flow**: JWT tokens sent in Authorization headers for protected API endpoints
+- **Browser**: Users interact with the Next.js app running on port 3000
+- **Frontend**: Next.js handles routing, auth, and makes API calls to the backend
+- **Backend**: FastAPI server on port 8000 processes requests and validates JWT tokens
+- **Database**: PostgreSQL on port 5432 stores user accounts and session data
+- **MMM Model**: 32MB Google Meridian model file loaded once and cached in memory
+- **State**: Zustand keeps auth state in browser localStorage between sessions
+- **Security**: JWT tokens in Authorization headers protect API endpoints
 
 ### MMM Processing Pipeline
 
@@ -139,14 +139,12 @@ The MMM model processing pipeline demonstrates significant performance optimizat
             │ (Frontend)  │         │ (Frontend)  │         │ (Reports)   │
             └─────────────┘         └─────────────┘         └─────────────┘
 ```
-**How it works:**
-
-- **Initial Load**: 32MB pickle file requires ~3 seconds for first-time loading via Google Meridian
-- **Cached Performance**: Subsequent API requests served in ~40-50ms (95% improvement)
-- **API Endpoints**: Three specialized endpoints serve channel summary, response curves, and export data
-- **Channel Analysis**: Extracts 5 marketing channels with real model parameters via `/mmm/channels/summary`
-- **Response Curves**: Generates Hill saturation curves showing diminishing returns via `/mmm/response-curves`
-- **Export Reports**: Provides insights in JSON, CSV, and text formats via `/export/insights`
+- **First load**: Takes ~3 seconds to load the 32MB model file
+- **After that**: Cached requests are fast at 40-50ms (95% improvement)
+- **Three APIs**: Channel summary, response curves, and export endpoints
+- **Channels**: Gets 5 marketing channels from `/mmm/channels/summary`
+- **Curves**: Shows diminishing returns via `/mmm/response-curves`
+- **Export**: Download insights as JSON, CSV, or text from `/export/insights`
 
 ### Authentication Flow
 
@@ -167,12 +165,12 @@ Authentication system with automatic login after registration for improved user 
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-- **Automatic Login**: `/auth/register` endpoint creates user and immediately returns JWT token
-- **JWT Security**: Tokens expire after 30 minutes with bcrypt password hashing on backend
-- **Session Persistence**: Zustand stores JWT in localStorage for cross-session authentication
-- **Protected Routes**: Dashboard and MMM endpoints require valid JWT tokens in Authorization headers
-- **API Authentication**: Frontend sends JWT via `Authorization: Bearer <token>` to FastAPI endpoints
-- **Security Measures**: CORS protection, input validation, and secure headers across all endpoints
+- **Auto-login**: Register at `/auth/register` and get logged in immediately
+- **Security**: Tokens expire after 30 minutes, passwords are bcrypt hashed
+- **Stay logged in**: Zustand saves your JWT in localStorage between sessions
+- **Protected pages**: Dashboard and MMM pages need a valid JWT token
+- **API calls**: Frontend sends JWT as `Authorization: Bearer <token>`
+- **Safety**: CORS protection, input validation, and secure headers
 
 ### Protocol-Based Architecture
 
@@ -198,11 +196,11 @@ Implementation uses Python protocols for dependency inversion and enhanced testa
 └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-- **Protocol Definitions**: Abstract interfaces in `services/interfaces.py` define service contracts
-- **Production Implementations**: Concrete services handle business logic and data operations
-- **Mock Implementations**: Test services in `tests/mocks/` provide isolated testing without dependencies
-- **Dependency Injection**: FastAPI resolves protocols via `api/deps.py` for automatic service injection
-- **SOLID Compliance**: Dependency inversion principle enables loose coupling and enhanced testability
+- **Protocols**: Abstract interfaces in `services/interfaces.py` define what services do
+- **Real services**: Concrete implementations handle business logic and database operations
+- **Test mocks**: Fake services in `tests/mocks/` let you test without real databases
+- **Dependency injection**: FastAPI automatically picks the right service via `api/deps.py`
+- **SOLID design**: Dependency inversion makes testing easier and code more flexible
 
 ## Key Components
 
