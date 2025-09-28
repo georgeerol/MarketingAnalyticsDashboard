@@ -228,10 +228,6 @@ class TestProtocolFlexibility:
         # Test that methods return expected types
         users = user_service.get_users()
         assert isinstance(users, list)
-        
-        status = mmm_service.get_model_status()
-        from app.schemas.mmm import MMMStatus
-        assert isinstance(status, MMMStatus)
 
 
 class TestProtocolPerformance:
@@ -319,8 +315,8 @@ class TestProtocolIntegration:
         response = client.get("/api/v1/mmm/info", headers=headers)
         assert response.status_code == 200
         
-        status_data = response.json()
-        assert status_data["status"] == "loaded"
+        info_data = response.json()
+        assert info_data["model_type"] == "Google Meridian"
         
         response = client.get("/api/v1/mmm/channels", headers=headers)
         assert response.status_code == 200

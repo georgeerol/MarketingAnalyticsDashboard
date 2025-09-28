@@ -200,7 +200,7 @@ class TestMMMEndpoints:
     @pytest.mark.asyncio
     async def test_get_channel_summary_authenticated(self, client: AsyncClient, auth_headers):
         """Test get channel summary with authentication."""
-        response = await client.get("/api/v1/mmm/summary", headers=auth_headers)
+        response = await client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         
         assert response.status_code == 200
         data = response.json()
@@ -223,7 +223,7 @@ class TestMMMEndpoints:
     @pytest.mark.asyncio
     async def test_get_channel_summary_unauthenticated(self, client: AsyncClient):
         """Test get channel summary without authentication."""
-        response = await client.get("/api/v1/mmm/summary")
+        response = await client.get("/api/v1/mmm/channels/summary")
         
         assert response.status_code == 401
 
@@ -265,7 +265,7 @@ class TestMMMWorkflow:
         curves_data = curves_response.json()
         
         # Step 6: Get channel summary
-        summary_response = await client.get("/api/v1/mmm/summary", headers=auth_headers)
+        summary_response = await client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         assert summary_response.status_code == 200
         summary_data = summary_response.json()
         
@@ -378,7 +378,7 @@ class TestMMMPerformance:
             client.get("/api/v1/mmm/info", headers=auth_headers),
             client.get("/api/v1/mmm/channels", headers=auth_headers),
             client.get("/api/v1/mmm/info", headers=auth_headers),
-            client.get("/api/v1/mmm/summary", headers=auth_headers)
+            client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         ]
         
         responses = await asyncio.gather(*tasks)

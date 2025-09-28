@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from app.services.mmm_service import MMMService, MMMModelError
-from app.schemas.mmm import MMMStatus, MMMModelInfo
+from app.schemas.mmm import MMMModelInfo
 
 
 class TestMMMService:
@@ -27,27 +27,6 @@ class TestMMMService:
         assert service._model_data is None
         assert service._is_loaded is False
 
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_model_status_file_exists(self, mmm_service: MMMService):
-        """Test getting model status when file exists."""
-        with patch('pathlib.Path.exists', return_value=True):
-            status = mmm_service.get_model_status()
-            
-            assert isinstance(status, MMMStatus)
-            assert status.status == "success"
-            assert status.file_exists is True
-
-    @pytest.mark.unit
-    @pytest.mark.mmm
-    def test_get_model_status_file_missing(self, mmm_service: MMMService):
-        """Test getting model status when file is missing."""
-        with patch('pathlib.Path.exists', return_value=False):
-            status = mmm_service.get_model_status()
-            
-            assert isinstance(status, MMMStatus)
-            assert status.status == "error"
-            assert status.file_exists is False
 
     @pytest.mark.unit
     @pytest.mark.mmm

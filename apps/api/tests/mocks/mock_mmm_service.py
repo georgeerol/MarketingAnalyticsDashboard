@@ -6,7 +6,7 @@ This demonstrates how protocols make MMM testing simple without complex model de
 
 from typing import List, Dict, Any, Optional
 from app.services.interfaces import MMMServiceProtocol
-from app.schemas.mmm import MMMStatus, MMMModelInfo, MMMChannelSummary
+from app.schemas.mmm import MMMModelInfo, MMMChannelSummary
 
 
 class MockMMMService(MMMServiceProtocol):
@@ -30,16 +30,6 @@ class MockMMMService(MMMServiceProtocol):
         """Track method calls for testing verification."""
         self.call_count[method_name] = self.call_count.get(method_name, 0) + 1
     
-    def get_model_status(self) -> MMMStatus:
-        """Get the status of the MMM model."""
-        self._track_call("get_model_status")
-        
-        return MMMStatus(
-            status="loaded" if self.simulate_model_loaded else "not_found",
-            message="Model loaded successfully" if self.simulate_model_loaded else "Model file not found",
-            file_exists=self.simulate_model_loaded,
-            model_info={"last_modified": "2024-01-01T00:00:00Z", "file_size_mb": 25.6} if self.simulate_model_loaded else None
-        )
     
     def get_model_info(self) -> MMMModelInfo:
         """Get detailed information about the MMM model."""

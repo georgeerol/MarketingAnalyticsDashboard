@@ -131,7 +131,7 @@ class TestEnhancedMMMEndpoints:
     @pytest.mark.asyncio
     async def test_channel_summary_enhanced_data(self, client: AsyncClient, auth_headers):
         """Test that channel summary includes enhanced efficiency data."""
-        response = await client.get("/api/v1/mmm/summary", headers=auth_headers)
+        response = await client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         
         assert response.status_code == 200
         data = response.json()
@@ -158,7 +158,7 @@ class TestEnhancedMMMEndpoints:
     async def test_consistency_between_endpoints(self, client: AsyncClient, auth_headers):
         """Test consistency between summary and response curves efficiency data."""
         # Get data from both endpoints
-        summary_response = await client.get("/api/v1/mmm/summary", headers=auth_headers)
+        summary_response = await client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         curves_response = await client.get("/api/v1/mmm/response-curves", headers=auth_headers)
         
         assert summary_response.status_code == 200
@@ -204,7 +204,7 @@ class TestRealDataWorkflows:
         curves_data = curves_response.json()
         
         # Step 4: Get channel summary
-        summary_response = await client.get("/api/v1/mmm/summary", headers=auth_headers)
+        summary_response = await client.get("/api/v1/mmm/channels/summary", headers=auth_headers)
         assert summary_response.status_code == 200
         summary_data = summary_response.json()
         
