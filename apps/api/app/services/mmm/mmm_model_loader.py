@@ -89,8 +89,102 @@ class ChannelNameExtractor:
             
             # Final fallback
             logger.warning("Could not extract channel names from model, using defaults")
-            return ["Google_Search", "Google_Display", "Facebook", "Instagram", "YouTube"]
+            return DEFAULT_CHANNEL_NAMES.copy()
             
         except Exception as e:
             logger.error(f"Error extracting channel names: {e}")
-            return ["Google_Search", "Google_Display", "Facebook", "Instagram", "YouTube"]
+            return DEFAULT_CHANNEL_NAMES.copy()
+    
+    @staticmethod
+    def validate_channel_names(channels: List[str]) -> List[str]:
+        """
+        Validate and clean channel names.
+        
+        Args:
+            channels: List of channel names to validate
+            
+        Returns:
+            List of validated channel names
+        """
+        if not channels:
+            logger.warning("Empty channel list provided, using defaults")
+            return DEFAULT_CHANNEL_NAMES.copy()
+        
+        validated = []
+        for i, channel in enumerate(channels):
+            if not isinstance(channel, str):
+                logger.warning(f"Non-string channel name at index {i}: {channel}")
+                validated.append(f"Channel{i}")
+            elif not channel.strip():
+                logger.warning(f"Empty channel name at index {i}")
+                validated.append(f"Channel{i}")
+            else:
+                validated.append(channel.strip())
+        
+        if len(validated) != len(channels):
+            logger.warning(f"Channel validation changed count: {len(channels)} -> {len(validated)}")
+        
+        return validated
+
+
+def get_model_info(model: Any) -> dict:
+    """
+    Extract comprehensive information about the loaded model.
+    
+    Args:
+        model: Loaded MMM model
+        
+    Returns:
+        Dictionary with model information
+    """
+    if model is None:
+        raise TypeError("Model cannot be None")
+    
+    info = {
+        "model_type": "Unknown",
+        "has_required_attributes": True,
+        "missing_attributes": [],
+        "channel_count": 0,
+        "attributes": []
+    }
+    
+    try:
+        # Determine model type
+        if hasattr(model, '__class__'):
+            class_name = model.__class__.__name__
+            if "Fallback" in class_name:
+                info["model_type"] = "Fallback MMM Model"
+            elif "Meridian" in class_name or "meridian" in str(type(model)).lower():
+                info["model_type"] = "Google Meridian"
+            else:
+                info["model_type"] = class_name
+        
+        # Check attributes
+        all_attributes = REQUIRED_MODEL_ATTRIBUTES + OPTIONAL_MODEL_ATTRIBUTES
+        present_attributes = []
+        missing_attributes = []
+        
+        for attr in all_attributes:
+            if hasattr(model, attr):
+                present_attributes.append(attr)
+            else:
+                missing_attributes.append(attr)
+        
+        info["attributes"] = present_attributes
+        info["missing_attributes"] = missing_attributes
+        info["has_required_attributes"] = all(
+            hasattr(model, attr) for attr in REQUIRED_MODEL_ATTRIBUTES
+        )
+        
+        # Get channel count
+        try:
+            channels = ChannelNameExtractor.extract_channel_names(model)
+            info["channel_count"] = len(channels)
+        except Exception:
+            info["channel_count"] = 0
+        
+    except Exception as e:
+        logger.error(f"Error getting model info: {e}")
+        info["error"] = str(e)
+    
+    return info
