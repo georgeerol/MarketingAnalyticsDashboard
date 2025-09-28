@@ -448,15 +448,15 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 
 ### Key Architectural Decisions
 
-| Decision          | What I Built                 | What I Considered   | Why I Chose This                                    |
-| ----------------- | ---------------------------- | ------------------- |-----------------------------------------------------|
-| **Architecture**  | Monorepo with Turbo + pnpm   | Separate repos for API/web | Easier to share types and components                |
+| Decision          | What I Built                 | What I Considered   | Why I Chose This                              |
+| ----------------- | ---------------------------- | ------------------- |-----------------------------------------------|
+| **Architecture**  | Monorepo with Turbo + pnpm   | Separate repos for API/web | Easier to share types and components          |
 | **API Style**     | REST endpoints               | GraphQL             | MMM data is pretty straightforward, REST is simpler |
-| **Auth**          | JWT + bcrypt                 | OAuth with Google   | Keep it simple                                      |
+| **Auth**          | JWT + bcrypt                 | OAuth with Google   | Keep it simple                                |
 | **Database**      | PostgreSQL                   | MongoDB for model data | User data is relational, Postgres handles JSON fine |
-| **Updates**       | Polling every 30s            | WebSocket connections | MMM data doesn't change that often                  |
-| **State**         | Zustand                      | Redux Toolkit       | Zustand keeps it simple                             |
-| **Model Caching** | Python LRU cache (3s → 40ms) | Redis from the start | Wanted to see the performance difference first      |
+| **Updates**       | Polling every 30s            | WebSocket connections | MMM data doesn't change that often            |
+| **State**         | Zustand                      | Redux Toolkit       | Zustand keeps it simple                       |
+| **Model Caching** | Python LRU cache (3s → 40ms) | Redis from the start | Wanted to see the performance difference      |
 
 ---
 
@@ -468,13 +468,11 @@ Excalidraw: [AWS Production Architecture](imgs/AWSProductionArchitecture.excalid
 
 **Why AWS for Production:**
 
-- **Auto-scaling**: ECS handles traffic spikes without me managing servers
+- **Auto-scaling**: ECS handles traffic spikes without managing servers
 - **Fast caching**: ElastiCache Redis keeps MMM data under 30ms response times
 - **Background jobs**: SQS + Lambda for heavy model computations without blocking the API
-- **Database reliability**: RDS Multi-AZ means automatic failover if something breaks
-- **User management**: Cognito handles auth so I don't have to build user registration flows
-- **Global CDN**: CloudFront serves static assets fast worldwide
-- **Monitoring built-in**: CloudWatch and X-Ray show me what's slow or breaking
-- **Security layers**: API Gateway throttling and WAF protect against attacks
+- **Database reliability**: RDS Multi-AZ, automatic fail over if something breaks
+- **User management**: Cognito handles auth so no need to build user registration flows
+- **Global CDN**: CloudFront serves static assets
+- **Monitoring built-in**: CloudWatch and X-Ray show what's slow or breaking
 - **Pay for usage**: Lambda only costs money when processing jobs
-- **Less ops work**: Managed services mean less infrastructure to maintain
