@@ -80,18 +80,18 @@ The application follows a standard three-tier architecture with clear data flow:
 │   Browser   │───▶│  Next.js    │───▶│   FastAPI   │
 │             │    │  Frontend   │    │   Backend   │
 └─────────────┘    └─────────────┘    └─────────────┘
-                          │                   │
-                          │                   ▼
-                          │            ┌─────────────┐
-                          │            │ PostgreSQL  │
-                          │            │  Database   │
-                          │            └─────────────┘
-                          │                   │
-                          ▼                   ▼
-                  ┌─────────────┐    ┌─────────────┐
-                  │   Zustand   │    │ Google MMM  │
-                  │    Store    │    │ Model (32MB)│
-                  └─────────────┘    └─────────────┘
+                           │                   │
+                           │                   ▼
+                           │            ┌─────────────┐
+                           │            │ PostgreSQL  │
+                           │            │  Database   │
+                           │            └─────────────┘
+                           │                   │
+                           ▼                   ▼
+                   ┌─────────────┐    ┌─────────────┐
+                   │   Zustand   │    │ Google MMM  │
+                   │    Store    │    │ Model (32MB)│
+                   └─────────────┘    └─────────────┘
 ```
 
 - **Browser Layer**: User interface and client-side interactions
@@ -110,14 +110,14 @@ The MMM model processing pipeline demonstrates significant performance optimizat
 │ saved_mmm   │───▶│ Model Cache │───▶│ Response    │
 │ .pkl (32MB) │    │ (LRU)       │    │ Curves      │
 └─────────────┘    └─────────────┘    └─────────────┘
-      │                   │                   │
-      │                   ▼                   ▼
-      │            ┌─────────────┐    ┌─────────────┐
-      │            │ Channel     │    │ Hill        │
-      │            │ Analysis    │    │ Saturation  │
-      │            └─────────────┘    └─────────────┘
-      │                   │                   │
-      ▼                   ▼                   ▼
+       │                   │                   │
+       │                   ▼                   ▼
+       │            ┌─────────────┐    ┌─────────────┐
+       │            │ Channel     │    │ Hill        │
+       │            │ Analysis    │    │ Saturation  │
+       │            └─────────────┘    └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │ Contribution│    │ Smart       │    │ Export      │
 │ Charts      │    │ Insights    │    │ Reports     │
@@ -435,121 +435,21 @@ docker exec -it docker-postgres-1 psql -U postgres -d mmm_db  # Direct DB access
 | `admin@example.com` | `admin123` | Administrator |
 | `demo@example.com`  | `demo123`  | Demo account  |
 
-## Technical Stack
-
-**Backend**
-
-- FastAPI with Uvicorn
-- PostgreSQL with SQLAlchemy ORM
-- JWT authentication with bcrypt
-- Google Meridian MMM model integration
-- Comprehensive test suite (pytest)
-
-**Frontend**
-
-- Next.js 14 with App Router
-- TypeScript and Tailwind CSS
-- Zustand for state management
-- Recharts for data visualization
-- shadcn/ui component library
-
-**Infrastructure**
-
-- Docker Compose for local development
-- Turbo monorepo with pnpm workspaces
-- Automated testing and linting
-
-## Key Features Explained
-
-### Model Caching
-
-The system implements intelligent LRU caching for the MMM model:
-
-- **Before**: 3+ seconds per request (32MB model loaded from disk)
-- **After**: 40-50ms per request (model served from memory)
-- **Result**: 95%+ performance improvement
-
-### Response Curves
-
-Each marketing channel has unique Hill saturation curves showing:
-
-- Spend vs. returns relationship
-- Saturation points where additional spend becomes inefficient
-- Marginal ROI at different spend levels
-
-### Smart Insights
-
-The system analyzes channel performance and generates recommendations:
-
-- Identifies top and underperforming channels
-- Suggests budget reallocation opportunities
-- Warns about channels approaching saturation
-- Provides specific ROI and efficiency metrics
-
-## Technical Decisions & Trade-offs
+## Production Deployment Options
 
 ### Key Architectural Decisions
 
-| Decision            | Approach                                       | Pros                                          | Cons                                       | Rationale                                    |
-| ------------------- | ---------------------------------------------- | --------------------------------------------- | ------------------------------------------ | -------------------------------------------- |
-| **Architecture**    | Monorepo with Turbo + pnpm workspaces          | Shared code, unified builds, type safety      | More complex than separate repos           | Better developer experience and code sharing |
-| **Authentication**  | JWT tokens with bcrypt password hashing        | Stateless, secure, scalable                   | Token management complexity                | Industry standard for API authentication     |
-| **MMM Integration** | Smart fallback system (real model → mock data) | Works without Google Meridian package         | May not reflect real model behavior in dev | Ensures development continuity               |
-| **Database**        | PostgreSQL with SQLAlchemy ORM                 | ACID compliance, complex queries, type safety | More setup than SQLite                     | Production-ready with proper relationships   |
-| **Frontend State**  | Zustand with persistence                       | Simple, TypeScript-first, persistent auth     | Less ecosystem than Redux                  | Lightweight and sufficient for project scope |
+| Decision | Current Implementation | Alternative Considered | Rationale |
+|----------|----------------------|----------------------|-----------|
+| **Architecture** | Monorepo with Turbo + pnpm workspaces | Microservices | Deployment simplicity and shared code benefits |
+| **API Design** | REST endpoints | GraphQL | Caching simplicity and team familiarity |
+| **Authentication** | JWT tokens with bcrypt (30min expiration) | OAuth2/SAML | Stateless, secure, industry standard |
+| **Database** | PostgreSQL with SQLAlchemy ORM | NoSQL (MongoDB) | ACID compliance and relational data structure |
+| **Real-time Updates** | Polling | WebSocket | Sufficient for MMM data update frequency |
+| **State Management** | Zustand with persistence | Redux Toolkit | Lightweight, TypeScript-first approach |
+| **Caching** | LRU model caching (95% improvement: 3s → 40-50ms) | Redis from start | Memory efficiency for development |
 
-### Production Scaling Strategy
-
-#### Current State vs Production Target
-
-| Aspect             | Current                                          | Production Target                           |
-| ------------------ | ------------------------------------------------ | ------------------------------------------- |
-| **Authentication** | JWT with 30min expiration                        | JWT with refresh tokens + rate limiting     |
-| **Database**       | Single PostgreSQL instance                       | PostgreSQL cluster with read replicas       |
-| **Caching**        | LRU model caching (95%+ performance improvement) | Redis for session and computed data caching |
-| **Monitoring**     | Basic logging                                    | APM with Grafana/Prometheus                 |
-| **Deployment**     | Docker Compose                                   | Kubernetes with auto-scaling                |
-
-### MMM Model Integration Strategy
-
-| What We're Optimizing | Current Implementation                          | Production Enhancement                     |
-| --------------------- | ----------------------------------------------- | ------------------------------------------ |
-| **Model Loading**     | LRU cached in memory (40-50ms after first load) | Pre-load and cache model data in Redis     |
-| **Data Processing**   | Real-time computation of response curves        | Background processing with cached results  |
-| **Channel Analysis**  | Extract 5 channels from real model              | Support dynamic channel configuration      |
-| **Performance**       | 40-50ms response times (95%+ improvement)       | <30ms with Redis and background processing |
-
-### Alternative Approaches Considered
-
-| Alternative           | What We Considered             | Pros                                      | Cons                                      | Why We Didn't Choose It               |
-| --------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------------- | ------------------------------------- |
-| **Microservices**     | Separate auth and MMM services | Better scalability, service isolation     | More complex deployment, network overhead | Monolith is simpler for current scope |
-| **GraphQL API**       | GraphQL instead of REST        | Flexible queries, better for complex data | Learning curve, more complex caching      | REST meets current requirements       |
-| **Real-time Updates** | WebSocket for live MMM updates | Real-time dashboard updates               | Added complexity, not required            | Polling is sufficient for MMM data    |
-| **NoSQL Database**    | MongoDB for MMM model storage  | Better for unstructured model data        | Different from relational user data       | PostgreSQL JSON support is sufficient |
-
-## Production Considerations
-
-This project is designed for easy production deployment:
-
-- Environment-based configuration
-- Docker containerization
-- Proper error handling and logging
-- Security best practices (CORS, input validation, password hashing)
-- Database migrations and seeding
-- Comprehensive test coverage
-
-For production scaling, consider:
-
-- Redis for session and computed data caching
-- Rate limiting for API endpoints
-- Load balancing and auto-scaling
-- Monitoring and alerting
-- CI/CD pipeline
-
-## Production-Grade System Architecture
-
-Scalable architecture design showing evolution from current monolith to production-ready distributed system:
+### Cloud vs. On-Premise Deployment
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
