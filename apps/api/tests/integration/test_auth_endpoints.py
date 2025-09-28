@@ -19,16 +19,14 @@ class TestAuthEndpoints:
             "password": "testpassword123"
         }
         
-        response = await client.post("/api/v1/auth/login-json", json=login_data)
+        response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
         
         assert response.status_code == 200
         data = response.json()
         
         assert "access_token" in data
         assert "token_type" in data
-        assert "user" in data
         assert data["token_type"] == "bearer"
-        assert data["user"]["email"] == test_user.email
 
     @pytest.mark.integration
     @pytest.mark.auth
@@ -59,7 +57,7 @@ class TestAuthEndpoints:
             "password": "testpassword123"
         }
         
-        response = await client.post("/api/v1/auth/login-json", json=login_data)
+        response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
         
         assert response.status_code == 401
         data = response.json()
@@ -75,7 +73,7 @@ class TestAuthEndpoints:
             "password": "wrongpassword"
         }
         
-        response = await client.post("/api/v1/auth/login-json", json=login_data)
+        response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
         
         assert response.status_code == 401
         data = response.json()
@@ -91,7 +89,7 @@ class TestAuthEndpoints:
             # Missing password
         }
         
-        response = await client.post("/api/v1/auth/login-json", json=login_data)
+        response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
         
         assert response.status_code == 422  # Validation error
 
@@ -266,7 +264,7 @@ class TestAuthWorkflow:
             "password": "workflowpass123"
         }
         
-        login_response = await client.post("/api/v1/auth/login-json", json=login_data)
+        login_response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
         assert login_response.status_code == 200
         
         login_result = login_response.json()
@@ -280,31 +278,6 @@ class TestAuthWorkflow:
         user_info2 = me_response2.json()
         assert user_info2["email"] == "workflow@example.com"
         assert user_info2["id"] == user_info["id"]  # Same user
-
-    @pytest.mark.integration
-    @pytest.mark.auth
-    @pytest.mark.asyncio
-    async def test_token_refresh_workflow(self, client: AsyncClient, test_user):
-        """Test token refresh workflow."""
-        # Step 1: Login to get initial token
-        login_data = {
-            "email": test_user.email,
-            "password": "testpassword123"
-        }
-        
-        login_response = await client.post("/api/v1/auth/login-json", json=login_data)
-        assert login_response.status_code == 200
-        
-        login_result = login_response.json()
-        original_token = login_result["access_token"]
-        
-        # Step 2: Use token to access protected endpoint
-        headers = {"Authorization": f"Bearer {original_token}"}
-        me_response = await client.get("/api/v1/auth/me", headers=headers)
-        assert me_response.status_code == 200
-        
-        # Note: In a real application, you might have a refresh endpoint
-        # For now, we're testing that the token works for protected endpoints
 
 
 class TestAuthSecurity:
@@ -320,7 +293,7 @@ class TestAuthSecurity:
             "password": "password"
         }
         
-        response = await client.post("/api/v1/auth/login-json", json=malicious_data)
+        response = await client.post("/api/v1/auth/login", data={"username": malicious_data["email"], "password": malicious_data["password"]})
         
         # Should return 401 (not found) rather than causing an error
         assert response.status_code == 401
@@ -357,7 +330,7 @@ class TestAuthSecurity:
         
         # Make multiple failed attempts
         for _ in range(5):
-            response = await client.post("/api/v1/auth/login-json", json=login_data)
+            response = await client.post("/api/v1/auth/login", data={"username": login_data["email"], "password": login_data["password"]})
             assert response.status_code == 401
         
         # All should fail with 401, not cause server errors

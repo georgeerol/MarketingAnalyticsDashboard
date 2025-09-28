@@ -102,21 +102,3 @@ class AuthService:
         
         return user
     
-    def refresh_token(self, user: User) -> str:
-        """
-        Generate a new access token for a user.
-        
-        Args:
-            user: User instance
-            
-        Returns:
-            New JWT access token
-        """
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": user.email},
-            expires_delta=access_token_expires
-        )
-        
-        logger.info(f"Refreshed access token for user: {user.email}")
-        return access_token

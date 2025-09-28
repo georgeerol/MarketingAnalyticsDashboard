@@ -275,7 +275,6 @@ class TestAuthServiceLogic:
         auth_service = AuthService(mock_db)
         
         # Test token generation
-        token = auth_service.refresh_token(mock_user)
         
         assert isinstance(token, str)
         assert len(token) > 0

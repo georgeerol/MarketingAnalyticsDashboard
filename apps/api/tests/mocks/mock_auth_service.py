@@ -102,15 +102,6 @@ class MockAuthService(AuthServiceProtocol):
         
         return None
     
-    def refresh_token(self, user: MockUser) -> str:
-        """
-        Generate a new access token for a user.
-        
-        Returns predictable refresh tokens for testing.
-        """
-        refresh_token = f"refresh_token_{user.id}_{len(self.generated_tokens)}"
-        self.generated_tokens.append(refresh_token)
-        return refresh_token
     
     # Utility methods for testing
     def set_valid_password(self, email: str, password: str):

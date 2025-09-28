@@ -69,9 +69,6 @@ class AuthServiceProtocol(Protocol):
         """Get current user from JWT token."""
         ...
     
-    def refresh_token(self, user: User) -> str:
-        """Generate a new access token for the user."""
-        ...
 
 
 @runtime_checkable

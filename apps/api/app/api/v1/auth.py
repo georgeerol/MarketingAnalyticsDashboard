@@ -80,28 +80,6 @@ async def login_oauth(
         )
 
 
-@router.post("/login-json", response_model=AuthResponse)
-async def login_json(
-    login_data: UserLogin,
-    auth_service: AuthServiceProtocol = Depends(get_auth_service)
-):
-    """
-    JSON-based login endpoint (returns user data along with token).
-    
-    - **email**: User's email address
-    - **password**: User's password
-    
-    Returns access token and user information.
-    """
-    try:
-        return auth_service.login(login_data)
-    except AuthenticationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
-        )
-
-
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
     current_user = Depends(get_current_active_user_dep)
@@ -114,16 +92,3 @@ async def get_current_user(
     return UserResponse.model_validate(current_user)
 
 
-@router.post("/refresh", response_model=Token)
-async def refresh_token(
-    current_user = Depends(get_current_active_user_dep),
-    auth_service: AuthServiceProtocol = Depends(get_auth_service)
-):
-    """
-    Refresh access token for current user.
-    
-    Requires valid JWT token in Authorization header.
-    Returns new access token with extended expiration.
-    """
-    new_token = auth_service.refresh_token(current_user)
-    return Token(access_token=new_token, token_type="bearer")
