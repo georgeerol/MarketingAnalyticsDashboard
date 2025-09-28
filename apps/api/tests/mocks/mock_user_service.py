@@ -4,7 +4,7 @@ Mock implementation of UserServiceProtocol for testing.
 This demonstrates how easy it is to create test doubles when using protocols.
 """
 
-from typing import List, Optional, Dict
+from typing import Optional, Dict
 from app.services.interfaces import UserServiceProtocol
 from app.schemas.user import UserCreate
 from app.models.user import User
