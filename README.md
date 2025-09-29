@@ -7,12 +7,11 @@ A Media Mix Modeling analytics platform built with FastAPI and Next.js.
 ## Requirements
 
 - Implement user authentication and dashboard
-- Load and integrate Google Meridian model trace (`saved_mmm.pkl`)
+- Load and integrate Google Meridian model(`saved_mmm.pkl`)
 - Build contribution charts for channel performance
 - Add response curves to show diminishing returns
-- Provide clear customer-facing insights and recommendations
+- Provide insights and recommendations
 - Ensure full testing (unit, integration, and coverage)
-- Set up CI/CD for production readiness
 
 ---
 
@@ -48,7 +47,6 @@ A Media Mix Modeling analytics platform built with FastAPI and Next.js.
 | -------------------------------- | --------------------------------------- | -------- |
 | Code Cleanup                     | Improve readability and maintainability | Complete |
 | Bug Fixes                        | Resolve issues found during testing     | Complete |
-| Performance Tuning               | Optimize queries and response times     | Complete |
 | Documentation Update             | Update README and code docs             | Complete |
 | Technical Decisions & Trade-offs | Document key architectural choices      | Complete |
 
@@ -104,7 +102,7 @@ Visit `http://localhost:3000` and log in with:
 
 ### Performance & Quality
 
-- **Cache**: Smart model caching (3+ seconds → 40-50ms)
+- **Cache**: Smart model caching (from 3+ seconds to 40-50ms)
 - **Test**: Tests covering all core functionality
 - **Architecture**: Modular MMM architecture, protocol-based services, Solid principles
 
@@ -165,7 +163,7 @@ Excalidraw: [MMM Processing Pipeline](imgs/MMMProcessingPipeline.excalidraw)
 - **Three APIs**: Channel summary, response curves, and export endpoints
 - **Channels**: Gets 5 marketing channels from `/mmm/channels/summary`
 - **Curves**: Shows diminishing returns via `/mmm/response-curves`
-- **Export**: Download insights as JSON, CSV, or text from `/export/insights`
+- **Export**: Download insights as text from `/export/insights`
 
 ### Authentication Flow
 
